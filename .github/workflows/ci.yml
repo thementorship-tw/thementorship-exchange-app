@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push to the same branch supersedes the previous run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, typecheck, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # Fails if src/db/schema.ts changed without a matching generated
+      # migration in drizzle/ — no database connection is made.
+      - name: Check migrations are up to date
+        env:
+          TURSO_DATABASE_URL: file:ci-check.db
+        run: |
+          pnpm db:generate
+          # --porcelain also reports newly generated (untracked) migration files,
+          # which `git diff` alone would miss.
+          changes=$(git status --porcelain -- drizzle)
+          if [ -n "$changes" ]; then
+            echo "::error::Schema changed but migrations were not regenerated. Run 'pnpm db:generate' and commit the result."
+            echo "$changes"
+            exit 1
+          fi
+
+      - name: Build
+        run: pnpm build
