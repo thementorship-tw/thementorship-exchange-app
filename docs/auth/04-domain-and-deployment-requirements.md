@@ -19,18 +19,18 @@ Mentorship Exchange 平台將使用 **Google SSO** 登入。Google OAuth 要求�
 
 ## 2. 環境 URL 需求
 
-| 環境           | 用途         | Base URL                | Redirect URI（完整）                             | 狀態          |
-| -------------- | ------------ | ----------------------- | ------------------------------------------------ | ------------- |
-| **Dev**        | RD 本機開發  | `http://localhost:3000` | `http://localhost:3000/api/auth/callback/google` | ✅ 不需 DNS   |
-| **Staging**    | 內部測試、QA | `https://staging.<TBD>` | `https://staging.<TBD>/api/auth/callback/google` | ⏳ **待提供** |
-| **Production** | 正式使用者   | `https://app.<TBD>`     | `https://app.<TBD>/api/auth/callback/google`     | ⏳ **待提供** |
+| 環境 | 用途 | Base URL | Redirect URI（完整） | 狀態 |
+|------|------|----------|---------------------|------|
+| **Dev** | RD 本機開發 | `http://localhost:3000` | `http://localhost:3000/api/auth/callback/google` | ✅ 不需 DNS |
+| **Staging** | 內部測試、QA | `https://staging.<TBD>` | `https://staging.<TBD>/api/auth/callback/google` | ⏳ **待提供** |
+| **Production** | 正式使用者 | `https://app.<TBD>` | `https://app.<TBD>/api/auth/callback/google` | ⏳ **待提供** |
 
 ### 命名建議（可調整）
 
-| 環境       | 建議子網域                      | 備註                                 |
-| ---------- | ------------------------------- | ------------------------------------ |
-| Staging    | `staging.<product-domain>`      | 例：`staging.thementorship.exchange` |
-| Production | `app.<product-domain>` 或根網域 | 團隊可共識                           |
+| 環境 | 建議子網域 | 備註 |
+|------|-----------|------|
+| Staging | `staging.<product-domain>` | 例：`staging.thementorship.exchange` |
+| Production | `app.<product-domain>` 或根網域 | 團隊可共識 |
 
 > 以上為**示意**，請 infra 回覆實際會使用的 URL。
 
@@ -58,9 +58,9 @@ Auth.js 使用的 callback path **固定**如下：
 
 ### 4.1 HTTPS
 
-| 環境                 | 要求           |
-| -------------------- | -------------- |
-| Dev（localhost）     | HTTP 可接受    |
+| 環境 | 要求 |
+|------|------|
+| Dev（localhost） | HTTP 可接受 |
 | Staging / Production | **必須 HTTPS** |
 
 ### 4.2 網域穩定性
@@ -70,11 +70,11 @@ Auth.js 使用的 callback path **固定**如下：
 
 ### 4.3 部署平台（待確認）
 
-| 選項                | 說明                                  |
-| ------------------- | ------------------------------------- |
-| Vercel              | 可先使用 `*.vercel.app`，後加自訂網域 |
-| GCP（Cloud Run 等） | 可先使用 `*.run.app`，後加自訂網域    |
-| 自架                | 需自行處理 TLS 憑證                   |
+| 選項 | 說明 |
+|------|------|
+| Vercel | 可先使用 `*.vercel.app`，後加自訂網域 |
+| GCP（Cloud Run 等） | 可先使用 `*.run.app`，後加自訂網域 |
+| 自架 | 需自行處理 TLS 憑證 |
 
 ⏳ **待確認：** 團隊預計使用哪個部署平台？
 
@@ -90,13 +90,13 @@ Auth.js 使用的 callback path **固定**如下：
 
 請 infra 完成後提供：
 
-| #   | 交付項目            | 範例                                   |
-| --- | ------------------- | -------------------------------------- |
-| 1   | Staging Base URL    | `https://staging.example.com`          |
-| 2   | Production Base URL | `https://app.example.com`              |
-| 3   | 部署平台            | Vercel / GCP / 其他                    |
-| 4   | TLS 是否就緒        | 是 / 否 / 預計日期                     |
-| 5   | 環境變數注入方式    | Vercel Env / GCP Secret Manager / 其他 |
+| # | 交付項目 | 範例 |
+|---|----------|------|
+| 1 | Staging Base URL | `https://staging.example.com` |
+| 2 | Production Base URL | `https://app.example.com` |
+| 3 | 部署平台 | Vercel / GCP / 其他 |
+| 4 | TLS 是否就緒 | 是 / 否 / 預計日期 |
+| 5 | 環境變數注入方式 | Vercel Env / GCP Secret Manager / 其他 |
 
 工程團隊收到後會：
 
@@ -107,11 +107,11 @@ Auth.js 使用的 callback path **固定**如下：
 
 ## 6. 我們不需要 Infra 做的
 
-| 項目                                    | 負責方                          |
-| --------------------------------------- | ------------------------------- |
-| Google OAuth Client 建立                | GCP 設定者（見 Runbook）        |
-| `/api/auth/*` 路由                      | RD（Auth.js 內建）              |
-| Session / Cookie 邏輯                   | RD                              |
+| 項目 | 負責方 |
+|------|--------|
+| Google OAuth Client 建立 | GCP 設定者（見 Runbook） |
+| `/api/auth/*` 路由 | RD（Auth.js 內建） |
+| Session / Cookie 邏輯 | RD |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | 工程團隊（來自 Google Console） |
 
 ---
@@ -149,18 +149,18 @@ Phase 3：
 
 ## 9. 聯絡窗口
 
-| 角色       | 負責內容          | 聯絡人 |
-| ---------- | ----------------- | ------ |
-| Tech Lead  | 規格、協調        | ⏳ TBD |
-| RD         | App 部署、Auth.js | ⏳ TBD |
+| 角色 | 負責內容 | 聯絡人 |
+|------|----------|--------|
+| Tech Lead | 規格、協調 | ⏳ TBD |
+| RD | App 部署、Auth.js | ⏳ TBD |
 | GCP 設定者 | Google OAuth 憑證 | ⏳ TBD |
-| Infra      | DNS、部署、TLS    | ⏳ TBD |
+| Infra | DNS、部署、TLS | ⏳ TBD |
 
 ---
 
 ## 10. 修訂紀錄
 
-| 版本 | 日期       | 變更                             |
-| ---- | ---------- | -------------------------------- |
-| 0.1  | 2026-08-13 | 初稿；dev 確定，staging/prod TBD |
-| 0.2  | 2026-08-13 | 補充使用階段與名詞交叉引用       |
+| 版本 | 日期 | 變更 |
+|------|------|------|
+| 0.1 | 2026-08-13 | 初稿；dev 確定，staging/prod TBD |
+| 0.2 | 2026-08-13 | 補充使用階段與名詞交叉引用 |

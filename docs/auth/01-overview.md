@@ -38,26 +38,26 @@ Google SSO 會牽涉 **Google 雲端後台設定** 與 **產品程式整合** �
 
 ### 2.2 名詞對照表
 
-| 名詞                                          | 白話說明                                                                                 | 在哪裡設定                                                | 使用階段                             | 主要給誰用                                           |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------- |
-| **GCP 專案**                                  | Google Cloud 上的一個「專案容器」，OAuth 相關設定都掛在這裡                              | [Google Cloud Console](https://console.cloud.google.com/) | Phase 1                              | 管理者（如社群 Google 帳號）                         |
-| **OAuth Consent Screen**                      | 使用者點「Google 登入」時，Google 跳出的**授權說明頁**設定（app 名稱、要存取哪些資料等） | Console → OAuth consent screen                            | Phase 1                              | **使用者**登入時會看到                               |
-| **使用者支援信箱**（User support email）      | 授權頁上顯示的「有問題請聯絡誰」                                                         | Consent Screen 表單欄位                                   | Phase 1                              | **使用者**看；不是放進 env                           |
-| **開發者聯絡信箱**（Developer contact email） | Google 有事要通知開發團隊時用的信箱                                                      | Consent Screen 表單欄位                                   | Phase 1                              | **Google** 聯絡用；使用者通常看不到                  |
-| **OAuth Client**                              | 一組「app 登入通行證」設定，包含 Client ID、Secret、允許的 redirect URI                  | Console → Credentials                                     | Phase 1                              | 管理者建立；RD 使用                                  |
-| **Client ID**                                 | 公開的 app 識別碼，程式需要用它向 Google 發起登入                                        | OAuth Client 建立後產生                                   | Phase 1 → 2                          | RD 放進 env（`AUTH_GOOGLE_ID`）                      |
-| **Client Secret**                             | 私密金鑰，證明 app 真的是你們的 server                                                   | OAuth Client 建立後產生                                   | Phase 1 → 2                          | RD 放進 env（`AUTH_GOOGLE_SECRET`），**不可 commit** |
-| **Redirect URI**                              | Google 登入完成後，**允許導回產品的網址**（必須事先登記，填錯就登入失敗）                | OAuth Client 表單欄位                                     | Phase 1；staging/prod 網域出來後追加 | Google 拿來比對；管理者設定                          |
-| **Test users**                                | Testing 模式下，**只有名單內的 Gmail 能登入**（用來內部試）                              | Consent Screen                                            | Phase 1 POC、Phase 3 驗收            | 測試者（可用個人 Gmail，不必是管理者帳號）           |
-| **環境變數（env）**                           | 程式讀取的設定檔，例如 Client ID、Secret、網站網址                                       | 本機 `.env.local`；上線後部署平台                         | Phase 2 起                           | RD                                                   |
-| **Auth.js**                                   | Next.js 用的登入函式庫，負責跟 Google 交握、管理 session                                 | 產品原始碼                                                | Phase 2                              | RD                                                   |
+| 名詞 | 白話說明 | 在哪裡設定 | 使用階段 | 主要給誰用 |
+|------|----------|------------|----------|------------|
+| **GCP 專案** | Google Cloud 上的一個「專案容器」，OAuth 相關設定都掛在這裡 | [Google Cloud Console](https://console.cloud.google.com/) | Phase 1 | 管理者（如社群 Google 帳號） |
+| **OAuth Consent Screen** | 使用者點「Google 登入」時，Google 跳出的**授權說明頁**設定（app 名稱、要存取哪些資料等） | Console → OAuth consent screen | Phase 1 | **使用者**登入時會看到 |
+| **使用者支援信箱**（User support email） | 授權頁上顯示的「有問題請聯絡誰」 | Consent Screen 表單欄位 | Phase 1 | **使用者**看；不是放進 env |
+| **開發者聯絡信箱**（Developer contact email） | Google 有事要通知開發團隊時用的信箱 | Consent Screen 表單欄位 | Phase 1 | **Google** 聯絡用；使用者通常看不到 |
+| **OAuth Client** | 一組「app 登入通行證」設定，包含 Client ID、Secret、允許的 redirect URI | Console → Credentials | Phase 1 | 管理者建立；RD 使用 |
+| **Client ID** | 公開的 app 識別碼，程式需要用它向 Google 發起登入 | OAuth Client 建立後產生 | Phase 1 → 2 | RD 放進 env（`AUTH_GOOGLE_ID`） |
+| **Client Secret** | 私密金鑰，證明 app 真的是你們的 server | OAuth Client 建立後產生 | Phase 1 → 2 | RD 放進 env（`AUTH_GOOGLE_SECRET`），**不可 commit** |
+| **Redirect URI** | Google 登入完成後，**允許導回產品的網址**（必須事先登記，填錯就登入失敗） | OAuth Client 表單欄位 | Phase 1；staging/prod 網域出來後追加 | Google 拿來比對；管理者設定 |
+| **Test users** | Testing 模式下，**只有名單內的 Gmail 能登入**（用來內部試） | Consent Screen | Phase 1 POC、Phase 3 驗收 | 測試者（可用個人 Gmail，不必是管理者帳號） |
+| **環境變數（env）** | 程式讀取的設定檔，例如 Client ID、Secret、網站網址 | 本機 `.env.local`；上線後部署平台 | Phase 2 起 | RD |
+| **Auth.js** | Next.js 用的登入函式庫，負責跟 Google 交握、管理 session | 產品原始碼 | Phase 2 | RD |
 
 ### 2.3 管理者 vs 測試登入：兩種 Google 帳號別搞混
 
-| 角色                 | 用哪個 Google 帳號                    | 做什麼                                    |
-| -------------------- | ------------------------------------- | ----------------------------------------- |
-| **GCP 管理者**       | 社群專用 Google 帳號（⏳ TBD）        | 登入 Cloud Console，建立專案與 OAuth 設定 |
-| **測試登入的使用者** | 任何 Gmail（例如 Tech Lead 個人帳號） | 在產品裡點「Google 登入」試流程           |
+| 角色 | 用哪個 Google 帳號 | 做什麼 |
+|------|-------------------|--------|
+| **GCP 管理者** | 社群專用 Google 帳號（⏳ TBD） | 登入 Cloud Console，建立專案與 OAuth 設定 |
+| **測試登入的使用者** | 任何 Gmail（例如 Tech Lead 個人帳號） | 在產品裡點「Google 登入」試流程 |
 
 > 用社群帳號**建立**憑證，用個人 Gmail**測試登入**，兩者可以不同，也經常這樣做。
 
@@ -65,10 +65,10 @@ Google SSO 會牽涉 **Google 雲端後台設定** 與 **產品程式整合** �
 
 **OAuth Client** = 在 Google Console 建立的一組憑證（ID + Secret + 允許的 redirect URI）。
 
-| 策略                | 做法                                                   |
-| ------------------- | ------------------------------------------------------ |
-| **A. 一組 client**  | 同一組 ID/Secret，redirect URI 填 dev + staging + prod |
-| **B. 各環境各一組** | dev、staging、prod 各建一組 client，各自獨立 Secret    |
+| 策略 | 做法 |
+|------|------|
+| **A. 一組 client** | 同一組 ID/Secret，redirect URI 填 dev + staging + prod |
+| **B. 各環境各一組** | dev、staging、prod 各建一組 client，各自獨立 Secret |
 
 **現階段建議：** 先建**一組** OAuth client，redirect URI **至少先加 localhost**；staging / prod 網域確定後再追加 URI，不必一次填完。
 
@@ -86,11 +86,11 @@ Google SSO 會牽涉 **Google 雲端後台設定** 與 **產品程式整合** �
 
 ### 本階段 vs 下一階段
 
-|             | 本階段（01～04 文件）         | 下一階段（學員 onboarding）      |
-| ----------- | ----------------------------- | -------------------------------- |
-| **目標**    | Google 能登入、session 能運作 | 學員白名單、建檔、隱私政策、申訴 |
-| **RD 工作** | Auth.js + OAuth 整合          | 白名單邏輯、DB、產品流程頁       |
-| **建議**    | **先做**，驗收後再開下一階段  | 獨立 spec，不與 SSO 憑證混在一起 |
+| | 本階段（01～04 文件） | 下一階段（學員 onboarding） |
+|--|----------------------|---------------------------|
+| **目標** | Google 能登入、session 能運作 | 學員白名單、建檔、隱私政策、申訴 |
+| **RD 工作** | Auth.js + OAuth 整合 | 白名單邏輯、DB、產品流程頁 |
+| **建議** | **先做**，驗收後再開下一階段 | 獨立 spec，不與 SSO 憑證混在一起 |
 
 ---
 
@@ -107,11 +107,11 @@ Auth.js 使用的 path 固定為：
 {Base URL}/api/auth/callback/google
 ```
 
-| 環境            | Base URL                | Redirect URI（完整）                             | 狀態                        |
-| --------------- | ----------------------- | ------------------------------------------------ | --------------------------- |
+| 環境 | Base URL | Redirect URI（完整） | 狀態 |
+|------|----------|---------------------|------|
 | **Dev（本機）** | `http://localhost:3000` | `http://localhost:3000/api/auth/callback/google` | ✅ 已確定，**現在就能設定** |
-| **Staging**     | `https://staging.<TBD>` | `https://staging.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加           |
-| **Production**  | `https://app.<TBD>`     | `https://app.<TBD>/api/auth/callback/google`     | ⏳ 網域確定後追加           |
+| **Staging** | `https://staging.<TBD>` | `https://staging.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加 |
+| **Production** | `https://app.<TBD>` | `https://app.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加 |
 
 環境 URL 需求詳見文件 04。
 
@@ -125,14 +125,14 @@ Auth.js 使用的 path 固定為：
 
 ## 5. 帳號與資源歸屬
 
-| 項目                          | 負責方                           | 用途說明                                        | 使用階段                    | 設定位置                            |
-| ----------------------------- | -------------------------------- | ----------------------------------------------- | --------------------------- | ----------------------------------- |
-| GCP 專案 Owner                | ⏳ TBD（社群專用 Google 帳號？） | 在 Google Cloud 建立專案，作為 OAuth 設定的容器 | Phase 1                     | Google Cloud Console                |
-| Consent Screen 使用者支援信箱 | ⏳ TBD                           | 登入授權頁顯示給使用者的聯絡信箱                | Phase 1                     | Console → OAuth consent screen      |
-| Consent Screen 開發者聯絡信箱 | ⏳ TBD                           | Google 通知開發團隊用（審核、政策等）           | Phase 1                     | Console → OAuth consent screen      |
-| Client ID / Secret 保管       | ⏳ TBD                           | 工程整合登入用；Secret 需安全存放               | Phase 1 建立 → Phase 2 使用 | Console 建立；RD 放 env / 1Password |
-| Auth.js 程式實作              | RD                               | 登入按鈕、session、路由保護                     | Phase 2                     | 產品原始碼                          |
-| DNS / 部署                    | Infra                            | 提供 staging / prod 的 Base URL                 | Phase 1 後段～Phase 3       | 部署平台、DNS                       |
+| 項目 | 負責方 | 用途說明 | 使用階段 | 設定位置 |
+|------|--------|----------|----------|----------|
+| GCP 專案 Owner | ⏳ TBD（社群專用 Google 帳號？） | 在 Google Cloud 建立專案，作為 OAuth 設定的容器 | Phase 1 | Google Cloud Console |
+| Consent Screen 使用者支援信箱 | ⏳ TBD | 登入授權頁顯示給使用者的聯絡信箱 | Phase 1 | Console → OAuth consent screen |
+| Consent Screen 開發者聯絡信箱 | ⏳ TBD | Google 通知開發團隊用（審核、政策等） | Phase 1 | Console → OAuth consent screen |
+| Client ID / Secret 保管 | ⏳ TBD | 工程整合登入用；Secret 需安全存放 | Phase 1 建立 → Phase 2 使用 | Console 建立；RD 放 env / 1Password |
+| Auth.js 程式實作 | RD | 登入按鈕、session、路由保護 | Phase 2 | 產品原始碼 |
+| DNS / 部署 | Infra | 提供 staging / prod 的 Base URL | Phase 1 後段～Phase 3 | 部署平台、DNS |
 
 > **待補充：** 社群專用 Google 帳號是否同時作為 GCP Owner 與 Consent Screen 支援信箱。
 
@@ -142,12 +142,12 @@ Auth.js 使用的 path 固定為：
 
 ### 技術棧
 
-| 項目            | 選型                          |
-| --------------- | ----------------------------- |
-| Framework       | Next.js 16.2.11（App Router） |
-| Auth            | Auth.js v5（`next-auth@5`）   |
-| Package Manager | pnpm                          |
-| OAuth Provider  | Google                        |
+| 項目 | 選型 |
+|------|------|
+| Framework | Next.js 16.2.11（App Router） |
+| Auth | Auth.js v5（`next-auth@5`） |
+| Package Manager | pnpm |
+| OAuth Provider | Google |
 
 ### OAuth 技術層流程（本階段）
 
@@ -190,12 +190,12 @@ sequenceDiagram
 
 ### 各層職責
 
-| 層級            | 實作方式                          | 說明                                  |
-| --------------- | --------------------------------- | ------------------------------------- |
-| OAuth callback  | Route Handler                     | `app/api/auth/[...nextauth]/route.ts` |
-| Session 讀取    | Server Component                  | `auth()`                              |
-| 登入 / 登出觸發 | Client Component 或 Server Action | `signIn()` / `signOut()`              |
-| 路由保護        | Middleware / Proxy                | 未登入 redirect 至 `/login`           |
+| 層級 | 實作方式 | 說明 |
+|------|----------|------|
+| OAuth callback | Route Handler | `app/api/auth/[...nextauth]/route.ts` |
+| Session 讀取 | Server Component | `auth()` |
+| 登入 / 登出觸發 | Client Component 或 Server Action | `signIn()` / `signOut()` |
+| 路由保護 | Middleware / Proxy | 未登入 redirect 至 `/login` |
 
 ---
 
@@ -203,11 +203,11 @@ sequenceDiagram
 
 本階段僅向 Google 請求基本身份資訊（會顯示在 Consent Screen 授權頁上）：
 
-| Scope     | 用途                    |
-| --------- | ----------------------- |
-| `openid`  | OpenID Connect 標準登入 |
-| `email`   | 使用者 email            |
-| `profile` | 使用者名稱、頭像        |
+| Scope | 用途 |
+|-------|------|
+| `openid` | OpenID Connect 標準登入 |
+| `email` | 使用者 email |
+| `profile` | 使用者名稱、頭像 |
 
 ---
 
@@ -288,10 +288,10 @@ sequenceDiagram
 
 ## 11. 修訂紀錄
 
-| 版本 | 日期       | 變更                                           |
-| ---- | ---------- | ---------------------------------------------- |
-| 0.1  | 2026-08-13 | 初稿，dev URI 確定；staging/prod TBD           |
-| 0.2  | 2026-08-13 | 流程圖改為 Mermaid sequence diagram            |
-| 0.3  | 2026-08-13 | 新增核心概念章節；帳號歸屬與環境表補充白話說明 |
-| 0.4  | 2026-08-13 | 區分本階段 SSO vs 下一階段 onboarding          |
-| 0.5  | 2026-08-13 | 移除適合對象、適合時機；精簡交叉引用           |
+| 版本 | 日期 | 變更 |
+|------|------|------|
+| 0.1 | 2026-08-13 | 初稿，dev URI 確定；staging/prod TBD |
+| 0.2 | 2026-08-13 | 流程圖改為 Mermaid sequence diagram |
+| 0.3 | 2026-08-13 | 新增核心概念章節；帳號歸屬與環境表補充白話說明 |
+| 0.4 | 2026-08-13 | 區分本階段 SSO vs 下一階段 onboarding |
+| 0.5 | 2026-08-13 | 移除適合對象、適合時機；精簡交叉引用 |
