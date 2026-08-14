@@ -14,10 +14,10 @@
 
 ### 你在 Console 會設定兩件事（順序不可顛倒）
 
-| 步驟 | Console 項目 | 白話用途 | 產出 |
-|------|-------------|----------|------|
-| 1 | **OAuth Consent Screen** | 使用者登入時看到的 app 名稱、授權說明、支援信箱 | 對外登入畫面 |
-| 2 | **OAuth Client ID** | app 的登入通行證 + 允許導回的網址清單 | Client ID、Client Secret |
+| 步驟 | Console 項目             | 白話用途                                        | 產出                     |
+| ---- | ------------------------ | ----------------------------------------------- | ------------------------ |
+| 1    | **OAuth Consent Screen** | 使用者登入時看到的 app 名稱、授權說明、支援信箱 | 對外登入畫面             |
+| 2    | **OAuth Client ID**      | app 的登入通行證 + 允許導回的網址清單           | Client ID、Client Secret |
 
 ---
 
@@ -30,11 +30,11 @@
 
 ### 需要的資訊（設定 redirect URI 用）
 
-| 環境 | Redirect URI | 狀態 |
-|------|--------------|------|
-| Dev | `http://localhost:3000/api/auth/callback/google` | ✅ 現在就能設定 |
-| Staging | `https://staging.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加 |
-| Production | `https://app.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加 |
+| 環境       | Redirect URI                                     | 狀態              |
+| ---------- | ------------------------------------------------ | ----------------- |
+| Dev        | `http://localhost:3000/api/auth/callback/google` | ✅ 現在就能設定   |
+| Staging    | `https://staging.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加 |
+| Production | `https://app.<TBD>/api/auth/callback/google`     | ⏳ 網域確定後追加 |
 
 > **Auth.js callback path 固定為 `/api/auth/callback/google`，請勿自行修改。**
 
@@ -60,11 +60,11 @@
    - **Internal**：僅限同 Google Workspace 組織（若產品僅限公司內部）
 3. 填寫 App information：
 
-   | 欄位 | 建議值 | 用途 | 是否放 env |
-   |------|--------|------|-----------|
-   | App name | Mentorship Exchange（或正式產品名） | 授權頁顯示的 app 名稱 | ❌ |
-   | User support email | ⏳ TBD（如社群信箱） | 授權頁顯示；使用者有問題可聯絡 | ❌ |
-   | Developer contact email | ⏳ TBD | Google 通知開發團隊用 | ❌ |
+   | 欄位                    | 建議值                              | 用途                           | 是否放 env |
+   | ----------------------- | ----------------------------------- | ------------------------------ | ---------- |
+   | App name                | Mentorship Exchange（或正式產品名） | 授權頁顯示的 app 名稱          | ❌         |
+   | User support email      | ⏳ TBD（如社群信箱）                | 授權頁顯示；使用者有問題可聯絡 | ❌         |
+   | Developer contact email | ⏳ TBD                              | Google 通知開發團隊用          | ❌         |
 
 4. **Scopes** → Add or Remove Scopes → 選擇：
    - `.../auth/userinfo.email`
@@ -79,10 +79,10 @@
 
 ### Testing vs Production（已發布）模式
 
-| 模式 | 誰能登入 | 何時使用 |
-|------|----------|----------|
-| **Testing** | 僅 test users（上限 100） | 開發 POC、內部測試 |
-| **In production** | 任何 Google 使用者 | 正式上線 |
+| 模式              | 誰能登入                  | 何時使用           |
+| ----------------- | ------------------------- | ------------------ |
+| **Testing**       | 僅 test users（上限 100） | 開發 POC、內部測試 |
+| **In production** | 任何 Google 使用者        | 正式上線           |
 
 > 本階段 scope 僅 `email` + `profile` + `openid`，通常**不需要** Google 額外 verification 即可發布。  
 > 正式上線前將 App 切至 **In production**。
@@ -139,11 +139,11 @@ https://app.<TBD>/api/auth/callback/google
 
 ### 交接清單
 
-| 項目 | 值 | 交接方式 |
-|------|-----|----------|
-| Client ID | `xxxx.apps.googleusercontent.com` | ⏳ TBD（1Password / 安全通道） |
-| Client Secret | `GOCSPX-xxxx` | ⏳ TBD（**不可** email 明文、不可 commit git） |
-| GCP Project ID | | 記錄於團隊 wiki 或 01-overview |
+| 項目           | 值                                | 交接方式                                       |
+| -------------- | --------------------------------- | ---------------------------------------------- |
+| Client ID      | `xxxx.apps.googleusercontent.com` | ⏳ TBD（1Password / 安全通道）                 |
+| Client Secret  | `GOCSPX-xxxx`                     | ⏳ TBD（**不可** email 明文、不可 commit git） |
+| GCP Project ID |                                   | 記錄於團隊 wiki 或 01-overview                 |
 
 ### RD 會將這些值放入環境變數
 
@@ -171,13 +171,13 @@ AUTH_GOOGLE_SECRET=<Client Secret>
 
 ## 8. 常見錯誤對照
 
-| 錯誤訊息 | 可能原因 | 解法 |
-|----------|----------|------|
-| `redirect_uri_mismatch` | redirect URI 與 Console 設定不一致 | 比對 URI 是否完全一致（含 http/https、port、path） |
-| `access_denied` | App 在 Testing 模式，使用者不在 test users | 將使用者 Gmail 加入 test users，或切換至 Production |
-| `invalid_client` | Client ID / Secret 錯誤或 env 未設定 | 檢查 `.env.local` 與 Console 值是否一致 |
-| 登入後馬上跳回未登入 | `AUTH_URL` 與實際網址不符 | 確認 `AUTH_URL=http://localhost:3000`（dev） |
-| `Error 403: org_internal` | Consent screen 設為 Internal 但使用者非組織成員 | 改 External 或確認使用者 Workspace |
+| 錯誤訊息                  | 可能原因                                        | 解法                                                |
+| ------------------------- | ----------------------------------------------- | --------------------------------------------------- |
+| `redirect_uri_mismatch`   | redirect URI 與 Console 設定不一致              | 比對 URI 是否完全一致（含 http/https、port、path）  |
+| `access_denied`           | App 在 Testing 模式，使用者不在 test users      | 將使用者 Gmail 加入 test users，或切換至 Production |
+| `invalid_client`          | Client ID / Secret 錯誤或 env 未設定            | 檢查 `.env.local` 與 Console 值是否一致             |
+| 登入後馬上跳回未登入      | `AUTH_URL` 與實際網址不符                       | 確認 `AUTH_URL=http://localhost:3000`（dev）        |
+| `Error 403: org_internal` | Consent screen 設為 Internal 但使用者非組織成員 | 改 External 或確認使用者 Workspace                  |
 
 ---
 
@@ -205,6 +205,6 @@ AUTH_GOOGLE_SECRET=<Client Secret>
 
 ## 11. 修訂紀錄
 
-| 版本 | 日期 | 變更 |
-|------|------|------|
-| 0.2 | 2026-08-13 | 補充各步驟用途說明；精簡交叉引用 |
+| 版本 | 日期       | 變更                             |
+| ---- | ---------- | -------------------------------- |
+| 0.2  | 2026-08-13 | 補充各步驟用途說明；精簡交叉引用 |

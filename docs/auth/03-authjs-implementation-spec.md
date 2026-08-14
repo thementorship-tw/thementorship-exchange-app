@@ -9,13 +9,13 @@
 
 ## 1. 技術選型
 
-| 項目 | 版本 / 選型 |
-|------|-------------|
-| Framework | Next.js 16.3.0（App Router） |
-| Auth Library | Auth.js v5（npm package: `next-auth@5`） |
-| Package Manager | pnpm |
-| OAuth Provider | Google |
-| Node.js | ≥ 20.9 |
+| 項目            | 版本 / 選型                              |
+| --------------- | ---------------------------------------- |
+| Framework       | Next.js 16.3.0（App Router）             |
+| Auth Library    | Auth.js v5（npm package: `next-auth@5`） |
+| Package Manager | pnpm                                     |
+| OAuth Provider  | Google                                   |
+| Node.js         | ≥ 20.9                                   |
 
 ---
 
@@ -23,12 +23,12 @@
 
 ### 必要變數
 
-| 變數 | 說明 | Dev 範例 |
-|------|------|----------|
-| `AUTH_SECRET` | Session 加密金鑰 | 執行 `openssl rand -base64 32` 產生 |
-| `AUTH_URL` | 該環境的 base URL（**不含** trailing slash） | `http://localhost:3000` |
-| `AUTH_GOOGLE_ID` | Google OAuth Client ID | 來自 Runbook 交接 |
-| `AUTH_GOOGLE_SECRET` | Google OAuth Client Secret | 來自 Runbook 交接 |
+| 變數                 | 說明                                         | Dev 範例                            |
+| -------------------- | -------------------------------------------- | ----------------------------------- |
+| `AUTH_SECRET`        | Session 加密金鑰                             | 執行 `openssl rand -base64 32` 產生 |
+| `AUTH_URL`           | 該環境的 base URL（**不含** trailing slash） | `http://localhost:3000`             |
+| `AUTH_GOOGLE_ID`     | Google OAuth Client ID                       | 來自 Runbook 交接                   |
+| `AUTH_GOOGLE_SECRET` | Google OAuth Client Secret                   | 來自 Runbook 交接                   |
 
 ### `.env.local` 範例（dev，勿 commit）
 
@@ -41,11 +41,11 @@ AUTH_GOOGLE_SECRET=<Client Secret>
 
 ### 各環境 AUTH_URL 對照
 
-| 環境 | AUTH_URL | 狀態 |
-|------|----------|------|
-| Dev | `http://localhost:3000` | ✅ |
-| Staging | `https://staging.<TBD>` | ⏳ |
-| Production | `https://app.<TBD>` | ⏳ |
+| 環境       | AUTH_URL                | 狀態 |
+| ---------- | ----------------------- | ---- |
+| Dev        | `http://localhost:3000` | ✅   |
+| Staging    | `https://staging.<TBD>` | ⏳   |
+| Production | `https://app.<TBD>`     | ⏳   |
 
 > `AUTH_URL` 必須與使用者實際存取 app 的 URL 一致，否則 OAuth callback 會失敗。
 
@@ -219,14 +219,14 @@ sequenceDiagram
 
 ### 各層職責
 
-| 步驟 | 執行位置 | 類型 |
-|------|----------|------|
-| 使用者點登入 | Login Page | Client / Server Action |
-| 導向 Google | Auth.js | Route Handler |
-| Google callback | `/api/auth/callback/google` | Route Handler |
-| 建立 session | Auth.js | Server |
-| 頁面讀 session | 任意 Server Component | Server Component |
-| 攔截未登入 | Middleware / Layout | Middleware |
+| 步驟            | 執行位置                    | 類型                   |
+| --------------- | --------------------------- | ---------------------- |
+| 使用者點登入    | Login Page                  | Client / Server Action |
+| 導向 Google     | Auth.js                     | Route Handler          |
+| Google callback | `/api/auth/callback/google` | Route Handler          |
+| 建立 session    | Auth.js                     | Server                 |
+| 頁面讀 session  | 任意 Server Component       | Server Component       |
+| 攔截未登入      | Middleware / Layout         | Middleware             |
 
 ---
 
@@ -240,10 +240,10 @@ sequenceDiagram
 
 Google Provider 預設提供：
 
-| 欄位 | 來源 |
-|------|------|
-| `session.user.email` | Google account email |
-| `session.user.name` | Google display name |
+| 欄位                 | 來源                   |
+| -------------------- | ---------------------- |
+| `session.user.email` | Google account email   |
+| `session.user.name`  | Google display name    |
 | `session.user.image` | Google profile picture |
 
 若需額外欄位，在 `callbacks.jwt` / `callbacks.session` 擴充。
@@ -252,12 +252,12 @@ Google Provider 預設提供：
 
 ## 9. 錯誤處理
 
-| 情境 | 預期行為 |
-|------|----------|
-| OAuth 授權被拒 | 導回 login 頁，顯示友善錯誤訊息 |
-| env 變數缺失 | dev 環境 console 明確報錯 |
-| session 過期 | 視為未登入，redirect 至 login |
-| Google API 異常 | 顯示通用錯誤，log 詳細資訊 |
+| 情境            | 預期行為                        |
+| --------------- | ------------------------------- |
+| OAuth 授權被拒  | 導回 login 頁，顯示友善錯誤訊息 |
+| env 變數缺失    | dev 環境 console 明確報錯       |
+| session 過期    | 視為未登入，redirect 至 login   |
+| Google API 異常 | 顯示通用錯誤，log 詳細資訊      |
 
 建議新增 `src/app/login/page.tsx` 讀取 query param `?error=...` 顯示錯誤（Auth.js 支援 `pages.error` 或 callback 處理）。
 
@@ -265,11 +265,11 @@ Google Provider 預設提供：
 
 ## 10. 路由一覽（階段 A）
 
-| 路徑 | 需登入 | 說明 |
-|------|--------|------|
-| `/login` | ❌ | 登入頁 |
-| `/home` | ✅ | **登入後首頁**；OAuth 成功後 redirect 目標 |
-| `/` | ⏳ TBD | 可 redirect 至 `/login` 或 `/home`，依產品決定 |
+| 路徑     | 需登入 | 說明                                           |
+| -------- | ------ | ---------------------------------------------- |
+| `/login` | ❌     | 登入頁                                         |
+| `/home`  | ✅     | **登入後首頁**；OAuth 成功後 redirect 目標     |
+| `/`      | ⏳ TBD | 可 redirect 至 `/login` 或 `/home`，依產品決定 |
 
 未登入存取 `/home` → redirect 至 `/login`。
 
@@ -306,9 +306,9 @@ Google Provider 預設提供：
 
 ## 13. 修訂紀錄
 
-| 版本 | 日期 | 變更 |
-|------|------|------|
-| 0.1 | 2026-08-13 | 初稿 |
-| 0.2 | 2026-08-13 | 補充使用階段與名詞交叉引用 |
-| 0.3 | 2026-08-13 | 登入後 landing 改為 `/home`（首頁）；精簡階段 A 路由表 |
-| 0.4 | 2026-08-13 | §5 依建議開發順序重排；Middleware 提前；標註 Client / Server 分工 |
+| 版本 | 日期       | 變更                                                              |
+| ---- | ---------- | ----------------------------------------------------------------- |
+| 0.1  | 2026-08-13 | 初稿                                                              |
+| 0.2  | 2026-08-13 | 補充使用階段與名詞交叉引用                                        |
+| 0.3  | 2026-08-13 | 登入後 landing 改為 `/home`（首頁）；精簡階段 A 路由表            |
+| 0.4  | 2026-08-13 | §5 依建議開發順序重排；Middleware 提前；標註 Client / Server 分工 |

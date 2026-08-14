@@ -6,14 +6,14 @@ Drizzle, and a CI pipeline for subsequent feature work to build on.
 
 ## Stack
 
-| Concern    | Choice                                        |
-| ---------- | --------------------------------------------- |
-| Framework  | Next.js 16 (App Router, TypeScript, Turbopack) |
-| Styling    | Tailwind CSS 4                                 |
-| Database   | Turso (libSQL) via Drizzle ORM                 |
+| Concern    | Choice                                          |
+| ---------- | ----------------------------------------------- |
+| Framework  | Next.js 16 (App Router, TypeScript, Turbopack)  |
+| Styling    | Tailwind CSS 4                                  |
+| Database   | Turso (libSQL) via Drizzle ORM                  |
 | Migrations | drizzle-kit — SQL files committed to `drizzle/` |
-| CI         | GitHub Actions                                 |
-| Hosting    | Vercel                                         |
+| CI         | GitHub Actions                                  |
+| Hosting    | Vercel                                          |
 
 Requires Node.js 22+ and pnpm 10+.
 
@@ -65,11 +65,11 @@ nothing connects during a build.
 
 ## Environments
 
-| Environment | Trigger              | Database                     |
-| ----------- | -------------------- | ---------------------------- |
-| Local       | `pnpm dev`           | `file:local.db`              |
-| Preview     | Pull request         | Turso staging database       |
-| Production  | Merge to `main`      | Turso production database    |
+| Environment | Trigger         | Database                  |
+| ----------- | --------------- | ------------------------- |
+| Local       | `pnpm dev`      | `file:local.db`           |
+| Preview     | Pull request    | Turso staging database    |
+| Production  | Merge to `main` | Turso production database |
 
 Deploys are handled by Vercel's Git integration rather than by a workflow. Set
 `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` per environment in the Vercel

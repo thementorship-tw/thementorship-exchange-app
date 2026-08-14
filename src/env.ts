@@ -9,9 +9,7 @@
 function required(name: string): string {
   const value = process.env[name];
   if (!value) {
-    throw new Error(
-      `Missing required environment variable: ${name}. See .env.example.`,
-    );
+    throw new Error(`Missing required environment variable: ${name}. See .env.example.`);
   }
   return value;
 }
