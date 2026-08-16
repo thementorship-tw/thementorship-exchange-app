@@ -1,5 +1,8 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import { defineConfig } from "drizzle-kit";
+
+dotenv.config({ path: ".env.local" });
+dotenv.config(); // .env fallback for transition, doesn't override .env.local
 
 const url = process.env.TURSO_DATABASE_URL;
 if (!url) {
