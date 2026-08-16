@@ -1,7 +1,7 @@
 # Google SSO 產品與技術總覽
 
-> **文件版本：** 0.3（草稿，待 review）
-> **最後更新：** 2026-08-13
+> **文件版本：** 0.6（草稿，待 review）
+> **最後更新：** 2026-08-16
 
 ---
 
@@ -144,8 +144,8 @@ Auth.js 使用的 path 固定為：
 
 | 項目 | 選型 |
 |------|------|
-| Framework | Next.js 16.2.11（App Router） |
-| Auth | Auth.js v5（`next-auth@5`） |
+| Framework | Next.js 16.3.0（App Router） |
+| Auth | Auth.js v5（`next-auth@beta`，目前為 `5.0.0-beta.32`） |
 | Package Manager | pnpm |
 | OAuth Provider | Google |
 
@@ -159,9 +159,8 @@ sequenceDiagram
     participant Google as Google OAuth
 
     User->>App: 存取受保護頁面
-    App->>User: redirect /login
-    User->>App: 點擊「Google 登入」
-    App->>Auth: signIn("google")
+    App->>User: redirect /api/auth/signin（Auth.js 內建登入頁）
+    User->>Auth: 點擊「Google 登入」
     Auth->>Google: 導向授權頁
     User->>Google: 同意授權
     Google->>Auth: callback /api/auth/callback/google
@@ -183,9 +182,9 @@ sequenceDiagram
     User->>App: 點擊登出
     App->>Auth: signOut()
     Auth->>Auth: 清除 session
-    Auth->>User: redirect /login
+    Auth->>User: redirect /（公開 landing）
     User->>App: 存取受保護頁面
-    App->>User: redirect /login（未登入）
+    App->>User: redirect /api/auth/signin（未登入）
 ```
 
 ### 各層職責
@@ -194,8 +193,9 @@ sequenceDiagram
 |------|----------|------|
 | OAuth callback | Route Handler | `app/api/auth/[...nextauth]/route.ts` |
 | Session 讀取 | Server Component | `auth()` |
-| 登入 / 登出觸發 | Client Component 或 Server Action | `signIn()` / `signOut()` |
-| 路由保護 | Middleware / Proxy | 未登入 redirect 至 `/login` |
+| 登入觸發 | Auth.js 內建登入頁 | `/api/auth/signin`，未自訂登入頁 |
+| 登出觸發 | Server Action | `signOut({ redirectTo: "/" })` |
+| 路由保護 | Proxy（`src/proxy.ts`，Next 16 取代 middleware） | 未登入 redirect 至 `/api/auth/signin?callbackUrl=...` |
 
 ---
 
@@ -295,3 +295,4 @@ sequenceDiagram
 | 0.3 | 2026-08-13 | 新增核心概念章節；帳號歸屬與環境表補充白話說明 |
 | 0.4 | 2026-08-13 | 區分本階段 SSO vs 下一階段 onboarding |
 | 0.5 | 2026-08-13 | 移除適合對象、適合時機；精簡交叉引用 |
+| 0.6 | 2026-08-16 | 依實作校正：登入頁為 Auth.js 內建 `/api/auth/signin`（無自訂 `/login`）；登出導回 `/`；§6 技術棧版本與 Proxy 更新；修正檔頭版本號（原停在 0.3） |
