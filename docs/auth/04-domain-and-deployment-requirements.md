@@ -1,9 +1,9 @@
 # 網域與部署需求規格（給 Infra / 網域負責人）
 
-> **文件版本：** 0.2（草稿，待 review）  
-> **對象：** 負責 DNS、部署、網域的同事  
-> **使用階段：** Phase 0～1（決定 URL）；Phase 3 前需就緒（staging / prod 驗收）  
-> **提出者：** Tech Lead  
+> **文件版本：** 0.3（草稿，待 review）
+> **對象：** 負責 DNS、部署、網域的同事
+> **使用階段：** Phase 0～1（決定 URL）；Phase 3 前需就緒（staging / prod 驗收）
+> **提出者：** Tech Lead
 > **目的：** 提供 Google SSO 所需的環境 URL，以便設定 OAuth redirect URI
 
 ---
@@ -12,7 +12,7 @@
 
 Mentorship Exchange 平台將使用 **Google SSO** 登入。Google OAuth 要求每個環境有**固定、可連線的 HTTPS URL**（本機 dev 除外），作為登入完成後的導回地址。
 
-**我們不需要 infra 設定 OAuth 或 `/api/auth/*` 路由**——那些由應用程式（Auth.js）處理。  
+**我們不需要 infra 設定 OAuth 或 `/api/auth/*` 路由**——那些由應用程式（Auth.js）處理。
 **我們需要的是：確保以下 URL 能指向已部署的 Next.js app。**
 
 ---
@@ -153,7 +153,7 @@ Phase 3：
 |------|----------|--------|
 | Tech Lead | 規格、協調 | ⏳ TBD |
 | RD | App 部署、Auth.js | ⏳ TBD |
-| GCP 設定者 | Google OAuth 憑證 | ⏳ TBD |
+| GCP 設定者 | Google OAuth 憑證 | `thementorshiptaiwan@gmail.com` |
 | Infra | DNS、部署、TLS | ⏳ TBD |
 
 ---
@@ -164,3 +164,4 @@ Phase 3：
 |------|------|------|
 | 0.1 | 2026-08-13 | 初稿；dev 確定，staging/prod TBD |
 | 0.2 | 2026-08-13 | 補充使用階段與名詞交叉引用 |
+| 0.3 | 2026-08-17 | §9 GCP 設定者回填為 `thementorshiptaiwan@gmail.com` |

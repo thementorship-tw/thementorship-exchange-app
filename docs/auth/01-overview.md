@@ -1,7 +1,7 @@
 # Google SSO 產品與技術總覽
 
-> **文件版本：** 0.6（草稿，待 review）
-> **最後更新：** 2026-08-16
+> **文件版本：** 0.7（草稿，待 review）
+> **最後更新：** 2026-08-17
 
 ---
 
@@ -44,33 +44,34 @@ Google SSO 會牽涉 **Google 雲端後台設定** 與 **產品程式整合** �
 | **OAuth Consent Screen** | 使用者點「Google 登入」時，Google 跳出的**授權說明頁**設定（app 名稱、要存取哪些資料等） | Console → OAuth consent screen | Phase 1 | **使用者**登入時會看到 |
 | **使用者支援信箱**（User support email） | 授權頁上顯示的「有問題請聯絡誰」 | Consent Screen 表單欄位 | Phase 1 | **使用者**看；不是放進 env |
 | **開發者聯絡信箱**（Developer contact email） | Google 有事要通知開發團隊時用的信箱 | Consent Screen 表單欄位 | Phase 1 | **Google** 聯絡用；使用者通常看不到 |
-| **OAuth Client** | 一組「app 登入通行證」設定，包含 Client ID、Secret、允許的 redirect URI | Console → Credentials | Phase 1 | 管理者建立；RD 使用 |
+| **OAuth Client** | 一組「app 登入通行證」設定，包含 Client ID、Client Secret、允許的 redirect URI | Console → Credentials | Phase 1 | 管理者建立；RD 使用 |
 | **Client ID** | 公開的 app 識別碼，程式需要用它向 Google 發起登入 | OAuth Client 建立後產生 | Phase 1 → 2 | RD 放進 env（`AUTH_GOOGLE_ID`） |
 | **Client Secret** | 私密金鑰，證明 app 真的是你們的 server | OAuth Client 建立後產生 | Phase 1 → 2 | RD 放進 env（`AUTH_GOOGLE_SECRET`），**不可 commit** |
+| **Session 金鑰**（`AUTH_SECRET`） | Auth.js 用來簽章 session cookie 的隨機字串。**與 Google 無關**，Google 不知道它存在 | 自行產生（`pnpm dlx auth secret`） | Phase 2 | RD **各自產生**；每人、每環境各一組，不需交接 |
 | **Redirect URI** | Google 登入完成後，**允許導回產品的網址**（必須事先登記，填錯就登入失敗） | OAuth Client 表單欄位 | Phase 1；staging/prod 網域出來後追加 | Google 拿來比對；管理者設定 |
 | **Test users** | Testing 模式下，**只有名單內的 Gmail 能登入**（用來內部試） | Consent Screen | Phase 1 POC、Phase 3 驗收 | 測試者（可用個人 Gmail，不必是管理者帳號） |
-| **環境變數（env）** | 程式讀取的設定檔，例如 Client ID、Secret、網站網址 | 本機 `.env.local`；上線後部署平台 | Phase 2 起 | RD |
+| **環境變數（env）** | 程式讀取的設定檔，例如 Client ID、Client Secret、Session 金鑰、網站網址 | 本機 `.env.local`；上線後部署平台 | Phase 2 起 | RD |
 | **Auth.js** | Next.js 用的登入函式庫，負責跟 Google 交握、管理 session | 產品原始碼 | Phase 2 | RD |
 
 ### 2.3 管理者 vs 測試登入：兩種 Google 帳號別搞混
 
 | 角色 | 用哪個 Google 帳號 | 做什麼 |
 |------|-------------------|--------|
-| **GCP 管理者** | 社群專用 Google 帳號（⏳ TBD） | 登入 Cloud Console，建立專案與 OAuth 設定 |
+| **GCP 管理者** | 社群專用 Google 帳號：`thementorshiptaiwan@gmail.com` | 登入 Cloud Console，建立專案與 OAuth 設定 |
 | **測試登入的使用者** | 任何 Gmail（例如 Tech Lead 個人帳號） | 在產品裡點「Google 登入」試流程 |
 
 > 用社群帳號**建立**憑證，用個人 Gmail**測試登入**，兩者可以不同，也經常這樣做。
 
 ### 2.4 OAuth Client 策略（決策說明）
 
-**OAuth Client** = 在 Google Console 建立的一組憑證（ID + Secret + 允許的 redirect URI）。
+**OAuth Client** = 在 Google Console 建立的一組憑證（Client ID + Client Secret + 允許的 redirect URI）。
 
 | 策略 | 做法 |
 |------|------|
-| **A. 一組 client** | 同一組 ID/Secret，redirect URI 填 dev + staging + prod |
-| **B. 各環境各一組** | dev、staging、prod 各建一組 client，各自獨立 Secret |
+| **A. 一組 client** | 同一組 Client ID / Client Secret，redirect URI 填 dev + prod |
+| **B. 各環境各一組** | dev、prod 各建一組 client，各自獨立的 Client Secret |
 
-**現階段建議：** 先建**一組** OAuth client，redirect URI **至少先加 localhost**；staging / prod 網域確定後再追加 URI，不必一次填完。
+**現階段建議：** 先建**一組** OAuth client，redirect URI **至少先加 localhost**；prod 網域確定後再追加 URI，不必一次填完。
 
 ---
 
@@ -82,7 +83,7 @@ Google SSO 會牽涉 **Google 雲端後台設定** 與 **產品程式整合** �
 - Auth.js session 管理（登入 / 登出）
 - Server Component 讀取 session
 - 基本路由保護（未登入 redirect）
-- 支援 dev 環境；staging / prod 待網域就緒後啟用
+- 支援 dev 環境；prod 待網域就緒後啟用
 
 ### 本階段 vs 下一階段
 
@@ -110,14 +111,11 @@ Auth.js 使用的 path 固定為：
 | 環境 | Base URL | Redirect URI（完整） | 狀態 |
 |------|----------|---------------------|------|
 | **Dev（本機）** | `http://localhost:3000` | `http://localhost:3000/api/auth/callback/google` | ✅ 已確定，**現在就能設定** |
-| **Staging** | `https://staging.<TBD>` | `https://staging.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加 |
 | **Production** | `https://app.<TBD>` | `https://app.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加 |
 
 環境 URL 需求詳見文件 04。
 
 ### 決策待辦
-
-- [ ] Staging 使用自訂子網域，或 Vercel preview URL？
 - [ ] Production 正式網域命名（`app.` 前綴 or 根網域）
 - [ ] OAuth client 策略：一組 or 各環境各一組（見 §2.4）
 
@@ -127,14 +125,16 @@ Auth.js 使用的 path 固定為：
 
 | 項目 | 負責方 | 用途說明 | 使用階段 | 設定位置 |
 |------|--------|----------|----------|----------|
-| GCP 專案 Owner | ⏳ TBD（社群專用 Google 帳號？） | 在 Google Cloud 建立專案，作為 OAuth 設定的容器 | Phase 1 | Google Cloud Console |
-| Consent Screen 使用者支援信箱 | ⏳ TBD | 登入授權頁顯示給使用者的聯絡信箱 | Phase 1 | Console → OAuth consent screen |
-| Consent Screen 開發者聯絡信箱 | ⏳ TBD | Google 通知開發團隊用（審核、政策等） | Phase 1 | Console → OAuth consent screen |
-| Client ID / Secret 保管 | ⏳ TBD | 工程整合登入用；Secret 需安全存放 | Phase 1 建立 → Phase 2 使用 | Console 建立；RD 放 env / 1Password |
+| GCP 專案 Owner | `thementorshiptaiwan@gmail.com`（社群專用帳號） | 在 Google Cloud 建立專案，作為 OAuth 設定的容器 | Phase 1 | Google Cloud Console |
+| Consent Screen 使用者支援信箱 |`thementorshiptaiwan@gmail.com` | 登入授權頁顯示給使用者的聯絡信箱 | Phase 1 | Console → OAuth consent screen |
+| Consent Screen 開發者聯絡信箱 | ⏳ 待回 Console 確認 | Google 通知開發團隊用（審核、政策等） | Phase 1 | Console → OAuth consent screen |
+| Client ID / Secret 保管 | 目前僅存於本機 `.env.local` | 機密；Console 建立後不再顯示，遺失只能重新產生 | Phase 1 建立 → Phase 2 使用 | Console 建立；RD 放 env |
 | Auth.js 程式實作 | RD | 登入按鈕、session、路由保護 | Phase 2 | 產品原始碼 |
-| DNS / 部署 | Infra | 提供 staging / prod 的 Base URL | Phase 1 後段～Phase 3 | 部署平台、DNS |
+| DNS / 部署 | Infra | 提供 prod 的 Base URL | Phase 1 後段～Phase 3 | 部署平台、DNS |
 
-> **待補充：** 社群專用 Google 帳號是否同時作為 GCP Owner 與 Consent Screen 支援信箱。
+> **待補充：**
+> - **開發者聯絡信箱**——Google 發政策、審核、API 異動通知用。建議填官方 + RD 兩個以上，單一收件人有漏信和被停用的風險。
+> - **GCP 專案 Owner 帳號**——目前依「支援信箱下拉選單只列出登入帳號本人或其 Google Group」推定為 `thementorshiptaiwan@gmail.com`。
 
 ---
 
@@ -215,27 +215,27 @@ sequenceDiagram
 
 ### Phase 0 — 決策（Tech Lead）
 
-- [ ] P0-1 確認 staging / prod URL（或標記 TBD + 命名慣例）
-- [ ] P0-2 確認 GCP 專案與社群 Google 帳號歸屬
-- [ ] P0-3 確認 OAuth client 策略（見 §2.4）
+- [ ] P0-1 確認 prod URL（或標記 TBD + 命名慣例）
+- [x] P0-2 確認 GCP 專案與社群 Google 帳號歸屬 — `thementorshiptaiwan@gmail.com`
+- [x] P0-3 確認 OAuth client 策略（見 §2.4
 
 ### Phase 1 — Google Cloud 設定（GCP 設定者，不需寫程式）
 
-- [ ] P1-1 建立 GCP 專案
-- [ ] P1-2 設定 OAuth Consent Screen（app 名稱、支援信箱、scopes）
-- [ ] P1-3 建立 OAuth Web Client，設定 dev redirect URI
-- [ ] P1-4 安全交接 Client ID / Secret 給 RD
-- [ ] P1-5 staging / prod URI 待網域就緒後追加
+- [x] P1-1 建立 GCP 專案
+- [x] P1-2 設定 OAuth Consent Screen（app 名稱、支援信箱、scopes）
+- [x] P1-3 建立 OAuth Web Client，設定 dev redirect URI
+- [ ] P1-4 交接 **Google Client Secret**（`AUTH_GOOGLE_SECRET`）給 RD — 目前僅存於本機
+- [ ] P1-5 prod URI 待網域就緒後追加
 
 → 操作細節：文件 02
 
 ### Phase 2 — Auth.js 整合（RD）
 
-- [ ] P2-1 安裝 Auth.js + 建立設定檔
-- [ ] P2-2 設定 env（Client ID、Secret、AUTH_URL）
-- [ ] P2-3 登入 / 登出 UI
-- [ ] P2-4 Server Component session 讀取
-- [ ] P2-5 Protected routes
+- [x] P2-1 安裝 Auth.js + 建立設定檔
+- [] P2-2 設定 env（Client ID、Secret、AUTH_URL）；prod 待網域確定
+- [x] P2-3 登入 / 登出 UI
+- [x] P2-4 Server Component session 讀取
+- [x] P2-5 Protected routes
 - [ ] P2-6 錯誤處理
 
 → 實作細節：文件 03
@@ -249,6 +249,7 @@ sequenceDiagram
 ### 下一階段 — 學員 onboarding（獨立規劃，非本批 scope）
 
 - 學員 email 白名單、首次建檔、隱私政策、申訴流程
+- 條款版本更新後的重新同意（`terms_version` 比對，見文件 05 §6）
 
 ---
 
@@ -296,3 +297,4 @@ sequenceDiagram
 | 0.4 | 2026-08-13 | 區分本階段 SSO vs 下一階段 onboarding |
 | 0.5 | 2026-08-13 | 移除適合對象、適合時機；精簡交叉引用 |
 | 0.6 | 2026-08-16 | 依實作校正：登入頁為 Auth.js 內建 `/api/auth/signin`（無自訂 `/login`）；登出導回 `/`；§6 技術棧版本與 Proxy 更新；修正檔頭版本號（原停在 0.3） |
+| 0.7 | 2026-08-17 | 回填 Console 與程式碼實況：GCP Owner 與支援信箱定案為 `thementorshiptaiwan@gmail.com`、app 名稱 Mentorship Exchange；環境簡化為 dev / prod（移除 staging）；§2.2 新增 `AUTH_SECRET` 詞條並統一「Client Secret」命名以與其區隔；結案 P0-2、P0-3、P1-1～P1-3、P2-1～P2-5。未結案：開發者聯絡信箱、P1-4 交接、P2-6 錯誤處理 |

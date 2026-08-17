@@ -1,7 +1,7 @@
 # Google OAuth 設定手冊（Runbook）
 
-> **文件版本：** 0.2（草稿，待 review）  
-> **對象：** 負責 Google Cloud Console 設定的人員（不需會寫程式）  
+> **文件版本：** 0.3（草稿，待 review）
+> **對象：** 負責 Google Cloud Console 設定的人員（不需會寫程式）
 > **使用階段：** Phase 1（在 RD 寫 Auth.js 之前或同時進行）
 
 ---
@@ -25,7 +25,7 @@
 
 ### 需要的權限
 
-- [ ] 可登入 Google Cloud Console 的 Google 帳號（⏳ TBD：社群專用帳號？）
+- [ ] 可登入 Google Cloud Console 的 Google 帳號：社群專用帳號 `thementorshiptaiwan@gmail.com`
 - [ ] 該帳號有 GCP 專案的 Owner 或 Editor 權限
 
 ### 需要的資訊（設定 redirect URI 用）
@@ -33,7 +33,6 @@
 | 環境 | Redirect URI | 狀態 |
 |------|--------------|------|
 | Dev | `http://localhost:3000/api/auth/callback/google` | ✅ 現在就能設定 |
-| Staging | `https://staging.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加 |
 | Production | `https://app.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加 |
 
 > **Auth.js callback path 固定為 `/api/auth/callback/google`，請勿自行修改。**
@@ -43,7 +42,7 @@
 ## 3. 建立 GCP 專案
 
 1. 前往 [Google Cloud Console](https://console.cloud.google.com/)
-2. 使用 ⏳ TBD 帳號登入
+2. 使用社群專用帳號 `thementorshiptaiwan@gmail.com` 登入
 3. 點選頂部專案選擇器 → **New Project**
 4. 專案名稱建議：`mentorship-exchange`（或團隊共識名稱）
 5. 建立完成後，確認已切換到該專案
@@ -62,9 +61,13 @@
 
    | 欄位 | 建議值 | 用途 | 是否放 env |
    |------|--------|------|-----------|
-   | App name | Mentorship Exchange（或正式產品名） | 授權頁顯示的 app 名稱 | ❌ |
-   | User support email | ⏳ TBD（如社群信箱） | 授權頁顯示；使用者有問題可聯絡 | ❌ |
-   | Developer contact email | ⏳ TBD | Google 通知開發團隊用 | ❌ |
+   | App name | ✅ Mentorship Exchange | 授權頁顯示的 app 名稱 | ❌ |
+   | User support email | ✅ `thementorshiptaiwan@gmail.com` | 授權頁顯示；使用者有問題可聯絡 | ❌ |
+   | Developer contact email | ⏳ TBD| Google 通知開發團隊用 | ❌ |
+
+   > **User support email 是下拉選單，不能自由輸入。** 選項只有兩種：目前登入 Console 的帳號本身，以及該帳號已加入為成員的 Google Groups。若日後想改用 `support@自訂網域` 這類地址顯示在授權頁上，必須先把它建成 Google Group 並將社群帳號加入，選項才會出現。
+   >
+   > Developer contact email 則是自由文字、可填多個，沒有這個限制。
 
 4. **Scopes** → Add or Remove Scopes → 選擇：
    - `.../auth/userinfo.email`
@@ -84,7 +87,7 @@
 | **Testing** | 僅 test users（上限 100） | 開發 POC、內部測試 |
 | **In production** | 任何 Google 使用者 | 正式上線 |
 
-> 本階段 scope 僅 `email` + `profile` + `openid`，通常**不需要** Google 額外 verification 即可發布。  
+> 本階段 scope 僅 `email` + `profile` + `openid`，通常**不需要** Google 額外 verification 即可發布。
 > 正式上線前將 App 切至 **In production**。
 
 ---
@@ -106,10 +109,9 @@ Dev 可先加：
 http://localhost:3000
 ```
 
-Staging / Production 待網域確定後追加：
+Production 待網域確定後追加：
 
 ```
-https://staging.<TBD>
 https://app.<TBD>
 ```
 
@@ -124,7 +126,6 @@ http://localhost:3000/api/auth/callback/google
 **網域確定後追加（不要刪 localhost）：**
 
 ```
-https://staging.<TBD>/api/auth/callback/google
 https://app.<TBD>/api/auth/callback/google
 ```
 
@@ -158,7 +159,7 @@ AUTH_GOOGLE_SECRET=<Client Secret>
 
 ## 7. 追加新環境 Redirect URI（之後再做）
 
-當 infra 提供 staging / prod URL 後：
+當 infra 提供 prod URL 後：
 
 1. 回到 **Credentials** → 點選已建立的 OAuth client
 2. 在 **Authorized redirect URIs** 區塊 **追加** 新 URI（不要刪除 localhost）
@@ -208,3 +209,4 @@ AUTH_GOOGLE_SECRET=<Client Secret>
 | 版本 | 日期 | 變更 |
 |------|------|------|
 | 0.2 | 2026-08-13 | 補充各步驟用途說明；精簡交叉引用 |
+| 0.3 | 2026-08-17 | 回填實際值：Console 帳號 `thementorshiptaiwan@gmail.com`、app 名稱、支援信箱；§4 補 User support email 為下拉選單的限制說明 |
