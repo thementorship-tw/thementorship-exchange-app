@@ -1,0 +1,11 @@
+.next/
+out/
+build/
+node_modules/
+docs/
+
+drizzle/
+
+pnpm-lock.yaml
+next-env.d.ts
+*.tsbuildinfo
