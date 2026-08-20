@@ -1,15 +1,15 @@
 # OAuth 成功後的路徑與 JWT Session（階段 A）
 
-> **文件版本：** 0.1  
-> **階段：** 階段 A（SSO 基礎，01～04）  
-> **前置：** Google OAuth 憑證已建立（文件 02）  
+> **文件版本：** 0.1
+> **階段：** 階段 A（SSO 基礎，01～04）
+> **前置：** Google OAuth 憑證已建立（文件 02）
 > **後續實作：** RD 依文件 03 實作
 
 ---
 
 ## 1. 這份文件做什麼
 
-說明 **Google OAuth 成功之後**，Auth.js 如何讓使用者保持登入狀態（JWT session）。  
+說明 **Google OAuth 成功之後**，Auth.js 如何讓使用者保持登入狀態（JWT session）。
 不包含學員白名單、建檔、隱私政策（下一階段，文件 05）。
 
 ---
@@ -22,7 +22,7 @@ Google 登入完成後，Google 只會提供一次性的使用者資訊，例如
 - 名字
 - 頭像 URL
 
-但網站不能每次開頁面都再叫使用者去 Google 登入。  
+但網站不能每次開頁面都再叫使用者去 Google 登入。
 因此 Auth.js 會做第二件事：**建立「登入狀態」（session）**，讓使用者接下來一段時間都被視為已登入。
 
 ```
@@ -66,7 +66,7 @@ Auth.js 預設用 **JWT** 方式保存 session。不必理解 JWT 的數學原�
 | 類型 | JWT session（階段 A） | 資料庫（階段 B） |
 |------|----------------------|-----------------|
 | **持久化什麼** | 「目前是誰登入」 | 學員資料、白名單、隱私政策同意紀錄等 |
-| **存在哪** | 瀏覽器 cookie（加密 JWT） | Postgres 等 DB |
+| **存在哪** | 瀏覽器 cookie（加密 JWT） | Turso / libSQL（本專案以 Drizzle ORM 存取） |
 | **要不要 DB** | ❌ 不需要 | ✅ 需要 |
 | **關掉瀏覽器** | cookie 還在且未過期 → 回來仍登入 | 資料一直在 DB |
 | **本階段** | ✅ Auth.js 預設做法 | ❌ 不在本階段 scope |
@@ -75,8 +75,8 @@ Auth.js 預設用 **JWT** 方式保存 session。不必理解 JWT 的數學原�
 
 - JWT session **是**一種「登入狀態的保存」（存在 cookie）
 - JWT session **不會**幫你存學員表、白名單等**業務資料**
-- 階段 A：只有 JWT session，沒有業務 DB → 合理且足夠
-- 階段 B：才需要 DB 存學員、查白名單（見 05）
+- 階段 A：**登入流程完全不經 DB** —— `src/auth.ts` 沒有掛 adapter
+- 階段 B：學員資料、白名單、`consent_logs` 才會真正寫進 DB（見 05）
 
 ---
 
@@ -87,20 +87,27 @@ sequenceDiagram
     participant Google as Google
     participant Auth as Auth.js
     participant Browser as 瀏覽器
+    participant Proxy as Proxy<br/>src/proxy.ts
     participant Page as 網站頁面
 
-    Google->>Auth: 回傳 email、name（OAuth 完成）
+    Google->>Auth: 回傳 email、name、頭像 URL（OAuth 完成）
     Auth->>Auth: 建立 JWT session
     Auth->>Browser: Set-Cookie（加密登入證明）
-    Auth->>Browser: redirect 至 /home 等
+    Auth->>Browser: redirect 回 /
 
     Note over Browser,Page: --- 之後的每次瀏覽 ---
 
-    Browser->>Page: 請求頁面（自動帶上 cookie）
+    Browser->>Proxy: 請求受保護頁面（自動帶上 cookie）
+    Proxy->>Proxy: authorized callback 驗證 session
+    Proxy->>Page: 放行
     Page->>Auth: auth() 讀 session
-    Auth->>Page: email、name
+    Auth->>Page: email、name、頭像 URL
     Page->>Browser: 渲染「已登入」UI
 ```
+
+> **受保護路由每次請求都會先經過 `src/proxy.ts`。** 它的 matcher 是排除清單（預設全擋、只放行公開路由），實際的阻擋判斷來自 `src/auth.ts` 的 `callbacks.authorized`。細節見 03 §5.3。
+>
+> 公開路由（`/`、靜態檔案）不經過 proxy，直接到頁面。
 
 ---
 
@@ -129,22 +136,12 @@ sequenceDiagram
 - 安裝 Auth.js、設定 Google Provider
 - callback Route Handler
 - `auth()`、`signIn()`、`signOut()`
-- Middleware 保護路由
+- Proxy 保護路由（`src/proxy.ts`，Next 16 取代 middleware）
 - env：`AUTH_SECRET`、`AUTH_GOOGLE_ID`、`AUTH_GOOGLE_SECRET`、`AUTH_URL`
 
 ---
 
-## 8. 階段 A 驗收 Checklist
-
-- [ ] Google 登入成功，導回 app
-- [ ] 頁面顯示使用者 name / email
-- [ ] 重新整理後仍維持登入
-- [ ] 登出後 session 清除
-- [ ] 登出後無法存取受保護頁面
-
----
-
-## 9. 修訂紀錄
+## 8. 修訂紀錄
 
 | 版本 | 日期 | 變更 |
 |------|------|------|

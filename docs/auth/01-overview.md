@@ -1,7 +1,7 @@
 # Google SSO 產品與技術總覽
 
-> **文件版本：** 0.7（草稿，待 review）
-> **最後更新：** 2026-08-17
+> **文件版本：** 0.8（草稿，待 review）
+> **最後更新：** 2026-08-20
 
 ---
 
@@ -13,7 +13,7 @@
 
 ### 成功長什麼樣（使用者視角）
 
-1. 未登入使用者進入需驗證的頁面 → 被導向登入頁
+1. 未登入使用者進入需驗證的頁面 → 被導向登入頁 `/login`
 2. 點擊「使用 Google 登入」→ 跳轉 Google 授權頁
 3. 授權完成 → 回到產品，顯示已登入狀態
 4. 可正常登出，登出後無法存取受保護頁面
@@ -48,7 +48,7 @@ Google SSO 會牽涉 **Google 雲端後台設定** 與 **產品程式整合** �
 | **Client ID** | 公開的 app 識別碼，程式需要用它向 Google 發起登入 | OAuth Client 建立後產生 | Phase 1 → 2 | RD 放進 env（`AUTH_GOOGLE_ID`） |
 | **Client Secret** | 私密金鑰，證明 app 真的是你們的 server | OAuth Client 建立後產生 | Phase 1 → 2 | RD 放進 env（`AUTH_GOOGLE_SECRET`），**不可 commit** |
 | **Session 金鑰**（`AUTH_SECRET`） | Auth.js 用來簽章 session cookie 的隨機字串。**與 Google 無關**，Google 不知道它存在 | 自行產生（`pnpm dlx auth secret`） | Phase 2 | RD **各自產生**；每人、每環境各一組，不需交接 |
-| **Redirect URI** | Google 登入完成後，**允許導回產品的網址**（必須事先登記，填錯就登入失敗） | OAuth Client 表單欄位 | Phase 1；staging/prod 網域出來後追加 | Google 拿來比對；管理者設定 |
+| **Redirect URI** | Google 登入完成後，**允許導回產品的網址**（必須事先登記，填錯就登入失敗） | OAuth Client 表單欄位 | Phase 1；prod 網域出來後追加 | Google 拿來比對；管理者設定 |
 | **Test users** | Testing 模式下，**只有名單內的 Gmail 能登入**（用來內部試） | Consent Screen | Phase 1 POC、Phase 3 驗收 | 測試者（可用個人 Gmail，不必是管理者帳號） |
 | **環境變數（env）** | 程式讀取的設定檔，例如 Client ID、Client Secret、Session 金鑰、網站網址 | 本機 `.env.local`；上線後部署平台 | Phase 2 起 | RD |
 | **Auth.js** | Next.js 用的登入函式庫，負責跟 Google 交握、管理 session | 產品原始碼 | Phase 2 | RD |
@@ -108,12 +108,15 @@ Auth.js 使用的 path 固定為：
 {Base URL}/api/auth/callback/google
 ```
 
+> 📌 **本表為環境與 URL 的唯一來源（single source of truth）。**
+> 02、03、04 只引用不複製；環境有異動時**只改這裡**，再依下表通知各文件負責人。
+
 | 環境 | Base URL | Redirect URI（完整） | 狀態 |
 |------|----------|---------------------|------|
 | **Dev（本機）** | `http://localhost:3000` | `http://localhost:3000/api/auth/callback/google` | ✅ 已確定，**現在就能設定** |
 | **Production** | `https://app.<TBD>` | `https://app.<TBD>/api/auth/callback/google` | ⏳ 網域確定後追加 |
 
-環境 URL 需求詳見文件 04。
+> **本專案不設 staging。** dev 驗證完直接上 prod。
 
 ### 決策待辦
 - [ ] Production 正式網域命名（`app.` 前綴 or 根網域）
@@ -140,14 +143,16 @@ Auth.js 使用的 path 固定為：
 
 ## 6. 技術架構
 
-### 技術棧
+本專案以 **Next.js（App Router）+ Auth.js v5 + Google Provider** 實作，session 採 JWT、不接資料庫。
 
-| 項目 | 選型 |
-|------|------|
-| Framework | Next.js 16.3.0（App Router） |
-| Auth | Auth.js v5（`next-auth@beta`，目前為 `5.0.0-beta.32`） |
-| Package Manager | pnpm |
-| OAuth Provider | Google |
+本節只提供概觀流程圖。**實作細節不在此重複**：
+
+| 需要什麼 | 去哪裡 |
+|----------|--------|
+| 完整技術棧與版本號 | 文件 03 §1 |
+| 各層職責與檔案對應 | 文件 03 §6 |
+| RD 逐項實作規格 | 文件 03 §5 |
+| JWT session 是什麼 | 文件 06 |
 
 ### OAuth 技術層流程（本階段）
 
@@ -159,7 +164,7 @@ sequenceDiagram
     participant Google as Google OAuth
 
     User->>App: 存取受保護頁面
-    App->>User: redirect /api/auth/signin（Auth.js 內建登入頁）
+    App->>User: redirect /login（自訂登入頁）
     User->>Auth: 點擊「Google 登入」
     Auth->>Google: 導向授權頁
     User->>Google: 同意授權
@@ -184,18 +189,10 @@ sequenceDiagram
     Auth->>Auth: 清除 session
     Auth->>User: redirect /（公開 landing）
     User->>App: 存取受保護頁面
-    App->>User: redirect /api/auth/signin（未登入）
+    App->>User: redirect /login（未登入）
 ```
 
-### 各層職責
-
-| 層級 | 實作方式 | 說明 |
-|------|----------|------|
-| OAuth callback | Route Handler | `app/api/auth/[...nextauth]/route.ts` |
-| Session 讀取 | Server Component | `auth()` |
-| 登入觸發 | Auth.js 內建登入頁 | `/api/auth/signin`，未自訂登入頁 |
-| 登出觸發 | Server Action | `signOut({ redirectTo: "/" })` |
-| 路由保護 | Proxy（`src/proxy.ts`，Next 16 取代 middleware） | 未登入 redirect 至 `/api/auth/signin?callbackUrl=...` |
+> 各層職責與對應檔案見 **文件 03 §6**。
 
 ---
 
@@ -217,7 +214,7 @@ sequenceDiagram
 
 - [ ] P0-1 確認 prod URL（或標記 TBD + 命名慣例）
 - [x] P0-2 確認 GCP 專案與社群 Google 帳號歸屬 — `thementorshiptaiwan@gmail.com`
-- [x] P0-3 確認 OAuth client 策略（見 §2.4
+- [x] P0-3 確認 OAuth client 策略（見 §2.4）
 
 ### Phase 1 — Google Cloud 設定（GCP 設定者，不需寫程式）
 
@@ -236,15 +233,16 @@ sequenceDiagram
 - [x] P2-3 登入 / 登出 UI
 - [x] P2-4 Server Component session 讀取
 - [x] P2-5 Protected routes
-- [ ] P2-6 錯誤處理
+- [x] P2-6 錯誤處理 — 錯誤統一導回 `/login`，以 `?error=` 顯示中文訊息（見文件 03 §9）
 
 → 實作細節：文件 03
 
 ### Phase 3 — 驗收（SSO 基礎）
 
 - [ ] P3-1 Dev 環境 E2E 登入成功
-- [ ] P3-2 Staging E2E（待 URL）
-- [ ] P3-3 Production smoke test（待 URL）
+- [ ] P3-2 Production smoke test（待 URL）
+- [ ]
+> RD 端更細的逐項驗收（含 HTTP status、OAuth 起手式參數、頭像 host allowlist）見 **文件 03 §11**。
 
 ### 下一階段 — 學員 onboarding（獨立規劃，非本批 scope）
 
@@ -253,27 +251,7 @@ sequenceDiagram
 
 ---
 
-## 9. 驗收標準（Acceptance Criteria）
-
-### Scenario：Dev 環境 Google 登入成功
-
-**Given** OAuth 憑證已建立且 dev redirect URI 已設定
-**And** Auth.js 整合已完成
-**When** 使用者在本機點擊「Google 登入」並完成授權
-**Then** 使用者被導回 app 且顯示已登入狀態
-**And** refresh 頁面後仍維持登入
-**And** 登出後無法存取受保護頁面
-
-### Scenario：Staging / Production 登入成功
-
-**Given** 對應環境的 redirect URI 已加入 Google Console
-**And** 該環境 `AUTH_URL` 設定正確
-**When** 使用者在該環境完成 Google 登入
-**Then** 登入流程與 dev 環境行為一致
-
----
-
-## 10. 個人驗證（Tech Lead POC）
+## 9. 個人驗證（Tech Lead POC）
 
 在 RD 正式實作前，Tech Lead 可自行驗證 **Phase 1 文件是否正確**：
 
@@ -287,7 +265,7 @@ sequenceDiagram
 
 ---
 
-## 11. 修訂紀錄
+## 10. 修訂紀錄
 
 | 版本 | 日期 | 變更 |
 |------|------|------|
@@ -298,3 +276,4 @@ sequenceDiagram
 | 0.5 | 2026-08-13 | 移除適合對象、適合時機；精簡交叉引用 |
 | 0.6 | 2026-08-16 | 依實作校正：登入頁為 Auth.js 內建 `/api/auth/signin`（無自訂 `/login`）；登出導回 `/`；§6 技術棧版本與 Proxy 更新；修正檔頭版本號（原停在 0.3） |
 | 0.7 | 2026-08-17 | 回填 Console 與程式碼實況：GCP Owner 與支援信箱定案為 `thementorshiptaiwan@gmail.com`、app 名稱 Mentorship Exchange；環境簡化為 dev / prod（移除 staging）；§2.2 新增 `AUTH_SECRET` 詞條並統一「Client Secret」命名以與其區隔；結案 P0-2、P0-3、P1-1～P1-3、P2-1～P2-5。未結案：開發者聯絡信箱、P1-4 交接、P2-6 錯誤處理 |
+| 0.8 | 2026-08-20 | 登入頁改為自訂 `/login`，內建 `/api/auth/signin` ；§6 兩張流程圖與 §1 敘述同步|

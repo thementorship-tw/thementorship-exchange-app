@@ -1,6 +1,6 @@
 # Auth.js 工程實作規格
 
-> **文件版本：** 0.6（草稿，待 review）
+> **文件版本：** 0.7.1（草稿，待 review）
 > **對象：** RD
 > **使用階段：** Phase 2（需 Phase 1 的 Client ID / Secret）
 > **前置：** OAuth 憑證已建立（文件 02）
@@ -72,10 +72,13 @@ pnpm add next-auth@beta
 
 ```
 src/
-├── auth.ts                              # Auth.js 設定（providers、callbacks）
+├── auth.ts                              # Auth.js 設定（providers、pages、callbacks）
 ├── proxy.ts                             # 路由保護（Next 16 慣例，取代 middleware.ts）
 └── app/
     ├── page.tsx                         # 公開 landing（見 §10）
+    ├── login/
+    │   ├── page.tsx                     # 自訂登入頁（見 §5.4）
+    │   └── google-sign-in-button.tsx    # Client Component，呼叫 signIn("google")
     ├── api/
     │   └── auth/
     │       └── [...nextauth]/
@@ -94,11 +97,12 @@ src/
 建議依下列順序開發，每步完成後可局部驗收：
 
 ```
-1. auth.ts          → Auth 設定（providers、匯出 auth / handlers、authorized callback）
+1. auth.ts          → Auth 設定（providers、pages、匯出 auth / handlers、authorized callback）
 2. Route Handler    → 掛上 /api/auth/*，OAuth callback 能跑
 3. Proxy            → 定義哪些路由需登入（未登入 redirect）
-4. 首頁 /home       → 登入後 landing，顯示 session 資料
-5. 登出             → signOut，驗證 session 清除
+4. 登入頁 /login    → 自訂登入頁
+5. 首頁 /home       → 登入後 landing，顯示 session 資料
+6. 登出             → signOut，驗證 session 清除
 ```
 
 > **為什麼 Proxy 放在頁面之前？** 先定義「誰能進 `/home`」，再實作頁面，可避免首頁漏保護或登入後 redirect 目標不一致。若 Proxy 整合有問題，可暫時只在 layout / page 用 `auth()` + `redirect()`，待 OAuth 跑通後再補。
@@ -106,6 +110,7 @@ src/
 ### 5.1 `src/auth.ts`
 
 - 設定 Google Provider
+- 設定 `pages` 指向自訂登入頁（見 §5.4）
 - 設定 `callbacks.authorized` — **這是 Proxy 阻擋的必要條件**（見 §5.3）
 - 匯出 `handlers`、`auth`、`signIn`、`signOut`
 
@@ -116,13 +121,16 @@ import Google from "next-auth/providers/google";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [Google],
+  pages: {
+    signIn: "/login",
+    error: "/login",
+  },
   callbacks: {
     authorized: ({ auth }) => !!auth?.user,
   },
 });
 ```
 
-不設 `pages`，登入頁與錯誤頁即為 Auth.js 內建的 `/api/auth/signin` 與 `/api/auth/error`。
 
 > **不要手動傳 `clientId` / `clientSecret`。** v5 會自動從 `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` 推斷（見 §2）。手動傳入不但多餘，`process.env.X` 的型別是 `string | undefined`，在本專案的 `strict: true` 下會直接 TS 編譯失敗。
 >
@@ -149,23 +157,16 @@ export { auth as proxy } from "@/auth";
 
 export const config = {
   matcher: [
-    "/((?!api/auth|_next|$|.*\\.(?:ico|png|jpe?g|gif|svg|webp|txt|xml|webmanifest|json)$).*)",
+    "/((?!api/auth|login|_next|$|.*\\.(?:ico|png|jpe?g|gif|svg|webp|txt|xml|webmanifest|json)$).*)",
   ],
 };
 ```
 
 matcher 採 **deny-list（排除清單）**：預設全部路由都需登入，只列出公開的例外。
 
-| 排除項 | 為什麼要公開 |
-|--------|--------------|
-| `api/auth` | OAuth callback 與內建登入頁，擋了會無限重導 |
-| `_next` | 打包後的 CSS / JS（`_next/static`）與圖片最佳化（`_next/image`） |
-| `$` | 根路由 `/`（公開 landing，見 §10） |
-| `*.副檔名` | favicon、robots.txt、sitemap.xml、manifest 及 `public/` 內的靜態檔案 |
 
 > **匯出名稱必須是 `proxy` 或 default export**，不能是 `middleware`。
 >
-> **只有這個檔案是不夠的。** `auth` 作為 proxy 時，若 `auth.ts` 沒有 `callbacks.authorized`，它只會把 session 附加到 `req.auth` 而**不會阻擋任何人**。擋人的判斷來自 §5.1 的 `authorized`，回傳 `false` 時 Auth.js 會導向 `/api/auth/signin?callbackUrl=...`。
 >
 > 若 Proxy 整合有問題，可改在 layout 層用 `auth()` + `redirect()`。
 
@@ -183,7 +184,23 @@ matcher 採 **deny-list（排除清單）**：預設全部路由都需登入，�
 | `(protected)/layout.tsx` | 群組首次進入 |
 | 頁面內的 `auth()` | 每次該頁渲染 |
 
-### 5.4 登入後首頁 `src/app/(protected)/home/page.tsx`
+### 5.4 登入頁 `src/app/login/page.tsx`
+
+這一頁同時是 `pages.signIn` 與 `pages.error`，要處理三種狀態：
+
+| 狀態 | 進入方式 | 顯示 |
+|------|----------|------|
+| 一般 | 直接進站，或被 proxy 導過來 | 提示文案 +「使用 Google 登入」按鈕 |
+| 錯誤 | Auth.js 帶 `?error=<code>` 回來 | 對應的中文錯誤訊息（見 §9） |
+| 拒絕 | `?error=AccessDenied` | 拒絕狀態區塊（文案見文件 05 §7） |
+
+實作要點：
+
+- Server Component，用 `await searchParams` 取 `error` 與 `callbackUrl`
+- 已登入者直接 `redirect` 至 `callbackUrl`，避免重複看到登入頁
+- Google 按鈕必須是獨立的 Client Component
+
+### 5.5 登入後首頁 `src/app/(protected)/home/page.tsx`
 
 - **Server Component**（用 `auth()` 讀 session）
 - Proxy 已負責未登入 redirect；此處 `auth()` 主要用於取得 `name` / `email` 渲染 UI
@@ -195,7 +212,7 @@ import { redirect } from "next/navigation";
 
 export default async function HomePage() {
   const session = await auth();
-  if (!session?.user) redirect("/api/auth/signin?callbackUrl=%2Fhome");
+  if (!session?.user) redirect("/login?callbackUrl=%2Fhome");
 
   return <div>Hello, {session.user.name}</div>;
 }
@@ -213,7 +230,7 @@ export default async function HomePage() {
 >
 > Next 的 wildcard 語法：`*` 匹配單一子網域，`**` 匹配開頭任意數量子網域。
 
-### 5.5 登出
+### 5.6 登出
 
 在 `/home` 內用 Server Action 包 `signOut`，登出後導回首頁 `/`：
 
@@ -237,14 +254,14 @@ import { signOut } from "@/auth";
 ```mermaid
 sequenceDiagram
     actor User as 使用者 (Browser)
-    participant SI as /api/auth/signin
+    participant LP as /login
     participant RH as Route Handler<br>/api/auth/[...nextauth]
     participant Google as Google OAuth
     participant PX as Proxy
     participant SC as Server Component
 
-    User->>SI: 點擊 Sign in with Google
-    SI->>RH: POST /api/auth/signin/google
+    User->>LP: 點擊「使用 Google 登入」
+    LP->>RH: POST /api/auth/signin/google
     RH->>Google: OAuth 授權請求
     Google->>User: 顯示 consent screen
     User->>Google: 授權
@@ -262,7 +279,7 @@ sequenceDiagram
 
 | 步驟 | 執行位置 | 類型 |
 |------|----------|------|
-| 使用者點登入 | Auth.js 內建登入頁 `/api/auth/signin` |
+| 使用者點登入 | `/login` | 自訂頁（Server Component + Client 按鈕） |
 | 導向 Google | Auth.js | Route Handler |
 | Google callback | `/api/auth/callback/google` | Route Handler |
 | 建立 session | Auth.js | Server |
@@ -295,19 +312,20 @@ Google Provider 預設提供：
 
 | 情境 | 預期行為 |
 |------|----------|
-| OAuth 授權被拒 | 導向 Auth.js 內建錯誤頁，顯示錯誤代碼 |
+| OAuth 授權被拒 | 回到 `/login`，顯示錯誤訊息 |
 | env 變數缺失 | dev 環境 console 明確報錯 |
-| session 過期 | 視為未登入，redirect 至 `/api/auth/signin` |
+| session 過期 | 視為未登入，redirect 至 `/login` |
 | Google API 異常 | 顯示通用錯誤，log 詳細資訊 |
 
-現行使用 Auth.js 內建的錯誤頁（`/api/auth/error`），錯誤以 `?error=<code>` 傳遞。code 來自 `@auth/core` 的型別定義：
+錯誤以 `?error=<code>` 回到 `/login`（`pages.error` 指向該頁，見 §5.1），由頁面查表轉成中文。
+
+code 來自 `@auth/core` 的型別定義：
 
 | 來源 | 常見 code |
 |------|-----------|
 | `SignInPageErrorParam` | `OAuthSignin`、`OAuthCallbackError`、`OAuthAccountNotLinked`、`Callback`、`SessionRequired` |
 | `ErrorPageParam` | `Configuration`、`AccessDenied`、`Verification` |
 
-> 內建錯誤頁為英文且無法在地化。若日後需要中文訊息或自訂樣式，須另外建立錯誤頁並在 `auth.ts` 設定 `pages.error` 指向它。
 
 ---
 
@@ -315,7 +333,7 @@ Google Provider 預設提供：
 
 | 路徑 | 需登入 | 說明 |
 |------|--------|------|
-| `/api/auth/signin` | ❌ | **登入頁**（Auth.js 內建頁） |
+| `/login` | ❌ | **登入頁**；提示文案、Google 按鈕、錯誤與拒絕狀態 |
 | `/home` | ✅ | **登入後的 app 主體**；顯示身分資訊與登出 |
 | `/` | ❌ | 公開的品牌 landing，**不** redirect；只放一個 CTA |
 
@@ -339,19 +357,21 @@ Google Provider 預設提供：
 - [x] `pnpm dev` 可正常啟動
 - [x] `/` 未登入可正常瀏覽，且有指向登入頁的 CTA
 - [x] 已登入時 `/` 的 CTA 變為「進入 Home」
-- [x] 登入後可看到使用者 name / email / 頭像（**頭像會驗到 §5.4 的 host allowlist**）
-- [x] 未登入存取 `/home` → 307 導向 `/api/auth/signin?callbackUrl=...`
-- [x] `/api/auth/signin` 顯示 Google 登入按鈕（內建頁）
+- [x] 登入後可看到使用者 name / email / 頭像（**頭像會驗到 §5.5 的 host allowlist**）
+- [x] 未登入存取 `/home` → 307 導向 `/login?callbackUrl=...`
+- [x] `/login` 顯示提示文案與 Google 登入按鈕
+- [x] `/login?error=AccessDenied` 顯示拒絕狀態區塊
+- [x] `/login?error=<其他 code>` 顯示對應中文訊息；未知 code 顯示通用訊息
 - [x] OAuth 起手式正確 — POST `/api/auth/signin/google` 回 302，導向
       `accounts.google.com/o/oauth2/v2/auth`，`redirect_uri` 為
       `/api/auth/callback/google`，`scope` 為 `openid profile email`
 - [x] env 變數未 commit 至 git
 - [x] refresh 頁面後 session 仍在
-- [x] 於 Google consent 頁按「取消」→ 顯示錯誤訊息
+- [x] 於 Google consent 頁按「取消」→ 回到 `/login?error=OAuthCallbackError`，顯示「Google 授權未完成」
 - [x] 登出後導回首頁 `/`，session 已清除
 - [x] 登出後無法進入受保護頁面（被 redirect）
 
-### Staging / Production（待 URL）
+### Production（待 URL）
 
 - [ ] 對應 redirect URI 已加入 Google Console
 - [ ] 部署環境 `AUTH_URL` 設定正確
@@ -377,3 +397,5 @@ Google Provider 預設提供：
 | 0.4 | 2026-08-13 | §5 依建議開發順序重排；Middleware 提前；標註 Client / Server 分工 |
 | 0.5 | 2026-08-16 | 依實作結果校正：Middleware → Next 16 `proxy.ts`；§5.1 移除手動 clientId/secret 並補 `authorized` callback；§2 補 v5 env 推斷與 `AUTH_TRUST_HOST`；§9 補實際 error code；§10 定案 `/` 為公開首頁 |
 | 0.6 | 2026-08-16 | §5.3 matcher 改為 deny-list（排除清單）並改寫維護規則；§5.4 未登入 redirect 改指 `/api/auth/signin` 並說明 `callbackUrl`；§6 登入頁改為 Auth.js 內建頁；修正 §11 env 數量與 §5.4 交叉引用 |
+| 0.7 | 2026-08-20 | **登入頁改回自訂 `/login`**）：§5.1 加 `pages`；新增 §5.4 登入頁（三種狀態、`callbackUrl`、重導由 Auth.js 擋） |
+| 0.7.1 | 2026-08-20 | 更正兩處：按取消回的是 `OAuthCallbackError` 不是 `AccessDenied`（§9）；`callbackUrl` 的開放重導 Auth.js 只擋一半，登入頁改用目的地白名單（§5.4） |

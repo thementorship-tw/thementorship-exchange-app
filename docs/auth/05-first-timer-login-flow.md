@@ -89,7 +89,7 @@ sequenceDiagram
     participant Google as Google SSO
     participant Auth as Auth.js
     participant WL as 學員白名單
-    participant DB as 學員資料
+    participant DB as 學員資料 / consent_logs
 
     User->>Login: 點 Google 登入
     Login->>Google: OAuth
@@ -100,9 +100,14 @@ sequenceDiagram
         Login->>User: 登入頁拒絕狀態（email + 說明 + 申訴）
     else 在白名單
         Auth->>User: session 建立
-        alt 首次登入
-            User->>Login: 同意隱私政策
-            Login->>DB: 建立 / 更新學員資料
+        Auth->>DB: 查最新 consent_logs.terms_version
+        alt 首次登入，或版本不符（見 §6）
+            Login->>User: 條款同意頁（互惠條款 + 隱私政策）
+            User->>Login: 同意
+            Login->>DB: 新增一筆 consent_logs（含 terms_version）
+            opt 僅首次
+                Login->>DB: 建立學員資料
+            end
         end
         Login->>User: 首頁
     end
