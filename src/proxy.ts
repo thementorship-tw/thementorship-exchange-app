@@ -5,7 +5,8 @@ export { auth as proxy } from "@/auth";
 export const config = {
   /**
    * 排除項：
-   *   api/auth   OAuth callback 與內建登入頁（作法一），擋了會無限重導
+   *   api/auth   OAuth callback 擋了會無限重導
+   *   login      自訂登入頁
    *   _next      打包後的 CSS / JS（_next/static）與圖片最佳化（_next/image）
    *   $          根路由 /（公開 landing）
    *   *.副檔名    favicon、robots.txt、sitemap.xml、manifest 及 public/ 內的靜態檔案
@@ -13,6 +14,6 @@ export const config = {
    * 新增公開路由時記得補進這份清單
    */
   matcher: [
-    "/((?!api/auth|_next|$|.*\\.(?:ico|png|jpe?g|gif|svg|webp|txt|xml|webmanifest|json)$).*)",
+    "/((?!api/auth|login|_next|$|.*\\.(?:ico|png|jpe?g|gif|svg|webp|txt|xml|webmanifest|json)$).*)",
   ],
 };

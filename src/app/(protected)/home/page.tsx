@@ -5,7 +5,7 @@ import { auth, signOut } from "@/auth";
 
 export default async function HomePage() {
   const session = await auth();
-  if (!session?.user) redirect("/api/auth/signin?callbackUrl=%2Fhome");
+  if (!session?.user) redirect("/login?callbackUrl=%2Fhome");
 
   const { name, email, image } = session.user;
 
