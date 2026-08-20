@@ -18,7 +18,9 @@ const ALLOWED_TARGETS = new Set(["/home"]);
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const { error, callbackUrl } = await searchParams;
   const errorCode = Array.isArray(error) ? error[0] : error;
-  const requestedTarget = Array.isArray(callbackUrl) ? callbackUrl[0] : callbackUrl;
+  const requestedTarget = Array.isArray(callbackUrl)
+    ? callbackUrl[0]
+    : callbackUrl;
   const callbackTarget =
     requestedTarget && ALLOWED_TARGETS.has(requestedTarget)
       ? requestedTarget
