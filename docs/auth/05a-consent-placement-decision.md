@@ -3,12 +3,12 @@
 > ## ✅ 已結案
 >
 > **2026-08-21 會議決議：採用案 B（登入頁勾選同意）。**
-> 實作規格已併入 [`05-first-timer-login-flow.md`](./05-first-timer-login-flow.md) v0.8，請以該文件為準。
+> 實作規格已併入 [`05-login-and-consent-flow.md`](./05-login-and-consent-flow.md) v0.8，請以該文件為準。
 > 本文件保留為決策紀錄，說明當初為何這樣選，內容不再更新。
 
 > **文件版本：** 1.1
 > **對象：** PM / RD / Designer
-> **相關文件：** [`05-first-timer-login-flow.md`](./05-first-timer-login-flow.md)（正式規格）、[`03-authjs-implementation-spec.md`](./03-authjs-implementation-spec.md)（自訂登入頁實作）
+> **相關文件：** [`05-login-and-consent-flow.md`](./05-login-and-consent-flow.md)（正式規格）、[`03-authjs-implementation-spec.md`](./03-authjs-implementation-spec.md)（自訂登入頁實作）
 > **目的：** 記錄 consent 放在登入頁（案 B）與放在 OAuth 之後（案 A）的比較，以及過程中發現的一處文件與 DB 不一致
 
 ---

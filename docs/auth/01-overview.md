@@ -197,7 +197,7 @@ sequenceDiagram
 | 登出觸發 | Server Action | `signOut({ redirectTo: "/" })` |
 | 路由保護 | Proxy（`src/proxy.ts`，Next 16 取代 middleware） | 未登入 redirect 至 `/api/auth/signin?callbackUrl=...` |
 
-> **⏭️ 下一階段：自訂登入頁 `/login`。** 條款同意的勾選框必須放在登入頁上（2026-08-21 會議決議，見 [05](./05-first-timer-login-flow.md) §3），Auth.js 內建頁無法承載，因此上述所有 `/api/auth/signin` 的 redirect 目標都會改為 `/login`。實作細節見 [03](./03-authjs-implementation-spec.md) §5.1、§5.3。
+> **⏭️ 下一階段：自訂登入頁 `/login`。** 條款同意的勾選框必須放在登入頁上（2026-08-21 會議決議，見 [05](./05-login-and-consent-flow.md) §3），Auth.js 內建頁無法承載，因此上述所有 `/api/auth/signin` 的 redirect 目標都會改為 `/login`。實作細節見 [03](./03-authjs-implementation-spec.md) §5.1、§5.3。
 
 ---
 

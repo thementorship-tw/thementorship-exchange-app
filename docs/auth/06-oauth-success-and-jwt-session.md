@@ -74,7 +74,7 @@ Auth.js 預設用 **JWT** 方式保存 session。不必理解 JWT 的數學原�
 
 > ⚠️ 最後一步不可省略。重簽後若沒更新 token，下一個請求會再次被攔，形成迴圈。
 
-細節見 [05 §6.3](./05-first-timer-login-flow.md)。
+細節見 [05 §6.3](./05-login-and-consent-flow.md)。
 
 ---
 
