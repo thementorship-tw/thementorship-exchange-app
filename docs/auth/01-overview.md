@@ -1,7 +1,7 @@
 # Google SSO 產品與技術總覽
 
-> **文件版本：** 0.7（草稿，待 review）
-> **最後更新：** 2026-08-17
+> **文件版本：** 0.8（草稿，待 review）
+> **最後更新：** 2026-08-21
 
 ---
 
@@ -193,9 +193,11 @@ sequenceDiagram
 |------|----------|------|
 | OAuth callback | Route Handler | `app/api/auth/[...nextauth]/route.ts` |
 | Session 讀取 | Server Component | `auth()` |
-| 登入觸發 | Auth.js 內建登入頁 | `/api/auth/signin`，未自訂登入頁 |
+| 登入觸發 | Auth.js 內建登入頁 | `/api/auth/signin`，未自訂登入頁（⏭️ 下一階段改為自訂 `/login`，見下） |
 | 登出觸發 | Server Action | `signOut({ redirectTo: "/" })` |
 | 路由保護 | Proxy（`src/proxy.ts`，Next 16 取代 middleware） | 未登入 redirect 至 `/api/auth/signin?callbackUrl=...` |
+
+> **⏭️ 下一階段：自訂登入頁 `/login`。** 條款同意的勾選框必須放在登入頁上（2026-08-21 會議決議，見 [05](./05-login-and-consent-flow.md) §3），Auth.js 內建頁無法承載，因此上述所有 `/api/auth/signin` 的 redirect 目標都會改為 `/login`。實作細節見 [03](./03-authjs-implementation-spec.md) §5.1、§5.3。
 
 ---
 
@@ -298,3 +300,4 @@ sequenceDiagram
 | 0.5 | 2026-08-13 | 移除適合對象、適合時機；精簡交叉引用 |
 | 0.6 | 2026-08-16 | 依實作校正：登入頁為 Auth.js 內建 `/api/auth/signin`（無自訂 `/login`）；登出導回 `/`；§6 技術棧版本與 Proxy 更新；修正檔頭版本號（原停在 0.3） |
 | 0.7 | 2026-08-17 | 回填 Console 與程式碼實況：GCP Owner 與支援信箱定案為 `thementorshiptaiwan@gmail.com`、app 名稱 Mentorship Exchange；環境簡化為 dev / prod（移除 staging）；§2.2 新增 `AUTH_SECRET` 詞條並統一「Client Secret」命名以與其區隔；結案 P0-2、P0-3、P1-1～P1-3、P2-1～P2-5。未結案：開發者聯絡信箱、P1-4 交接、P2-6 錯誤處理 |
+| 0.8 | 2026-08-21 | §6 各層職責補注：下一階段改用自訂登入頁 `/login`（條款勾選框需放在登入頁，2026-08-21 會議決議），所有 `/api/auth/signin` 的 redirect 目標將隨之改變 |

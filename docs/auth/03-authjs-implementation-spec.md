@@ -1,6 +1,6 @@
 # Auth.js 工程實作規格
 
-> **文件版本：** 0.6（草稿，待 review）
+> **文件版本：** 0.7（草稿，待 review）
 > **對象：** RD
 > **使用階段：** Phase 2（需 Phase 1 的 Client ID / Secret）
 > **前置：** OAuth 憑證已建立（文件 02）
@@ -122,7 +122,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 });
 ```
 
-不設 `pages`，登入頁與錯誤頁即為 Auth.js 內建的 `/api/auth/signin` 與 `/api/auth/error`。
+**階段 A（現況）：** 不設 `pages`，登入頁與錯誤頁即為 Auth.js 內建的 `/api/auth/signin` 與 `/api/auth/error`。
+
+> **⏭️ 下一階段改為自訂登入頁。** 條款同意的勾選框要放在登入頁上（見 05 §3），內建頁無法放，因此需自建 `/login` 並設定：
+>
+> ```typescript
+> pages: { signIn: "/login" },
+> ```
+>
+> 設定後，`authorized` 回傳 `false` 時 Auth.js 會改導向 `/login?callbackUrl=...`，全站的未登入 redirect 目標一併改變（連帶影響 §5.3、§5.4、§9、§10）。
 
 > **不要手動傳 `clientId` / `clientSecret`。** v5 會自動從 `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` 推斷（見 §2）。手動傳入不但多餘，`process.env.X` 的型別是 `string | undefined`，在本專案的 `strict: true` 下會直接 TS 編譯失敗。
 >
@@ -162,6 +170,13 @@ matcher 採 **deny-list（排除清單）**：預設全部路由都需登入，�
 | `_next` | 打包後的 CSS / JS（`_next/static`）與圖片最佳化（`_next/image`） |
 | `$` | 根路由 `/`（公開 landing，見 §10） |
 | `*.副檔名` | favicon、robots.txt、sitemap.xml、manifest 及 `public/` 內的靜態檔案 |
+| `login` | ⏭️ **下一階段**：自訂登入頁 `/login`（見 §5.1） |
+
+> **⚠️ 自訂登入頁上線時，`/login` 必須加進排除清單。** 漏掉的話：未登入者進 `/login` → 被 proxy 擋下 → 導向 `/login` → 再被擋下 …… 形成無限重導。matcher 會變成：
+>
+> ```typescript
+> "/((?!api/auth|login|_next|$|.*\\.(?:ico|png|jpe?g|gif|svg|webp|txt|xml|webmanifest|json)$).*)",
+> ```
 
 > **匯出名稱必須是 `proxy` 或 default export**，不能是 `middleware`。
 >
@@ -200,6 +215,8 @@ export default async function HomePage() {
   return <div>Hello, {session.user.name}</div>;
 }
 ```
+
+> ⏭️ **下一階段**：自訂登入頁上線後，此處的 redirect 目標改為 `/login?callbackUrl=%2Fhome`。
 
 > Google 頭像的子網域**不固定**（`lh3` / `lh4` …），寫死單一個會讓部分使用者的頭像掛掉 — 而且這是**逐使用者**發生、build / typecheck / lint 全都驗不出來的錯誤。`next.config.ts` 應使用單層 wildcard：
 >
@@ -262,7 +279,7 @@ sequenceDiagram
 
 | 步驟 | 執行位置 | 類型 |
 |------|----------|------|
-| 使用者點登入 | Auth.js 內建登入頁 `/api/auth/signin` |
+| 使用者點登入 | 階段 A：Auth.js 內建登入頁 `/api/auth/signin`；⏭️ 下一階段：自訂 `/login` |
 | 導向 Google | Auth.js | Route Handler |
 | Google callback | `/api/auth/callback/google` | Route Handler |
 | 建立 session | Auth.js | Server |
@@ -297,7 +314,7 @@ Google Provider 預設提供：
 |------|----------|
 | OAuth 授權被拒 | 導向 Auth.js 內建錯誤頁，顯示錯誤代碼 |
 | env 變數缺失 | dev 環境 console 明確報錯 |
-| session 過期 | 視為未登入，redirect 至 `/api/auth/signin` |
+| session 過期 | 視為未登入，redirect 至 `/api/auth/signin`（⏭️ 下一階段改為 `/login`） |
 | Google API 異常 | 顯示通用錯誤，log 詳細資訊 |
 
 現行使用 Auth.js 內建的錯誤頁（`/api/auth/error`），錯誤以 `?error=<code>` 傳遞。code 來自 `@auth/core` 的型別定義：
@@ -315,9 +332,10 @@ Google Provider 預設提供：
 
 | 路徑 | 需登入 | 說明 |
 |------|--------|------|
-| `/api/auth/signin` | ❌ | **登入頁**（Auth.js 內建頁） |
+| `/api/auth/signin` | ❌ | **登入頁**（Auth.js 內建頁）；⏭️ 下一階段由 `/login` 取代 |
 | `/home` | ✅ | **登入後的 app 主體**；顯示身分資訊與登出 |
 | `/` | ❌ | 公開的品牌 landing，**不** redirect；只放一個 CTA |
+| `/login` | ❌ | ⏭️ **下一階段**：自訂登入頁。Google 登入按鈕 + 條款勾選框 + 條款彈窗；亦承載白名單拒絕狀態（見 05 §3、§9） |
 
 
 ### `/` 與 `/home` 的分工
@@ -327,7 +345,7 @@ Google Provider 預設提供：
 | | `/` | `/home` |
 |---|---|---|
 | 定位 | 公開 landing | 登入後的 app 主體 |
-| 未登入 | 顯示「登入」CTA | 進不來（被 proxy 擋下） |
+| 未登入 | 顯示「登入」CTA（⏭️ 下一階段指向 `/login`） | 進不來（被 proxy 擋下） |
 | 已登入 | 只顯示「進入 Home」 | 身分資訊（name / email / 頭像）+ **登出** |
 
 ---
@@ -357,6 +375,18 @@ Google Provider 預設提供：
 - [ ] 部署環境 `AUTH_URL` 設定正確
 - [ ] HTTPS 環境登入成功
 
+### ⏭️ 下一階段：自訂登入頁 `/login`（尚未實作）
+
+- [ ] `auth.ts` 已設定 `pages: { signIn: "/login" }`
+- [ ] `/login` 已加入 proxy matcher 排除清單（**未加會無限重導**）
+- [ ] 未登入存取 `/home` → 導向 `/login?callbackUrl=...`，非 `/api/auth/signin`
+- [ ] `/` 的 CTA 指向 `/login`
+- [ ] `/login` 未勾選同意時，Google 登入按鈕不可按
+- [ ] 條款彈窗可開啟，關閉後不影響勾選狀態
+- [ ] 登入成功後 `callbackUrl` 仍正確帶回原本要去的頁面
+
+> Google Console 的 redirect URI **不受影響**——OAuth callback 仍是 `/api/auth/callback/google`，自訂的只是登入畫面。
+
 ---
 
 ## 12. 參考資源
@@ -377,3 +407,4 @@ Google Provider 預設提供：
 | 0.4 | 2026-08-13 | §5 依建議開發順序重排；Middleware 提前；標註 Client / Server 分工 |
 | 0.5 | 2026-08-16 | 依實作結果校正：Middleware → Next 16 `proxy.ts`；§5.1 移除手動 clientId/secret 並補 `authorized` callback；§2 補 v5 env 推斷與 `AUTH_TRUST_HOST`；§9 補實際 error code；§10 定案 `/` 為公開首頁 |
 | 0.6 | 2026-08-16 | §5.3 matcher 改為 deny-list（排除清單）並改寫維護規則；§5.4 未登入 redirect 改指 `/api/auth/signin` 並說明 `callbackUrl`；§6 登入頁改為 Auth.js 內建頁；修正 §11 env 數量與 §5.4 交叉引用 |
+| 0.7 | 2026-08-21 | 標注下一階段改用自訂登入頁 `/login`（條款勾選框需放在登入頁，見 05 v0.8）：§5.1 `pages.signIn`、§5.3 matcher 須排除 `/login` 並警告無限重導、§5.4 / §6 / §9 / §10 redirect 目標、§11 新增下一階段 checklist。階段 A 現況與已驗收項目維持不變 |
