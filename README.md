@@ -34,8 +34,14 @@ it and committed, so every environment applies the same reviewed SQL.
 ```bash
 pnpm db:generate   # schema.ts changed -> write a new SQL file into drizzle/
 pnpm db:migrate    # apply pending migrations to TURSO_DATABASE_URL
+pnpm db:seed       # seed the local whitelist configured in .env.local
 pnpm db:studio     # browse the database
 ```
+
+`db:seed` is restricted to a local `file:` database. Set
+`DEV_WHITELIST_SESSION` and the comma-separated `DEV_WHITELIST_EMAILS` in
+`.env.local`; never commit real email addresses. Re-running the command restores
+the configured local entries to an active development baseline.
 
 Commit the generated file in the same PR as the schema change — CI fails
 otherwise (see below).
