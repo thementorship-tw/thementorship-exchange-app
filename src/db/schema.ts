@@ -12,17 +12,29 @@ import {
 export const profileTypes = ["skill", "career", "interest"] as const;
 export type ProfileType = (typeof profileTypes)[number];
 
-const profileTypeSqlValues = sql.raw(profileTypes.map((type) => `'${type}'`).join(", "));
+const profileTypeSqlValues = sql.raw(
+  profileTypes.map((type) => `'${type}'`).join(", "),
+);
 
 const id = () =>
   text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID());
 const timestamp = (name: string) => integer(name, { mode: "timestamp" });
-const timestampWithDefault = (name: string) =>
-  timestamp(name)
+/** 建立時由 SQLite DEFAULT 填入時間，後續更新時維持原值。 */
+const createdAtColumn = () =>
+  timestamp("created_at")
     .notNull()
     .default(sql`(unixepoch())`);
+/**
+ * 建立時由 SQLite DEFAULT 填入時間；透過 Drizzle ORM 更新且未明確指定此欄位時，
+ * `$onUpdate` 會自動改為更新當下。直接執行 raw SQL 不會觸發 `$onUpdate`。
+ */
+const updatedAtColumn = () =>
+  timestamp("updated_at")
+    .notNull()
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => new Date());
 const boolean = (name: string) => integer(name, { mode: "boolean" });
 
 /**
@@ -41,9 +53,9 @@ export const whitelist = sqliteTable(
     /** 目前是否具備登入資格；false 時拒絕登入。 */
     active: boolean("active").notNull().default(true),
     /** 白名單資料建立或匯入時間；預設為當前時間。 */
-    createdAt: timestampWithDefault("created_at"),
-    /** 白名單資料最後更新時間；建立時預設為當前時間。 */
-    updatedAt: timestampWithDefault("updated_at"),
+    createdAt: createdAtColumn(),
+    /** 白名單資料最後更新時間；建立及透過 Drizzle ORM 更新時自動填入當前時間。 */
+    updatedAt: updatedAtColumn(),
     /** 白名單資格停用時間；null 代表未停用。 */
     deactivatedAt: timestamp("deactivated_at"),
   },
@@ -81,11 +93,11 @@ export const users = sqliteTable(
     /** 最近一次成功登入時間。 */
     lastLoginAt: timestamp("last_login_at"),
     /** 第一次成功登入並建立平台帳號的時間。 */
-    createdAt: timestampWithDefault("created_at"),
+    createdAt: createdAtColumn(),
     /** 建立資料的使用者；系統操作時可為 null。 */
     createdBy: text("created_by").references((): AnySQLiteColumn => users.id),
-    /** 使用者資料最後更新時間。 */
-    updatedAt: timestampWithDefault("updated_at"),
+    /** 使用者資料最後更新時間；建立及透過 Drizzle ORM 更新時自動填入當前時間。 */
+    updatedAt: updatedAtColumn(),
     /** 最後修改資料的使用者；系統操作時可為 null。 */
     updatedBy: text("updated_by").references((): AnySQLiteColumn => users.id),
     /** 平台帳號停用時間；null 代表未停用。 */
@@ -152,13 +164,13 @@ export const profiles = sqliteTable(
     /** 是否公開顯示；false 代表下架但資料仍存在。 */
     visible: boolean("visible").notNull().default(true),
     /** 交流檔案首次建立時間。 */
-    createdAt: timestampWithDefault("created_at"),
+    createdAt: createdAtColumn(),
     /** 建立交流檔案的平台使用者。 */
     createdBy: text("created_by")
       .notNull()
       .references(() => users.id),
-    /** 交流檔案最後修改時間。 */
-    updatedAt: timestampWithDefault("updated_at"),
+    /** 交流檔案最後修改時間；建立及透過 Drizzle ORM 更新時自動填入當前時間。 */
+    updatedAt: updatedAtColumn(),
     /** 最後修改交流檔案的使用者；系統操作時可為 null。 */
     updatedBy: text("updated_by").references(() => users.id),
     /** 軟刪除時間；null 代表未刪除。 */
@@ -217,7 +229,7 @@ export const contactLogs = sqliteTable(
     /** 接收者第一次開啟詳情的時間；null 代表未讀。 */
     readAt: timestamp("read_at"),
     /** Application 送出時間。 */
-    createdAt: timestampWithDefault("created_at"),
+    createdAt: createdAtColumn(),
   },
   (table) => [
     index("idx_contact_profile").on(table.profileId),
@@ -255,7 +267,7 @@ export const pushSubscriptions = sqliteTable(
     /** 註冊 Token 時的瀏覽器與裝置資訊，用於除錯。 */
     userAgent: text("user_agent"),
     /** Token 第一次註冊時間。 */
-    createdAt: timestampWithDefault("created_at"),
+    createdAt: createdAtColumn(),
     /** Token 失效或取消訂閱時間；null 代表仍有效。 */
     deactivatedAt: timestamp("deactivated_at"),
   },
