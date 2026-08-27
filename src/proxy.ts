@@ -4,15 +4,9 @@ export { auth as proxy } from "@/auth";
 
 export const config = {
   /**
-   * 排除項：
-   *   api/auth   OAuth callback 與內建登入頁（作法一），擋了會無限重導
-   *   _next      打包後的 CSS / JS（_next/static）與圖片最佳化（_next/image）
-   *   $          根路由 /（公開 landing）
-   *   *.副檔名    favicon、robots.txt、sitemap.xml、manifest 及 public/ 內的靜態檔案
-   *
-   * 新增公開路由時記得補進這份清單
+   * 只列出需要登入的 URL 前綴，不要使用「除了公開頁以外全擋」的規則。
+   * 否則未知路由會在 Next.js 判斷 404 之前被導回登入頁。
+   * 新增受保護的頂層路由時，請在這裡加入對應前綴。
    */
-  matcher: [
-    "/((?!api/auth|_next|$|.*\\.(?:ico|png|jpe?g|gif|svg|webp|txt|xml|webmanifest|json)$).*)",
-  ],
+  matcher: ["/home/:path*"],
 };

@@ -1,0 +1,38 @@
+/* Compound type styles from the Mentorship Foundation. */
+@theme {
+  --font-sans:
+    "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", ui-sans-serif,
+    system-ui, sans-serif;
+
+  --text-display: 40px;
+  --text-display--line-height: 52px;
+  --text-display--font-weight: 600;
+
+  --text-h1: 24px;
+  --text-h1--line-height: 32px;
+  --text-h1--font-weight: 600;
+
+  --text-h2: 18px;
+  --text-h2--line-height: 24px;
+  --text-h2--font-weight: 600;
+
+  --text-body-lg-strong: 16px;
+  --text-body-lg-strong--line-height: 24px;
+  --text-body-lg-strong--font-weight: 600;
+
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-strong: 14px;
+  --text-body-strong--line-height: 20px;
+  --text-body-strong--font-weight: 600;
+
+  --text-body: 14px;
+  --text-body--line-height: 20px;
+  --text-body--font-weight: 400;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--font-weight: 400;
+}

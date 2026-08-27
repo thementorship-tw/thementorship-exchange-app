@@ -1,0 +1,51 @@
+/*
+ * Mentorship Foundation tokens
+ *
+ * Components should prefer these semantic names over primitive palette names.
+ * The source primitive is kept in the comment so values remain traceable to
+ * the Figma Foundation document.
+ */
+@theme {
+  /* Background */
+  --color-page: #f4f6fa; /* color_blue_1 */
+  --color-surface: #ffffff; /* color_white */
+  --color-surface-subtle: #efefef; /* color_neutral_1 */
+  --color-overlay: rgb(0 0 0 / 0.4);
+  --color-glass: rgb(255 255 255 / 0.7);
+
+  /* Brand and text */
+  --color-brand: #131956; /* color_blue_7 */
+  --color-brand-subtle: #e1e3f2; /* color_blue_2 */
+  --color-primary: #1f2630; /* color_neutral_10 */
+  --color-secondary: #62676e; /* color_neutral_7 */
+  --color-inverse: #ffffff; /* color_white */
+
+  /* Border */
+  --color-line: #d8d9dc; /* color_neutral_2 */
+  --color-line-strong: #949ba5; /* color_neutral_5 */
+
+  /* Accent */
+  --color-gold: #7e7059; /* color_yellow_6 */
+  --color-gold-strong: #735b35; /* color_yellow_8 */
+  --color-gold-subtle: #f8f5f2; /* color_yellow_1 */
+
+  /* Feedback */
+  --color-success: #2f7a5b; /* color_green_6 */
+  --color-success-subtle: #e8f2ed; /* color_green_1 */
+  --color-error: #a62c24; /* color_red_6 */
+  --color-error-subtle: #fbeae8; /* color_red_1 */
+  --color-info: #131956; /* color_blue_7 */
+  --color-info-subtle: #e1e3f2; /* color_blue_2 */
+
+  /* Radius */
+  --radius-2: 2px;
+  --radius-4: 4px;
+  --radius-8: 8px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --radius-20: 20px;
+  --radius-24: 24px;
+  --radius-28: 28px;
+  --radius-32: 32px;
+  --radius-pill: 999px;
+}
