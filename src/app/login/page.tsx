@@ -28,10 +28,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           <p className="mb-5 text-body-lg text-brand md:landscape:mb-8 lg:mb-8">
             此專案僅開放予曼陀號社群參與者使用，請使用報名曼陀號時的帳號登入
           </p>
-          <LoginForm
-            callbackUrl={callbackUrl}
-            authError={params.error !== undefined}
-          />
+          <LoginForm callbackUrl={callbackUrl} />
         </div>
       </section>
     </main>

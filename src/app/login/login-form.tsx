@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { type FormEvent, useActionState, useState } from "react";
 
 import { Button } from "@/components/button";
@@ -11,13 +12,7 @@ import { PrivacyPolicyDialog } from "./privacy-policy-dialog";
 
 const initialState: LoginState = { error: null };
 
-export function LoginForm({
-  callbackUrl,
-  authError,
-}: {
-  callbackUrl: string;
-  authError: boolean;
-}) {
+export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   const [accepted, setAccepted] = useState(false);
   const [policyOpen, setPolicyOpen] = useState(false);
   const [consentToastOpen, setConsentToastOpen] = useState(false);
@@ -28,15 +23,14 @@ export function LoginForm({
     signInWithGoogle,
     initialState,
   );
-  const loginError = authError ? "auth-error" : state.error;
+
+  const searchParams = useSearchParams();
+  const loginError = searchParams.get("error") ?? state.error;
   const loginErrorOpen =
     loginError !== null && loginError !== dismissedLoginError;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (accepted) {
-      setDismissedLoginError(null);
-      return;
-    }
+    if (accepted) return;
     event.preventDefault();
     setConsentToastOpen(true);
   };
@@ -131,6 +125,7 @@ export function LoginForm({
 
       <LoginErrorDialog
         open={loginErrorOpen}
+        errorCode={loginError}
         onClose={closeLoginError}
       />
     </>
