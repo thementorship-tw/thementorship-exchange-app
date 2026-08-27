@@ -21,22 +21,28 @@ export function LoginForm({
   const [accepted, setAccepted] = useState(false);
   const [policyOpen, setPolicyOpen] = useState(false);
   const [consentToastOpen, setConsentToastOpen] = useState(false);
-  const [loginErrorDismissed, setLoginErrorDismissed] = useState(false);
+  const [dismissedLoginError, setDismissedLoginError] = useState<string | null>(
+    null,
+  );
   const [state, formAction, pending] = useActionState(
     signInWithGoogle,
     initialState,
   );
+  const loginError = authError ? "auth-error" : state.error;
   const loginErrorOpen =
-    !loginErrorDismissed && (authError || state.error !== null);
+    loginError !== null && loginError !== dismissedLoginError;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (accepted) return;
+    if (accepted) {
+      setDismissedLoginError(null);
+      return;
+    }
     event.preventDefault();
     setConsentToastOpen(true);
   };
 
   const closeLoginError = () => {
-    setLoginErrorDismissed(true);
+    setDismissedLoginError(loginError);
 
     const url = new URL(window.location.href);
     if (!url.searchParams.has("error")) return;
@@ -59,9 +65,9 @@ export function LoginForm({
 
         <Button
           type="submit"
-          size="lg"
+          size="xl"
           disabled={pending}
-          className="min-h-16 w-full md:landscape:w-auto md:landscape:min-w-44 lg:w-auto lg:min-w-44"
+          className="w-full md:landscape:w-auto md:landscape:min-w-44 lg:w-auto lg:min-w-44"
         >
           {pending ? "前往 Google…" : "Google 登入"}
         </Button>

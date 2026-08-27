@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { buttonClassName } from "@/components/button";
 import { OceanScene } from "@/components/ocean-scene";
 
 export default function NotFound() {
@@ -15,7 +16,10 @@ export default function NotFound() {
           </p>
           <Link
             href="/"
-            className="mt-7 inline-flex min-h-16 w-full min-w-44 items-center justify-center rounded-pill border border-brand bg-brand px-8 text-body-lg-strong text-inverse shadow-sm transition hover:bg-[#080d43] active:translate-y-px focus-visible:outline-2 focus-visible:outline-brand sm:w-auto"
+            className={buttonClassName({
+              size: "xl",
+              className: "mt-7 w-full min-w-44 sm:w-auto",
+            })}
           >
             回到首頁
           </Link>

@@ -8,7 +8,6 @@ export function OceanScene() {
         src="/images/login/background-lg.png"
         alt=""
         fill
-        priority
         sizes="(min-width: 1024px) 100vw, (min-width: 768px) and (orientation: landscape) 100vw, 1px"
         className="hidden -translate-y-20 object-cover object-[left_90%] md:landscape:block lg:block"
       />

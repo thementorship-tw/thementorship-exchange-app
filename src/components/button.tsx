@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from "react";
 
 type ButtonVariant = "primary" | "secondary";
-type ButtonSize = "sm" | "md" | "lg";
+type ButtonSize = "sm" | "md" | "lg" | "xl";
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -19,7 +19,20 @@ const sizeClasses: Record<ButtonSize, string> = {
   sm: "min-h-10 px-5 text-body-strong",
   md: "min-h-12 px-6 text-body-lg-strong",
   lg: "min-h-14 px-8 text-body-lg-strong",
+  xl: "min-h-16 px-8 text-body-lg-strong",
 };
+
+export function buttonClassName({
+  variant = "primary",
+  size = "md",
+  className = "",
+}: {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  className?: string;
+} = {}) {
+  return `inline-flex cursor-pointer items-center justify-center rounded-pill shadow-sm transition enabled:active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+}
 
 export function Button({
   className = "",
@@ -31,7 +44,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`inline-flex cursor-pointer items-center justify-center rounded-pill shadow-sm transition enabled:active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={buttonClassName({ variant, size, className })}
       {...props}
     />
   );

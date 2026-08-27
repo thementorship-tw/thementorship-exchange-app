@@ -5,21 +5,16 @@ import { auth } from "@/auth";
 import { OceanScene } from "@/components/ocean-scene";
 
 import { LoginForm } from "./login-form";
+import { getSafeCallbackUrl } from "./callback-url";
 
 export const metadata: Metadata = {
   title: "登入｜The Mentorship Exchange",
   description: "使用報名曼陀號時的 Google 帳號登入。",
 };
 
-const safeCallbackUrl = (value: string | string[] | undefined) => {
-  const candidate = Array.isArray(value) ? value[0] : value;
-  if (!candidate?.startsWith("/") || candidate.startsWith("//")) return "/home";
-  return candidate;
-};
-
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const [session, params] = await Promise.all([auth(), searchParams]);
-  const callbackUrl = safeCallbackUrl(params.callbackUrl);
+  const callbackUrl = getSafeCallbackUrl(params.callbackUrl);
 
   if (session?.user) redirect(callbackUrl);
 
@@ -35,7 +30,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           </p>
           <LoginForm
             callbackUrl={callbackUrl}
-            authError={typeof params.error === "string"}
+            authError={params.error !== undefined}
           />
         </div>
       </section>

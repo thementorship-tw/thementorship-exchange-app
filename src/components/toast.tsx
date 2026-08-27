@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useEffectEvent } from "react";
 
 type ToastVariant = "info" | "success" | "error";
 
@@ -25,11 +25,13 @@ export function Toast({
   duration = 3200,
   variant = "info",
 }: ToastProps) {
+  const closeToast = useEffectEvent(onClose); // React 19 的 useEffectEvent（1. closeToast 在 effect 中維持穩定，不會因父元件 re-render 讓 timer 重建。 2. 呼叫時仍會取得最新的 onClose，不會發生閉包保留舊 callback 的問題。）
+
   useEffect(() => {
     if (!open) return;
-    const timeout = window.setTimeout(onClose, duration);
+    const timeout = window.setTimeout(closeToast, duration); // 讓 effect 不必追蹤 onClose 的變化，但真正執行時，仍會呼叫最新的 onClose
     return () => window.clearTimeout(timeout);
-  }, [duration, onClose, open]);
+  }, [duration, open]);
 
   if (!open) return null;
 

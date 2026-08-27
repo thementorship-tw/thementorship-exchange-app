@@ -47,7 +47,6 @@ export function Dialog({
         event.preventDefault();
         onClose();
       }}
-      onClose={onClose}
       className="m-auto w-[calc(100%-2rem)] max-w-xl rounded-20 bg-surface p-0 text-primary shadow-xl backdrop:bg-overlay backdrop:backdrop-blur-[1px]"
     >
       <div className="relative p-6 sm:p-8">
