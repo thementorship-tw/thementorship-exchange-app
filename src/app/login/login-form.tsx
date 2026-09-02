@@ -33,10 +33,7 @@ export function LoginForm({
     loginError !== null && loginError !== dismissedLoginError;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (accepted) {
-      setDismissedLoginError(null);
-      return;
-    }
+    if (accepted) return;
     event.preventDefault();
     setConsentToastOpen(true);
   };
@@ -57,11 +54,7 @@ export function LoginForm({
         onSubmit={handleSubmit}
         className="flex w-full flex-col items-center md:landscape:w-auto lg:w-auto"
       >
-        <input
-          type="hidden"
-          name="callbackUrl"
-          value={callbackUrl}
-        />
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
 
         <Button
           type="submit"
@@ -96,10 +89,7 @@ export function LoginForm({
             </svg>
           </span>
           <div className="flex items-center">
-            <label
-              htmlFor="login-consent"
-              className="cursor-pointer"
-            >
+            <label htmlFor="login-consent" className="cursor-pointer">
               我同意
             </label>
             <button
@@ -113,10 +103,7 @@ export function LoginForm({
         </div>
       </form>
 
-      <Toast
-        open={consentToastOpen}
-        onClose={() => setConsentToastOpen(false)}
-      >
+      <Toast open={consentToastOpen} onClose={() => setConsentToastOpen(false)}>
         請同意規範與隱私政策
       </Toast>
 
@@ -129,10 +116,7 @@ export function LoginForm({
         }}
       />
 
-      <LoginErrorDialog
-        open={loginErrorOpen}
-        onClose={closeLoginError}
-      />
+      <LoginErrorDialog open={loginErrorOpen} onClose={closeLoginError} />
     </>
   );
 }

@@ -3,7 +3,12 @@ import type { ButtonHTMLAttributes } from "react";
 type ButtonVariant = "primary" | "secondary";
 type ButtonSize = "sm" | "md" | "lg" | "xl";
 
-export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+export type ButtonProps = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  "className"
+> & {
+  /** Use only for external layout such as margin, width, or responsive placement. */
+  className?: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
 };
@@ -29,6 +34,7 @@ export function buttonClassName({
 }: {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  /** Use only for external layout such as margin, width, or responsive placement. */
   className?: string;
 } = {}) {
   return `inline-flex cursor-pointer items-center justify-center rounded-pill shadow-sm transition enabled:active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;

@@ -14,12 +14,15 @@ export const metadata: Metadata = {
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const [session, params] = await Promise.all([auth(), searchParams]);
-  const callbackUrl = getSafeCallbackUrl(params.callbackUrl);
+  const callbackUrl = getSafeCallbackUrl(
+    params.callbackUrl,
+    process.env.AUTH_URL,
+  );
 
   if (session?.user) redirect(callbackUrl);
 
   return (
-    <main className="relative isolate min-h-dvh flex-1 overflow-hidden bg-[#e6f4ff]">
+    <main className="bg-ocean-background relative isolate min-h-dvh flex-1 overflow-hidden">
       <OceanScene />
 
       <section className="mx-auto flex min-h-dvh w-full max-w-[1280px] items-start justify-center px-4 pt-[26.5vh] md:landscape:justify-start md:landscape:px-16 md:landscape:pt-[31vh] lg:justify-start lg:px-16 lg:pt-[31vh] xl:px-36">

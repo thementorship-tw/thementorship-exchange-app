@@ -1,5 +1,7 @@
 "use server";
 
+import { AuthError } from "next-auth";
+
 import { signIn } from "@/auth";
 
 import { getSafeCallbackUrl } from "./callback-url";
@@ -16,9 +18,23 @@ export async function signInWithGoogle(
     return { error: "請先同意規範與隱私政策。" };
   }
 
-  await signIn("google", {
-    redirectTo: getSafeCallbackUrl(formData.get("callbackUrl")),
-  });
+  try {
+    // 登入中...
+    await signIn("google", {
+      redirectTo: getSafeCallbackUrl(
+        formData.get("callbackUrl"),
+        process.env.AUTH_URL,
+      ),
+    });
+  } catch (error) {
+    // 登入錯誤
+    if (error instanceof AuthError) {
+      return { error: "auth-error" };
+    }
+
+    // 可能是 NEXT_REDIRECT（Next.js 用來跳轉的特殊訊號），交還給 Next.js
+    throw error;
+  }
 
   return { error: null };
 }
