@@ -7,8 +7,7 @@ import {
 } from "@/consent-versions";
 import { serverEnv } from "@/env";
 
-// CHECK:
-const MAX_AGE_SECONDS = 30 * 60;
+const MAX_AGE_SECONDS = 30 * 24 * 60 * 60; // 30 days
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 /**
