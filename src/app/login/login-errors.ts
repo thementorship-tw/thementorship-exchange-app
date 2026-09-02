@@ -3,26 +3,41 @@ export type LoginErrorContent = {
   body: string;
 };
 
-export const CONSENT_REQUIRED_ERROR = "consent_required";
-export const ACCOUNT_DISABLED_ERROR = "account_disabled";
-export const SERVER_ERROR = "server_error";
-const LOGIN_ERROR_CONTENT: Record<string, LoginErrorContent> = {
-  AccessDenied: {
+export const LOGIN_ERROR = {
+  ACCESS_DENIED: "AccessDenied",
+  CONSENT_REQUIRED: "consent_required",
+  ACCOUNT_DISABLED: "account_disabled",
+  SERVER_ERROR: "server_error",
+} as const;
+
+export type LoginErrorCode = (typeof LOGIN_ERROR)[keyof typeof LOGIN_ERROR];
+
+const DEFAULT_LOGIN_ERROR = LOGIN_ERROR.ACCESS_DENIED;
+
+const LOGIN_ERROR_CONTENT: Record<LoginErrorCode, LoginErrorContent> = {
+  [LOGIN_ERROR.ACCESS_DENIED]: {
     title: "登入遇到問題了嗎？",
     body: "請先確認你使用報名曼陀號時的帳號登入，如仍無法登入，請點此回報專案小組，我們將儘快與你聯絡。",
   },
   // CHECK: 設計稿尚未定義以下狀態
-  // [ACCOUNT_DISABLED_ERROR]: {
-  //   title: "這個帳號目前無法使用",
-  //   body: "你的帳號已被停用，因此無法登入平台。若你認為這是誤判，請點此回報專案小組。",
-  // },
-  // [SERVER_ERROR]: {
-  //   title: "登入沒有完成",
-  //   body: "你的帳號沒有問題，是我們這邊暫時出了狀況，這次登入沒有記錄成功。請稍後再試一次；如果持續發生，請點此回報專案小組。",
-  // },
+  [LOGIN_ERROR.CONSENT_REQUIRED]: {
+    title: "請重新確認同意",
+    body: "登入期間未能取得你的條款同意紀錄，請重新勾選同意後再登入一次。",
+  },
+  [LOGIN_ERROR.ACCOUNT_DISABLED]: {
+    title: "這個帳號目前無法使用",
+    body: "你的帳號已被停用。若你認為這是誤判，請回報專案小組。",
+  },
+  [LOGIN_ERROR.SERVER_ERROR]: {
+    title: "登入沒有完成",
+    body: "系統暫時發生問題，請稍後再試；如果持續發生，請回報專案小組。",
+  },
 };
 
 export function loginErrorContent(code: string | null): LoginErrorContent {
-  const content = code ? LOGIN_ERROR_CONTENT[code] : undefined;
-  return content ?? LOGIN_ERROR_CONTENT.AccessDenied;
+  if (code && code in LOGIN_ERROR_CONTENT) {
+    return LOGIN_ERROR_CONTENT[code as LoginErrorCode];
+  }
+
+  return LOGIN_ERROR_CONTENT[DEFAULT_LOGIN_ERROR];
 }

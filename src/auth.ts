@@ -5,11 +5,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
 import { getSafeCallbackUrl } from "@/app/login/callback-url";
-import {
-  ACCOUNT_DISABLED_ERROR,
-  CONSENT_REQUIRED_ERROR,
-  SERVER_ERROR,
-} from "@/app/login/login-errors";
+import { LOGIN_ERROR } from "@/app/login/login-errors";
 import { readConsentReceipt } from "@/consent-receipt";
 import { isCurrentConsent, type ConsentVersions } from "@/consent-versions";
 import { createUserOnFirstLogin, recordReturningLogin } from "@/db/login";
@@ -94,11 +90,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (existingUser !== null) {
           if (!existingUser.active)
-            return loginErrorRedirect(ACCOUNT_DISABLED_ERROR);
+            return loginErrorRedirect(LOGIN_ERROR.ACCOUNT_DISABLED);
 
           const receipt = await readConsentReceipt();
           if (receipt === null)
-            return loginErrorRedirect(CONSENT_REQUIRED_ERROR);
+            return loginErrorRedirect(LOGIN_ERROR.CONSENT_REQUIRED);
 
           const { emailConflict } = await recordReturningLogin({
             userId: existingUser.id,
@@ -119,7 +115,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (whitelistEntry === null) return false;
 
         const receipt = await readConsentReceipt();
-        if (receipt === null) return loginErrorRedirect(CONSENT_REQUIRED_ERROR);
+        if (receipt === null)
+          return loginErrorRedirect(LOGIN_ERROR.CONSENT_REQUIRED);
 
         await createUserOnFirstLogin({
           sub,
@@ -131,7 +128,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
       } catch (error) {
         console.error("[auth] signIn callback failed", error);
-        return loginErrorRedirect(SERVER_ERROR);
+        return loginErrorRedirect(LOGIN_ERROR.SERVER_ERROR);
       }
 
       return true;
