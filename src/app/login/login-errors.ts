@@ -50,9 +50,3 @@ export function loginErrorContent(code: string | null): LoginErrorContent {
 
   return LOGIN_ERROR_CONTENT[DEFAULT_LOGIN_ERROR];
 }
-
-/**
- * middleware 會把 auth.js 導回網址上的 `?error=` 搬進這顆 cookie，
- * 登入頁讀到之後由 middleware 在同一個 response 刪掉，所以只會出現一次。
- */
-export const LOGIN_ERROR_COOKIE = "mentorship.login-error";

@@ -1,7 +1,13 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { type FormEvent, useActionState, useState } from "react";
+import {
+  type FormEvent,
+  useActionState,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { Button } from "@/components/button";
 import { Toast } from "@/components/toast";
@@ -11,6 +17,23 @@ import { LoginErrorDialog } from "./login-error-dialog";
 import { PrivacyPolicyDialog } from "./privacy-policy-dialog";
 
 const initialState: LoginState = { error: null };
+
+function removeErrorFromUrl() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("error")) return;
+
+  url.searchParams.delete("error");
+  window.history.replaceState(null, "", url);
+}
+
+const subscribeToHydration = () => () => {};
+
+function isReloadNavigation() {
+  const navigation = performance.getEntriesByType("navigation")[0] as
+    PerformanceNavigationTiming | undefined;
+
+  return navigation?.type === "reload";
+}
 
 export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   const [accepted, setAccepted] = useState(false);
@@ -25,23 +48,36 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   );
 
   const searchParams = useSearchParams();
-  const loginError = searchParams.get("error") ?? state.error;
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
+  const reloaded = hydrated && isReloadNavigation();
+  const loginError =
+    (reloaded ? null : searchParams.get("error")) ?? state.error;
   const loginErrorOpen =
     loginError !== null && loginError !== dismissedLoginError;
 
+  useEffect(() => {
+    if (reloaded && searchParams.has("error")) {
+      removeErrorFromUrl();
+    }
+  }, [reloaded, searchParams]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (accepted) return;
+    if (accepted) {
+      setDismissedLoginError(null);
+      return;
+    }
+
     event.preventDefault();
     setConsentToastOpen(true);
   };
 
   const closeLoginError = () => {
     setDismissedLoginError(loginError);
-
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has("error")) return;
-    url.searchParams.delete("error");
-    window.history.replaceState(null, "", url);
+    removeErrorFromUrl();
   };
 
   return (
