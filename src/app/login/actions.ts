@@ -22,8 +22,6 @@ export async function signInWithGoogle(
 
   await issueConsentReceipt();
 
-  await issueConsentReceipt();
-
   try {
     // 登入中...
     await signIn("google", {

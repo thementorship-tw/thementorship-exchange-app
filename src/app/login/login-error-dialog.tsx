@@ -4,10 +4,6 @@ import { Dialog } from "@/components/dialog";
 
 import { loginErrorContent } from "./login-errors";
 
-/**
- * 純呈現：文案由 `login-errors.ts` 依代碼決定，這裡不判斷任何情境。
- * 要新增或修改文案請改那個檔案。
- */
 export function LoginErrorDialog({
   open,
   errorCode,
@@ -27,7 +23,21 @@ export function LoginErrorDialog({
       onClose={onClose}
       showCloseButton
     >
-      <p className="text-left">{body}</p>
+      <p className="text-left">
+        {body.map((part, index) =>
+          typeof part === "string" ? (
+            part
+          ) : (
+            <a
+              key={index}
+              href={part.href}
+              className="cursor-pointer font-semibold text-brand underline decoration-1 underline-offset-4 transition-colors hover:text-link-hover focus-visible:rounded-4 focus-visible:outline-2 focus-visible:outline-brand"
+            >
+              {part.text}
+            </a>
+          ),
+        )}
+      </p>
     </Dialog>
   );
 }
