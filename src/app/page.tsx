@@ -5,10 +5,10 @@ import { auth } from "@/auth";
 export default async function Home() {
   const session = await auth();
 
-  // 已登入直接進 app，未登入導向 Auth.js 內建登入頁
+  // 已登入直接進 app，未登入導向自訂登入頁
   const cta = session?.user
     ? { href: "/home", label: "進入 Home" }
-    : { href: "/api/auth/signin", label: "登入" };
+    : { href: "/login", label: "登入" };
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 px-6 dark:bg-black">
