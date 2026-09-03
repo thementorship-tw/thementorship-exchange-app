@@ -8,7 +8,7 @@ export default function NotFound() {
     <main className="relative isolate min-h-dvh flex-1 overflow-hidden bg-[#e6f4ff]">
       <OceanScene />
 
-      <section className="mx-auto flex min-h-dvh w-full max-w-[1280px] items-start justify-center px-4 pt-[26vh] md:landscape:justify-start md:landscape:px-16 md:landscape:pt-[31vh] lg:justify-start lg:px-16 lg:pt-[31vh] xl:px-36">
+      <section className="mx-auto flex min-h-dvh w-full max-w-7xl items-start justify-center px-4 pt-[26vh] md:landscape:justify-start md:landscape:px-16 md:landscape:pt-[31vh] lg:justify-start lg:px-16 lg:pt-[31vh] xl:px-36">
         <div className="relative z-10 flex w-full max-w-2xl flex-col items-center text-center md:landscape:max-w-[54vw] lg:max-w-[54vw]">
           <h1 className="text-h1 text-primary">這片海域沒有東西</h1>
           <p className="mt-5 text-body-lg text-secondary">
