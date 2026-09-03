@@ -5,7 +5,7 @@ import { OceanScene } from "@/components/ocean-scene";
 
 export default function NotFound() {
   return (
-    <main className="relative isolate min-h-dvh flex-1 overflow-hidden bg-[#e6f4ff]">
+    <main className="bg-ocean-background relative isolate min-h-dvh flex-1 overflow-hidden">
       <OceanScene />
 
       <section className="mx-auto flex min-h-dvh w-full max-w-7xl items-start justify-center px-4 pt-[26vh] md:landscape:justify-start md:landscape:px-16 md:landscape:pt-[31vh] lg:justify-start lg:px-16 lg:pt-[31vh] xl:px-36">

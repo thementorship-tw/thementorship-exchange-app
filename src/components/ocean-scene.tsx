@@ -3,7 +3,10 @@ import Image from "next/image";
 /** Shared decorative ocean scene used by login and full-page empty states. */
 export function OceanScene() {
   return (
-    <div aria-hidden="true" className="absolute inset-0 -z-10">
+    <div
+      aria-hidden="true"
+      className="absolute inset-0 -z-10"
+    >
       <Image
         src="/images/login/background-lg.png"
         alt=""
@@ -15,7 +18,7 @@ export function OceanScene() {
         src="/images/login/background-sm.png"
         alt=""
         fill
-        priority
+        fetchPriority="high"
         sizes="(min-width: 1024px) 1px, (min-width: 768px) and (orientation: landscape) 1px, 100vw"
         className="object-cover object-left-bottom md:landscape:hidden lg:hidden"
       />
@@ -25,7 +28,7 @@ export function OceanScene() {
           src="/images/login/boat.png"
           alt=""
           fill
-          priority
+          fetchPriority="high"
           sizes="(min-width: 1024px) 42vw, (min-width: 768px) and (orientation: landscape) 42vw, 1px"
           className="object-contain object-right-bottom"
         />
@@ -46,6 +49,7 @@ export function OceanScene() {
           src="/images/login/wave-2.png"
           alt=""
           fill
+          loading="eager"
           sizes="(min-width: 1024px) 110vw, (min-width: 768px) and (orientation: landscape) 110vw, 1px"
           className="object-cover object-top"
         />
@@ -55,6 +59,7 @@ export function OceanScene() {
           src="/images/login/wave-1.png"
           alt=""
           fill
+          loading="eager"
           sizes="(min-width: 1024px) 110vw, (min-width: 768px) and (orientation: landscape) 110vw, 1px"
           className="object-cover object-top"
         />

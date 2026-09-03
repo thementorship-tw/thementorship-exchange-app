@@ -8,6 +8,7 @@
 @theme {
   /* Background */
   --color-page: #f4f6fa; /* color_blue_1 */
+  --color-ocean-background: #e6f4ff;
   --color-surface: #ffffff; /* color_white */
   --color-surface-subtle: #efefef; /* color_neutral_1 */
   --color-overlay: rgb(0 0 0 / 0.4);
