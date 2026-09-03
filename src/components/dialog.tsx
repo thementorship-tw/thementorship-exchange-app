@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  type ReactNode,
-  useEffect,
-  useId,
-  useRef,
-} from "react";
+import { type ReactNode, useEffect, useId, useRef } from "react";
 
 export type DialogProps = {
   open: boolean;
@@ -15,6 +10,8 @@ export type DialogProps = {
   onClose: () => void;
   closeLabel?: string;
   showCloseButton?: boolean;
+  size?: "md" | "lg";
+  scrollable?: boolean;
 };
 
 export function Dialog({
@@ -25,6 +22,8 @@ export function Dialog({
   onClose,
   closeLabel = "關閉",
   showCloseButton = false,
+  size = "md",
+  scrollable = false,
 }: DialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -47,9 +46,11 @@ export function Dialog({
         event.preventDefault();
         onClose();
       }}
-      className="m-auto w-[calc(100%-2rem)] max-w-xl rounded-20 bg-surface p-0 text-primary shadow-xl backdrop:bg-overlay backdrop:backdrop-blur-[1px]"
+      className={`m-auto w-[calc(100%-2rem)] rounded-20 bg-surface p-0 text-primary shadow-xl backdrop:bg-overlay backdrop:backdrop-blur-[1px] ${size === "lg" ? "max-w-3xl" : "max-w-xl"}`}
     >
-      <div className="relative p-6 sm:p-8">
+      <div
+        className={`relative p-6 sm:p-8 ${scrollable ? "flex max-h-[calc(100dvh-2rem)] flex-col" : ""}`}
+      >
         {showCloseButton && (
           <button
             type="button"
@@ -79,7 +80,7 @@ export function Dialog({
         </h2>
         <div
           id={descriptionId}
-          className="mt-4 text-body-lg text-secondary"
+          className={`mt-4 text-body-lg text-secondary ${scrollable ? "min-h-0 overflow-y-auto pr-2 focus-visible:rounded-4 focus-visible:outline-2 focus-visible:outline-brand" : ""}`}
         >
           {children}
         </div>
