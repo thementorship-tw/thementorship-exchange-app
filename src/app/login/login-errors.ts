@@ -10,6 +10,7 @@ export type LoginErrorContent = {
 
 export const LOGIN_ERROR = {
   ACCESS_DENIED: "AccessDenied",
+  CONFIGURATION: "Configuration",
   CONSENT_REQUIRED: "consent_required",
   ACCOUNT_DISABLED: "account_disabled",
   SERVER_ERROR: "server_error",
@@ -29,6 +30,14 @@ const LOGIN_ERROR_CONTENT: Record<LoginErrorCode, LoginErrorContent> = {
     ],
   },
   // CHECK: 設計稿尚未定義以下狀態
+  [LOGIN_ERROR.CONFIGURATION]: {
+    title: "系統暫時無法登入",
+    body: [
+      "這是系統設定的問題，不是您的帳號有狀況，",
+      { text: "請點此回報專案小組", href: CONTACT_URL },
+      "，我們會盡快處理。",
+    ],
+  },
   [LOGIN_ERROR.CONSENT_REQUIRED]: {
     title: "請重新確認同意",
     body: ["登入期間未能取得你的條款同意紀錄，請重新勾選同意後再登入一次。"],

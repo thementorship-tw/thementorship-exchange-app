@@ -1,4 +1,4 @@
-import { and, eq, ne, sql } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 
 import type { ConsentReceipt } from "@/consent-receipt";
 import { getDb } from "@/db";
@@ -78,7 +78,6 @@ export async function recordReturningLogin(
         googleName: input.googleName,
         avatarUrl: input.avatarUrl,
         lastLoginAt: now,
-        updatedAt: sql`${users.updatedAt}`,
       })
       .where(eq(users.id, input.userId));
 

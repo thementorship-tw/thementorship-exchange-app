@@ -66,10 +66,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   }, [reloaded, searchParams]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (accepted) {
-      setDismissedLoginError(null);
-      return;
-    }
+    if (accepted) return;
 
     event.preventDefault();
     setConsentToastOpen(true);
