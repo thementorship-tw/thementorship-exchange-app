@@ -4,6 +4,8 @@ import { AuthError } from "next-auth";
 
 import { signIn } from "@/auth";
 
+import { issueConsentReceipt } from "@/consent-receipt";
+
 import { getSafeCallbackUrl } from "./callback-url";
 
 export type LoginState = {
@@ -17,6 +19,8 @@ export async function signInWithGoogle(
   if (formData.get("consent") !== "on") {
     return { error: "請先同意規範與隱私政策。" };
   }
+
+  await issueConsentReceipt();
 
   try {
     // 登入中...

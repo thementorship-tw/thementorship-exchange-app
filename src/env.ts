@@ -9,7 +9,9 @@
 function required(name: string): string {
   const value = process.env[name];
   if (!value) {
-    throw new Error(`Missing required environment variable: ${name}. See .env.example.`);
+    throw new Error(
+      `Missing required environment variable: ${name}. See .env.example.`,
+    );
   }
   return value;
 }
@@ -18,6 +20,9 @@ export const serverEnv = {
   /** libsql://<db>.turso.io for Turso, or file:local.db for a local SQLite file. */
   get databaseUrl(): string {
     return required("TURSO_DATABASE_URL");
+  },
+  get authSecret(): string {
+    return required("AUTH_SECRET");
   },
   /** Not needed when TURSO_DATABASE_URL points at a local file: database. */
   get databaseAuthToken(): string | undefined {

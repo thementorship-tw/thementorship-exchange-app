@@ -1,21 +1,18 @@
 import Image from "next/image";
-import { redirect } from "next/navigation";
 
-import { auth, signOut } from "@/auth";
+import { requireActiveUser, signOut } from "@/auth";
 
 export default async function HomePage() {
-  const session = await auth();
-  if (!session?.user) redirect("/login?callbackUrl=%2Fhome");
-
-  const { name, email, image } = session.user;
+  const { user } = await requireActiveUser("/home");
+  const { nickname, email, avatarUrl } = user;
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 px-6 dark:bg-black">
       <main className="flex w-full max-w-md flex-col gap-6">
         <div className="flex items-center gap-4">
-          {image && (
+          {avatarUrl && (
             <Image
-              src={image}
+              src={avatarUrl}
               alt=""
               width={56}
               height={56}
@@ -24,13 +21,9 @@ export default async function HomePage() {
           )}
           <div className="flex flex-col">
             <h1 className="text-xl font-semibold tracking-tight text-black dark:text-zinc-50">
-              {name ?? "已登入"}
+              {nickname}
             </h1>
-            {email && (
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                {email}
-              </p>
-            )}
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">{email}</p>
           </div>
         </div>
 

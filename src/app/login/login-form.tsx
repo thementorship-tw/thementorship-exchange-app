@@ -1,6 +1,13 @@
 "use client";
 
-import { type FormEvent, useActionState, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  type FormEvent,
+  useActionState,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { Button } from "@/components/button";
 import { Toast } from "@/components/toast";
@@ -11,13 +18,24 @@ import { PrivacyPolicyDialog } from "./privacy-policy-dialog";
 
 const initialState: LoginState = { error: null };
 
-export function LoginForm({
-  callbackUrl,
-  authError,
-}: {
-  callbackUrl: string;
-  authError: boolean;
-}) {
+function removeErrorFromUrl() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("error")) return;
+
+  url.searchParams.delete("error");
+  window.history.replaceState(null, "", url);
+}
+
+const subscribeToHydration = () => () => {};
+
+function isReloadNavigation() {
+  const navigation = performance.getEntriesByType("navigation")[0] as
+    PerformanceNavigationTiming | undefined;
+
+  return navigation?.type === "reload";
+}
+
+export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   const [accepted, setAccepted] = useState(false);
   const [policyOpen, setPolicyOpen] = useState(false);
   const [consentToastOpen, setConsentToastOpen] = useState(false);
@@ -28,23 +46,35 @@ export function LoginForm({
     signInWithGoogle,
     initialState,
   );
-  const loginError = authError ? "auth-error" : state.error;
+
+  const searchParams = useSearchParams();
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
+  const reloaded = hydrated && isReloadNavigation();
+  const loginError =
+    (reloaded ? null : searchParams.get("error")) ?? state.error;
   const loginErrorOpen =
     loginError !== null && loginError !== dismissedLoginError;
 
+  useEffect(() => {
+    if (reloaded && searchParams.has("error")) {
+      removeErrorFromUrl();
+    }
+  }, [reloaded, searchParams]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (accepted) return;
+
     event.preventDefault();
     setConsentToastOpen(true);
   };
 
   const closeLoginError = () => {
     setDismissedLoginError(loginError);
-
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has("error")) return;
-    url.searchParams.delete("error");
-    window.history.replaceState(null, "", url);
+    removeErrorFromUrl();
   };
 
   return (
@@ -54,7 +84,11 @@ export function LoginForm({
         onSubmit={handleSubmit}
         className="flex w-full flex-col items-center md:landscape:w-auto lg:w-auto"
       >
-        <input type="hidden" name="callbackUrl" value={callbackUrl} />
+        <input
+          type="hidden"
+          name="callbackUrl"
+          value={callbackUrl}
+        />
 
         <Button
           type="submit"
@@ -89,7 +123,10 @@ export function LoginForm({
             </svg>
           </span>
           <div className="flex items-center">
-            <label htmlFor="login-consent" className="cursor-pointer">
+            <label
+              htmlFor="login-consent"
+              className="cursor-pointer"
+            >
               我同意
             </label>
             <button
@@ -103,7 +140,10 @@ export function LoginForm({
         </div>
       </form>
 
-      <Toast open={consentToastOpen} onClose={() => setConsentToastOpen(false)}>
+      <Toast
+        open={consentToastOpen}
+        onClose={() => setConsentToastOpen(false)}
+      >
         請同意規範與隱私政策
       </Toast>
 
@@ -116,7 +156,11 @@ export function LoginForm({
         }}
       />
 
-      <LoginErrorDialog open={loginErrorOpen} onClose={closeLoginError} />
+      <LoginErrorDialog
+        open={loginErrorOpen}
+        errorCode={loginError}
+        onClose={closeLoginError}
+      />
     </>
   );
 }

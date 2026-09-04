@@ -6,8 +6,17 @@
  * the Figma Foundation document.
  */
 @theme {
+  /* Primitive palette — Blue */
+  --color-blue-1: #f4f6fa;
+  --color-blue-2: #e1e3f2;
+  --color-blue-5: #343b87;
+  --color-blue-6: #21286f;
+  --color-blue-7: #131956;
+  --color-blue-8: #090e3e;
+  --color-blue-9: #00063a;
+
   /* Background */
-  --color-page: #f4f6fa; /* color_blue_1 */
+  --color-page: var(--color-blue-1);
   --color-ocean-background: #e6f4ff;
   --color-surface: #ffffff; /* color_white */
   --color-surface-subtle: #efefef; /* color_neutral_1 */
@@ -15,8 +24,9 @@
   --color-glass: rgb(255 255 255 / 0.7);
 
   /* Brand and text */
-  --color-brand: #131956; /* color_blue_7 */
-  --color-brand-subtle: #e1e3f2; /* color_blue_2 */
+  --color-brand: var(--color-blue-7);
+  --color-link-hover: var(--color-blue-6);
+  --color-brand-subtle: var(--color-blue-2);
   --color-primary: #1f2630; /* color_neutral_10 */
   --color-secondary: #62676e; /* color_neutral_7 */
   --color-inverse: #ffffff; /* color_white */
@@ -35,8 +45,8 @@
   --color-success-subtle: #e8f2ed; /* color_green_1 */
   --color-error: #a62c24; /* color_red_6 */
   --color-error-subtle: #fbeae8; /* color_red_1 */
-  --color-info: #131956; /* color_blue_7 */
-  --color-info-subtle: #e1e3f2; /* color_blue_2 */
+  --color-info: var(--color-blue-7);
+  --color-info-subtle: var(--color-blue-2);
 
   /* Radius */
   --radius-2: 2px;
