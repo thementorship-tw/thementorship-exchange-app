@@ -2,22 +2,41 @@
 
 import { Dialog } from "@/components/dialog";
 
+import { loginErrorContent } from "./login-errors";
+
 export function LoginErrorDialog({
   open,
+  errorCode,
   onClose,
 }: {
   open: boolean;
+  /** 登入頁網址上的 `?error=` */
+  errorCode: string | null;
   onClose: () => void;
 }) {
+  const { title, body } = loginErrorContent(errorCode);
+
   return (
     <Dialog
       open={open}
-      title="登入遇到問題了嗎？"
+      title={title}
       onClose={onClose}
       showCloseButton
     >
-      <p>
-        請先確認你使用報名曼陀號時的帳號登入，如仍無法登入，請由此回報專案小組，我們將儘快與你聯絡。
+      <p className="text-left">
+        {body.map((part, index) =>
+          typeof part === "string" ? (
+            part
+          ) : (
+            <a
+              key={index}
+              href={part.href}
+              className="cursor-pointer font-semibold text-brand underline decoration-1 underline-offset-4 transition-colors hover:text-link-hover focus-visible:rounded-4 focus-visible:outline-2 focus-visible:outline-brand"
+            >
+              {part.text}
+            </a>
+          ),
+        )}
       </p>
     </Dialog>
   );

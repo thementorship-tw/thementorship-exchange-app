@@ -1,5 +1,4 @@
 // 匯出名稱必須是 proxy 或 default，否則 Next 16 build 會失敗。
-// 擋人的判斷在 auth.ts 的 callbacks.authorized；少了它這裡只會附加 session 而不阻擋。
 export { auth as proxy } from "@/auth";
 
 export const config = {

@@ -3,7 +3,10 @@ import Image from "next/image";
 /** Shared decorative ocean scene used by login and full-page empty states. */
 export function OceanScene() {
   return (
-    <div aria-hidden="true" className="absolute inset-0 -z-10">
+    <div
+      aria-hidden="true"
+      className="absolute inset-0 -z-10"
+    >
       <Image
         src="/images/login/background-lg.png"
         alt=""
