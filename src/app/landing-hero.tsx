@@ -61,7 +61,7 @@ function BlurredBackdrop({ visible }: { visible: boolean }) {
       className="pointer-events-none absolute inset-0 -z-10"
     >
       <Image
-        src="/images/landing-background.png"
+        src="/landing-background.png"
         alt=""
         fill
         loading="eager"
@@ -79,7 +79,7 @@ function BlurredBackdrop({ visible }: { visible: boolean }) {
             }}
           >
             <Image
-              src="/images/landing-background.png"
+              src="/landing-background.png"
               alt=""
               fill
               loading="eager"
