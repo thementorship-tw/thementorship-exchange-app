@@ -1,29 +1,62 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { auth } from "@/auth";
+import { buttonClassName } from "@/components/button";
 
 export default async function Home() {
   const session = await auth();
 
   // 已登入直接進 app，未登入導向自訂登入頁
-  const cta = session?.user
-    ? { href: "/home", label: "進入 Home" }
-    : { href: "/login", label: "登入" };
+  const ctaHref = session?.user ? "/home" : "/login";
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 px-6 dark:bg-black">
-      <main className="flex w-full max-w-2xl flex-col items-start gap-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-black dark:text-zinc-50">
-          The Mentorship Exchange
-        </h1>
+    <main className="relative isolate flex min-h-dvh flex-1 flex-col items-center justify-center overflow-hidden bg-[#1e1e1e] px-6 py-16 text-center">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10"
+      >
+        <Image
+          src="/images/landing-background.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="scale-110 object-cover object-bottom blur-lg"
+        />
+      </div>
 
-        <Link
-          href={cta.href}
-          className="rounded-md bg-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-200"
+      <Image
+        src="/logo.png"
+        alt="The Mentorship Exchange"
+        width={62}
+        height={60}
+        priority
+        className="mb-6 h-[60px] w-[62px]"
+      />
+
+      <h1 className="text-display text-inverse">在航程上，結伴學習不孤單</h1>
+
+      <p className="mt-5 max-w-120 text-h1 text-inverse">
+        你可以是老師、是學生，用專長交換專長，交流就是成長的開始。
+      </p>
+
+      <Link
+        href={ctaHref}
+        className={buttonClassName({
+          variant: "secondary",
+          size: "xl",
+          className: "mt-8",
+        })}
+      >
+        開始交換技能
+        <span
+          aria-hidden="true"
+          className="ml-3 flex size-5 items-center justify-center rounded-pill bg-brand"
         >
-          {cta.label}
-        </Link>
-      </main>
-    </div>
+          <span className="size-1.5 rounded-pill bg-surface" />
+        </span>
+      </Link>
+    </main>
   );
 }
