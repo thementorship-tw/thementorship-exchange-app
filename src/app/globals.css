@@ -80,3 +80,10 @@ body {
     transform: translateY(-46px);
   }
 }
+
+.landing-lens {
+  /* 鏡片半徑，直徑 180px */
+  --lens-r: 90px;
+  --lens-x: -100vw;
+  --lens-y: -100vh;
+}
