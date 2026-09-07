@@ -2,9 +2,9 @@
 
 import { type RefObject, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { buttonClassName } from "@/components/button";
+import { Button } from "@/components/button";
 
 /** 游標在按鈕或連結上時要交還系統游標，否則鏡片會蓋住按鈕文字。 */
 function isOverControl(target: EventTarget | null) {
@@ -61,13 +61,13 @@ function BlurredBackdrop({ visible }: { visible: boolean }) {
       className="pointer-events-none absolute inset-0 -z-10"
     >
       <Image
-        src="/landing-background.png"
+        src="/images/landing-background.png"
         alt=""
         fill
         loading="eager"
         fetchPriority="high"
         sizes="100vw"
-        className="scale-110 object-cover object-bottom blur-lg"
+        className="scale-110 object-cover object-center blur-lg md:object-bottom"
       />
 
       {visible && (
@@ -79,12 +79,12 @@ function BlurredBackdrop({ visible }: { visible: boolean }) {
             }}
           >
             <Image
-              src="/landing-background.png"
+              src="/images/landing-background.png"
               alt=""
               fill
               loading="eager"
               sizes="100vw"
-              className="scale-110 object-cover object-bottom"
+              className="scale-110 object-cover object-center md:object-bottom"
             />
           </div>
 
@@ -109,45 +109,40 @@ function BlurredBackdrop({ visible }: { visible: boolean }) {
 export function LandingHero({ ctaHref }: { ctaHref: string }) {
   const rootRef = useRef<HTMLElement>(null);
   const lensVisible = useLens(rootRef);
+  const router = useRouter();
 
   return (
     <main
       ref={rootRef}
-      className={`landing-lens relative isolate flex min-h-dvh flex-1 flex-col items-center justify-center overflow-hidden bg-[#1e1e1e] px-6 py-16 text-center ${lensVisible ? "cursor-none" : ""}`}
+      className={`landing-lens relative isolate flex min-h-dvh flex-1 flex-col items-center justify-center overflow-hidden bg-[#1e1e1e] px-4 py-16 text-center ${lensVisible ? "cursor-none" : ""}`}
     >
       <BlurredBackdrop visible={lensVisible} />
 
-      <Image
-        src="/logo.png"
-        alt="The Mentorship Exchange"
-        width={62}
-        height={60}
-        loading="eager"
-        className="mb-6 h-15 w-15.5"
-      />
+      <div className="flex w-full max-w-82 flex-col items-center px-5 pt-5">
+        <Image
+          src="/images/logo.png"
+          alt="The Mentorship Exchange"
+          width={62}
+          height={60}
+          loading="eager"
+          className="mb-6 h-15 w-15.5"
+        />
 
-      <h1 className="text-display text-inverse">在航程上，結伴學習不孤單</h1>
+        <h1 className="text-h1 text-inverse">在航程上，結伴學習不孤單</h1>
 
-      <p className="mt-5 max-w-120 text-h1 text-inverse">
-        你可以是老師、是學生，用專長交換專長，交流就是成長的開始。
-      </p>
+        <p className="mt-3 max-w-120 text-body-lg text-inverse">
+          你可以是老師、是學生，用專長交換專長，交流就是成長的開始。
+        </p>
 
-      <Link
-        href={ctaHref}
-        className={buttonClassName({
-          variant: "secondary",
-          size: "xl",
-          className: "mt-8",
-        })}
-      >
-        開始交換技能
-        <span
-          aria-hidden="true"
-          className="ml-3 flex size-5 items-center justify-center rounded-pill bg-brand"
+        <Button
+          variant="secondary"
+          size="sm"
+          className="mt-6 py-3 md:min-h-14 md:px-10.25 md:text-body-lg-strong"
+          onClick={() => router.push(ctaHref)}
         >
-          <span className="size-1.5 rounded-pill bg-surface" />
-        </span>
-      </Link>
+          開始尋找夥伴
+        </Button>
+      </div>
     </main>
   );
 }
