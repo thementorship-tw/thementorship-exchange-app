@@ -2,12 +2,8 @@
 
 import Image from "next/image";
 
-export const LANDING_BACKGROUND_SRC = "/images/landing-background.png";
-
-export const FINE_POINTER_QUERY = "(pointer: fine)";
-
 export function hasPointer() {
-  return window.matchMedia(FINE_POINTER_QUERY).matches;
+  return window.matchMedia("(pointer: fine)").matches; // fine: 滑鼠、觸控板、觸控筆
 }
 
 export function readLensRadius(root: HTMLElement) {
@@ -24,7 +20,7 @@ export function Lens() {
         }}
       >
         <Image
-          src={LANDING_BACKGROUND_SRC}
+          src="/images/landing-background.png"
           alt=""
           fill
           loading="eager"

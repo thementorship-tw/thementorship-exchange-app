@@ -100,53 +100,14 @@ body {
   initial-value: -9999px;
 }
 
-@keyframes landing-bubble-rise {
-  0% {
-    --lens-x: 37%;
-    --lens-y: 115%;
-  }
-  12.5% {
-    --lens-x: 45%;
-    --lens-y: 98%;
-  }
-  25% {
-    --lens-x: 48%;
-    --lens-y: 81%;
-  }
-  37.5% {
-    --lens-x: 45%;
-    --lens-y: 64%;
-  }
-  50% {
-    --lens-x: 37%;
-    --lens-y: 48%;
-  }
-  62.5% {
-    --lens-x: 29%;
-    --lens-y: 31%;
-  }
-  75% {
-    --lens-x: 26%;
-    --lens-y: 14%;
-  }
-  87.5% {
-    --lens-x: 29%;
-    --lens-y: -3%;
-  }
-  100% {
-    --lens-x: 37%;
-    --lens-y: -20%;
-  }
-}
-
 .landing-bubble {
-  animation: landing-bubble-rise 28s linear infinite;
+  --lens-r: 60px; /* 半徑 */
+  --lens-x: 37%;
+  --lens-y: 115%;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .landing-bubble {
-    animation: none;
-    --lens-x: 37%;
     --lens-y: 48%;
   }
 }
