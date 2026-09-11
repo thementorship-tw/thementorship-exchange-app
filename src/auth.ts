@@ -6,11 +6,17 @@ import Google from "next-auth/providers/google";
 
 import { getSafeCallbackUrl } from "@/app/login/callback-url";
 import { LOGIN_ERROR } from "@/app/login/login-errors";
-import { readConsentReceipt } from "@/consent-receipt";
-import { isCurrentConsent, type ConsentVersions } from "@/consent-versions";
-import { createUserOnFirstLogin, recordReturningLogin } from "@/db/login";
-import { findUserBySub, type SessionUser } from "@/db/user";
-import { findActiveWhitelistEntry } from "@/db/whitelist";
+import { readConsentReceipt } from "@/server/auth/consent-receipt";
+import {
+  createUserOnFirstLogin,
+  recordReturningLogin,
+} from "@/server/auth/login.service";
+import { findUserBySub, type SessionUser } from "@/server/auth/user.repository";
+import { findActiveWhitelistEntry } from "@/server/auth/whitelist.repository";
+import {
+  isCurrentConsent,
+  type ConsentVersions,
+} from "@/shared/consent-versions";
 
 declare module "next-auth" {
   interface Session {

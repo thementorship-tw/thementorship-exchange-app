@@ -11,7 +11,7 @@ if (!url) {
 
 export default defineConfig({
   dialect: "turso",
-  schema: "./src/db/schema.ts",
+  schema: "./src/server/db/schema.ts",
   out: "./drizzle",
   dbCredentials: {
     url,

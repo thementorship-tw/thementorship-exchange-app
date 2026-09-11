@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { OceanScene } from "@/components/ocean-scene";
-import { isCurrentConsent } from "@/consent-versions";
+import { isCurrentConsent } from "@/shared/consent-versions";
 
 import { LoginForm } from "./login-form";
 import { getSafeCallbackUrl } from "./callback-url";

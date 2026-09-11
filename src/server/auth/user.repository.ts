@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { getDb } from "@/db";
-import { users } from "@/db/schema";
+import { getDb } from "@/server/db";
+import { users } from "@/server/db/schema";
 
 export type SessionUser = {
   id: string;
