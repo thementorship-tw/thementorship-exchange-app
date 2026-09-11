@@ -2,19 +2,7 @@ import Image from "next/image";
 
 type BoatSide = "left" | "right";
 
-/** 兩張設計稿的船身位置與大小不同：登入頁靠右且較大，首頁列表靠左並被左緣裁掉一截。 */
-const boatSideClasses: Record<BoatSide, string> = {
-  left: "-left-[7vw] bottom-24 w-[32vw]",
-  right: "right-0 bottom-8 w-[40vw]",
-};
-
-const boatObjectClasses: Record<BoatSide, string> = {
-  left: "object-left-bottom",
-  right: "object-right-bottom",
-};
-
 export type OceanSceneProps = {
-  /** 船身靠左或靠右；登入頁靠右，首頁列表靠左。 */
   boatSide?: BoatSide;
 };
 
@@ -38,19 +26,19 @@ export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
         fill
         fetchPriority="high"
         sizes="(min-width: 1024px) 1px, (min-width: 768px) and (orientation: landscape) 1px, 100vw"
-        className="object-cover object-left-bottom md:landscape:hidden lg:hidden"
+        className="object-cover object-bottom md:landscape:hidden lg:hidden"
       />
 
       <div
-        className={`login-boat absolute z-10 hidden aspect-[1003/614] md:landscape:block lg:block ${boatSideClasses[boatSide]}`}
+        className={`login-boat login-boat-${boatSide} absolute z-10 hidden aspect-1003/614 md:landscape:block lg:block`}
       >
         <Image
           src="/images/login/boat.png"
           alt=""
           fill
           fetchPriority="high"
-          sizes="(min-width: 1024px) 42vw, (min-width: 768px) and (orientation: landscape) 42vw, 1px"
-          className={`object-contain ${boatObjectClasses[boatSide]}`}
+          sizes="(min-width: 1024px) 40vw, (min-width: 768px) and (orientation: landscape) 40vw, 1px"
+          className="object-contain object-(--boat-anchor)"
         />
       </div>
 

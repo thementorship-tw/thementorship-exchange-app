@@ -1,8 +1,5 @@
-import type { ProfileType } from "@/db/schema";
+import type { ProfileListItem, ProfileType } from "./mock-profiles";
 
-import type { ProfileListItem } from "./mock-profiles";
-
-/** 列表卡片所需的貼文資料；時間已在 server 端格式化，避免 hydration 不一致。 */
 export type PostSummary = {
   id: string;
   type: ProfileType;
@@ -18,14 +15,13 @@ export type PostSummary = {
     jobTitle: string | null;
     avatarUrl: string | null;
   };
-  /** 已格式化的相對時間，例如「22小時前」。 */
+  /** 已格式化的相對時間。 */
   timeLabel: string;
 };
 
 export const postTypeLabels: Record<ProfileType, string> = {
-  skill: "技能",
-  career: "職涯聊天",
-  interest: "興趣",
+  skillAndHobby: "技能與興趣",
+  career: "職涯",
 };
 
 const MINUTE = 60_000;

@@ -5,7 +5,6 @@ import { requireActiveUser } from "@/auth";
 import { OceanScene } from "@/components/ocean-scene";
 
 import { HomeSidebar } from "./home-sidebar";
-import { parseListParams } from "./list-params";
 import { MobileHeader } from "./mobile-header";
 import { listProfiles } from "./mock-profiles";
 import { PostList } from "./post-list";
@@ -13,17 +12,13 @@ import { toPostSummary } from "./posts";
 
 export const metadata: Metadata = {
   title: "交流列表｜The Mentorship Exchange",
-  description: "瀏覽曼陀號社群的技能、職涯與興趣交流貼文。",
+  description: "瀏覽曼陀號社群的技能與興趣、職涯交流貼文。",
 };
 
-export default async function HomePage({ searchParams }: PageProps<"/home">) {
-  const [, params] = await Promise.all([
-    requireActiveUser("/home"),
-    searchParams,
-  ]);
+export default async function HomePage() {
+  await requireActiveUser("/home");
 
-  const listParams = parseListParams(params);
-  const items = await listProfiles(listParams);
+  const items = await listProfiles();
   const now = new Date();
   const posts = items.map((item) => toPostSummary(item, now));
 
@@ -38,13 +33,10 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
 
         <HomeSidebar />
 
-        <PostList
-          posts={posts}
-          params={listParams}
-        />
+        <PostList posts={posts} />
       </div>
 
-      {/* CHECK: 發文流程（Home / Desktop / 02–08）尚未實作。 */}
+      {/* TODO: 發文流程 尚未實作。 */}
       <button
         type="button"
         aria-label="我要發文"

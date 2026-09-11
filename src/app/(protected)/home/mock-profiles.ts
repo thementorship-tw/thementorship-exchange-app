@@ -1,13 +1,6 @@
-import type { ProfileType } from "@/db/schema";
+export const profileTypes = ["skillAndHobby", "career"] as const;
+export type ProfileType = (typeof profileTypes)[number];
 
-/**
- * 列表頁的暫時假資料來源。
- *
- * 型別與函式簽章刻意跟之後的 @/db/profiles 對齊，等查詢層進 main 之後，
- * 只要把各處的 import 路徑換掉、刪掉這支檔案即可，UI 不用動。
- */
-
-/** 列表排序方式；newest 為建立時間新到舊。 */
 export type SortOrder = "newest" | "oldest";
 
 /** 列表查詢回傳的單筆交流檔案，含刊登者的顯示欄位。 */
@@ -24,7 +17,6 @@ export type ProfileListItem = {
 };
 
 export type ListProfilesOptions = {
-  /** 可複選；空陣列代表不篩選類型。 */
   types?: ProfileType[];
   order?: SortOrder;
   limit?: number;
@@ -42,7 +34,7 @@ const DAY = 24 * HOUR;
 const mockItems: (Omit<ProfileListItem, "createdAt"> & { agoMs: number })[] = [
   {
     id: "mock-1",
-    type: "skill",
+    type: "skillAndHobby",
     offersText: "Figma 元件庫建置、設計系統導入",
     wantsText: "想找人帶我看 React 的狀態管理",
     description:
@@ -65,7 +57,7 @@ const mockItems: (Omit<ProfileListItem, "createdAt"> & { agoMs: number })[] = [
   },
   {
     id: "mock-3",
-    type: "interest",
+    type: "skillAndHobby",
     offersText: "台北近郊路線推薦、裝備採購雷點",
     wantsText: "找一起爬山的夥伴，週末為主",
     description: "爬了五年，最近在練長程縱走。平日也可以約吃飯聊工作。",
@@ -76,7 +68,7 @@ const mockItems: (Omit<ProfileListItem, "createdAt"> & { agoMs: number })[] = [
   },
   {
     id: "mock-4",
-    type: "skill",
+    type: "skillAndHobby",
     offersText: "資料分析、SQL 與 dbt 實務",
     wantsText: "想學怎麼把分析結果講成一個故事",
     description:
