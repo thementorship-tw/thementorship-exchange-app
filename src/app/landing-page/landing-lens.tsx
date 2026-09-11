@@ -6,10 +6,6 @@ export function hasPointer() {
   return window.matchMedia("(pointer: fine)").matches; // fine: 滑鼠、觸控板、觸控筆
 }
 
-export function readLensRadius(root: HTMLElement) {
-  return parseFloat(getComputedStyle(root).getPropertyValue("--lens-r")) || 90;
-}
-
 export function Lens() {
   return (
     <>
