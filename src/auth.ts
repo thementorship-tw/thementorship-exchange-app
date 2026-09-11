@@ -169,6 +169,17 @@ type ActiveSession = {
   consent: ConsentVersions | null;
 };
 
+export type ActiveUserResult =
+  | { ok: true; user: SessionUser; consent: ConsentVersions }
+  | {
+      ok: false;
+      reason:
+        | "unauthenticated"
+        | "user_not_found"
+        | "account_inactive"
+        | "consent_required";
+    };
+
 function loginUrl(callbackUrl: string): string {
   return `${LOGIN_PATH}?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 }
@@ -176,15 +187,38 @@ function loginUrl(callbackUrl: string): string {
 export async function requireActiveUser(
   callbackUrl = "/home",
 ): Promise<ActiveSession> {
+  const result = await resolveActiveUser();
+
+  if (!result.ok) {
+    if (
+      result.reason === "user_not_found" ||
+      result.reason === "account_inactive"
+    ) {
+      redirect(FORCE_SIGN_OUT_PATH);
+    }
+
+    redirect(loginUrl(callbackUrl));
+  }
+
+  return { user: result.user, consent: result.consent };
+}
+
+/** 驗證 session、平台帳號與條款，不決定失敗時要 redirect 或回傳 HTTP error。 */
+export async function resolveActiveUser(): Promise<ActiveUserResult> {
   const session = await auth();
 
-  if (session?.user === undefined) redirect(loginUrl(callbackUrl));
+  if (session?.user === undefined || session.sub === null) {
+    return { ok: false, reason: "unauthenticated" };
+  }
 
-  const user = await findUserBySub(session.sub ?? "");
-  if (user === null || !user.active) redirect(FORCE_SIGN_OUT_PATH);
+  const user = await findUserBySub(session.sub);
+  if (user === null) return { ok: false, reason: "user_not_found" };
+  if (!user.active) return { ok: false, reason: "account_inactive" };
 
   const { consent } = session;
-  if (!isCurrentConsent(consent)) redirect(loginUrl(callbackUrl));
+  if (!isCurrentConsent(consent) || consent === null) {
+    return { ok: false, reason: "consent_required" };
+  }
 
-  return { user, consent };
+  return { ok: true, user, consent };
 }
