@@ -1,4 +1,4 @@
-import { SearchIcon } from "@/components/icons";
+import { Search } from "lucide-react";
 
 /** 關鍵字搜尋輸入框；桌機在側欄，手機在頁首下方。 */
 export function SearchField({ className = "" }: { className?: string }) {
@@ -6,7 +6,7 @@ export function SearchField({ className = "" }: { className?: string }) {
     <div
       className={`flex h-11 items-center gap-2 rounded-12 border border-line bg-surface px-4 focus-within:outline-2 focus-within:outline-brand ${className}`}
     >
-      <SearchIcon className="size-5 text-secondary" />
+      <Search className="size-5 text-secondary" />
       {/* CHECK: 搜尋行為尚未實作，先呈現設計稿的輸入框外觀。 */}
       <input
         type="search"

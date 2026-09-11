@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { ChevronDown } from "lucide-react";
 import { useId, useState } from "react";
-
-import { CaretDownIcon } from "@/components/icons";
 
 import { postTypeLabels, type PostSummary } from "./posts";
 
@@ -34,7 +33,7 @@ export function PostCard({ post }: { post: PostSummary }) {
               /* after 偽元素把觸控範圍撐到 44x44，維持視覺上的 24px 圓鈕。 */
               className="relative flex size-6 cursor-pointer items-center justify-center rounded-pill bg-surface text-secondary transition focus-visible:outline-2 focus-visible:outline-brand after:absolute after:-inset-2.5 after:content-['']"
             >
-              <CaretDownIcon
+              <ChevronDown
                 className={`size-3 transition-transform ${expanded ? "rotate-180" : ""}`}
               />
             </button>

@@ -1,11 +1,12 @@
-import { BellIcon, PlusIcon, SettingsIcon } from "@/components/icons";
+import { Bell, Plus, Settings } from "lucide-react";
+
 import { buttonClassName } from "@/components/button";
 
 import { SearchField } from "./search-field";
 
 const navItems = [
-  { label: "系統通知", Icon: BellIcon },
-  { label: "設定中心", Icon: SettingsIcon },
+  { label: "系統通知", Icon: Bell },
+  { label: "設定中心", Icon: Settings },
 ];
 
 /** 桌機版側欄：站台名稱、搜尋、功能選單與發文按鈕。 */
@@ -43,7 +44,7 @@ export function HomeSidebar() {
         className={buttonClassName({ size: "xl", className: "w-full gap-2" })}
       >
         我要發文
-        <PlusIcon className="size-5" />
+        <Plus className="size-5" />
       </button>
     </aside>
   );

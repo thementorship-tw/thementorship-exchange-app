@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import { Plus } from "lucide-react";
 
 import { requireActiveUser } from "@/auth";
-import { PlusIcon } from "@/components/icons";
 import { OceanScene } from "@/components/ocean-scene";
 
 import { HomeSidebar } from "./home-sidebar";
@@ -33,7 +33,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
 
       <MobileHeader />
 
-      <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col gap-6 px-4 pb-2 md:px-6 md:landscape:flex-row md:landscape:py-6 lg:flex-row lg:py-6 xl:px-20">
+      <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col gap-6 px-4 pb-2 md:px-6 md:landscape:flex-row md:landscape:py-6 lg:flex-row lg:py-6 xl:px-20">
         <h1 className="sr-only">交流列表</h1>
 
         <HomeSidebar />
@@ -50,7 +50,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
         aria-label="我要發文"
         className="fixed right-4 bottom-6 z-20 flex size-12 cursor-pointer items-center justify-center rounded-pill bg-brand text-inverse shadow-lg transition active:translate-y-px focus-visible:outline-2 focus-visible:outline-brand md:landscape:hidden lg:hidden"
       >
-        <PlusIcon className="size-6" />
+        <Plus className="size-6" />
       </button>
     </main>
   );

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { CheckIcon, SortIcon } from "@/components/icons";
+import { ArrowDownWideNarrow, ArrowUpNarrowWide, Check } from "lucide-react";
+
 import { profileTypes } from "@/db/schema";
 
 import { buildListHref, type ListParams } from "./list-params";
@@ -21,6 +22,8 @@ const tagClasses = {
 /** 快速篩選標籤與排序切換；狀態放在網址上，兩者都是連結。 */
 export function FilterBar({ params }: { params: ListParams }) {
   const nextOrder = params.order === "newest" ? "oldest" : "newest";
+  const SortIcon =
+    params.order === "newest" ? ArrowDownWideNarrow : ArrowUpNarrowWide;
 
   return (
     <div className="flex items-center justify-between gap-2 py-1">
@@ -44,7 +47,7 @@ export function FilterBar({ params }: { params: ListParams }) {
               className={`${tagClasses.base} ${active ? tagClasses.selected : tagClasses.default}`}
             >
               {postTypeLabels[type]}
-              {active && <CheckIcon className="size-4" />}
+              {active && <Check className="size-4" />}
               <LinkPending />
             </Link>
           );
@@ -57,10 +60,7 @@ export function FilterBar({ params }: { params: ListParams }) {
         aria-label={`切換排序，目前為${sortLabels[params.order]}`}
         className="relative flex h-7 items-center gap-1 overflow-hidden rounded-pill px-2 text-body whitespace-nowrap text-secondary transition hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-brand"
       >
-        <SortIcon
-          className="size-5"
-          direction={params.order === "newest" ? "descending" : "ascending"}
-        />
+        <SortIcon className="size-5" />
         <span className="hidden md:landscape:inline lg:inline">
           {sortLabels[params.order]}
         </span>
