@@ -1,46 +1,57 @@
-import Image from "next/image";
+import type { Metadata } from "next";
 
-import { requireActiveUser, signOut } from "@/auth";
+import { requireActiveUser } from "@/auth";
+import { PlusIcon } from "@/components/icons";
+import { OceanScene } from "@/components/ocean-scene";
 
-export default async function HomePage() {
-  const { user } = await requireActiveUser("/home");
-  const { nickname, email, avatarUrl } = user;
+import { HomeSidebar } from "./home-sidebar";
+import { parseListParams } from "./list-params";
+import { MobileHeader } from "./mobile-header";
+import { listProfiles } from "./mock-profiles";
+import { PostList } from "./post-list";
+import { toPostSummary } from "./posts";
+
+export const metadata: Metadata = {
+  title: "交流列表｜The Mentorship Exchange",
+  description: "瀏覽曼陀號社群的技能、職涯與興趣交流貼文。",
+};
+
+export default async function HomePage({ searchParams }: PageProps<"/home">) {
+  const [, params] = await Promise.all([
+    requireActiveUser("/home"),
+    searchParams,
+  ]);
+
+  const listParams = parseListParams(params);
+  const items = await listProfiles(listParams);
+  const now = new Date();
+  const posts = items.map((item) => toPostSummary(item, now));
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 px-6 dark:bg-black">
-      <main className="flex w-full max-w-md flex-col gap-6">
-        <div className="flex items-center gap-4">
-          {avatarUrl && (
-            <Image
-              src={avatarUrl}
-              alt=""
-              width={56}
-              height={56}
-              className="size-14 rounded-full"
-            />
-          )}
-          <div className="flex flex-col">
-            <h1 className="text-xl font-semibold tracking-tight text-black dark:text-zinc-50">
-              {nickname}
-            </h1>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">{email}</p>
-          </div>
-        </div>
+    <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-page">
+      <OceanScene boatSide="left" />
 
-        <form
-          action={async () => {
-            "use server";
-            await signOut({ redirectTo: "/" });
-          }}
-        >
-          <button
-            type="submit"
-            className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800"
-          >
-            登出
-          </button>
-        </form>
-      </main>
-    </div>
+      <MobileHeader />
+
+      <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col gap-6 px-4 pb-2 md:px-6 md:landscape:flex-row md:landscape:py-6 lg:flex-row lg:py-6 xl:px-20">
+        <h1 className="sr-only">交流列表</h1>
+
+        <HomeSidebar />
+
+        <PostList
+          posts={posts}
+          params={listParams}
+        />
+      </div>
+
+      {/* CHECK: 發文流程（Home / Desktop / 02–08）尚未實作。 */}
+      <button
+        type="button"
+        aria-label="我要發文"
+        className="fixed right-4 bottom-6 z-20 flex size-12 cursor-pointer items-center justify-center rounded-pill bg-brand text-inverse shadow-lg transition active:translate-y-px focus-visible:outline-2 focus-visible:outline-brand md:landscape:hidden lg:hidden"
+      >
+        <PlusIcon className="size-6" />
+      </button>
+    </main>
   );
 }

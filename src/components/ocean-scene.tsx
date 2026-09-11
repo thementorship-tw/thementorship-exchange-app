@@ -1,7 +1,25 @@
 import Image from "next/image";
 
+type BoatSide = "left" | "right";
+
+/** 兩張設計稿的船身位置與大小不同：登入頁靠右且較大，首頁列表靠左並被左緣裁掉一截。 */
+const boatSideClasses: Record<BoatSide, string> = {
+  left: "-left-[7vw] bottom-24 w-[32vw]",
+  right: "right-0 bottom-8 w-[40vw]",
+};
+
+const boatObjectClasses: Record<BoatSide, string> = {
+  left: "object-left-bottom",
+  right: "object-right-bottom",
+};
+
+export type OceanSceneProps = {
+  /** 船身靠左或靠右；登入頁靠右，首頁列表靠左。 */
+  boatSide?: BoatSide;
+};
+
 /** Shared decorative ocean scene used by login and full-page empty states. */
-export function OceanScene() {
+export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
   return (
     <div
       aria-hidden="true"
@@ -23,14 +41,16 @@ export function OceanScene() {
         className="object-cover object-left-bottom md:landscape:hidden lg:hidden"
       />
 
-      <div className="login-boat absolute right-0 bottom-8 z-10 hidden aspect-[1003/614] w-[40vw] md:landscape:block lg:block">
+      <div
+        className={`login-boat absolute z-10 hidden aspect-[1003/614] md:landscape:block lg:block ${boatSideClasses[boatSide]}`}
+      >
         <Image
           src="/images/login/boat.png"
           alt=""
           fill
           fetchPriority="high"
           sizes="(min-width: 1024px) 42vw, (min-width: 768px) and (orientation: landscape) 42vw, 1px"
-          className="object-contain object-right-bottom"
+          className={`object-contain ${boatObjectClasses[boatSide]}`}
         />
       </div>
 
