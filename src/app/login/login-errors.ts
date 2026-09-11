@@ -33,7 +33,7 @@ const LOGIN_ERROR_CONTENT: Record<LoginErrorCode, LoginErrorContent> = {
   [LOGIN_ERROR.CONFIGURATION]: {
     title: "系統暫時無法登入",
     body: [
-      "這是系統設定的問題，不是您的帳號有狀況，",
+      "此為系統設定問題，非個人帳號有狀況，",
       { text: "請點此回報專案小組", href: CONTACT_URL },
       "，我們會盡快處理。",
     ],
