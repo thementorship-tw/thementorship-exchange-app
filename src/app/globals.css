@@ -80,3 +80,34 @@ body {
     transform: translateY(-46px);
   }
 }
+
+.landing-lens {
+  /* 鏡片半徑，直徑 180px */
+  --lens-r: 90px;
+  --lens-x: -100vw;
+  --lens-y: -100vh;
+}
+
+@property --lens-x {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: -9999px;
+}
+
+@property --lens-y {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: -9999px;
+}
+
+.landing-bubble {
+  --lens-r: 60px; /* 半徑 */
+  --lens-x: 37%;
+  --lens-y: 115%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-bubble {
+    --lens-y: 48%;
+  }
+}
