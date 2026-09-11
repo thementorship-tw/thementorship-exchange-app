@@ -9,8 +9,10 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
-export const profileTypes = ["skill", "career", "interest"] as const;
-export type ProfileType = (typeof profileTypes)[number];
+import { PROFILE_TYPES, type ProfileType } from "@/shared/profile-types";
+
+export const profileTypes = PROFILE_TYPES;
+export type { ProfileType };
 
 const profileTypeSqlValues = sql.raw(
   profileTypes.map((type) => `'${type}'`).join(", "),
@@ -214,7 +216,7 @@ export const contactLogs = sqliteTable(
     wantedItem: text("wanted_item").notNull(),
     /** 發起此次聯絡的動機。 */
     motivation: text("motivation").notNull(),
-    /** 發起人的站外聯絡資訊；僅接收者可查看。 */
+    /** 發起人的站外聯絡資訊；僅發起者與接收者可查看。 */
     contactInfo: text("contact_info").notNull(),
     /** Application 送出當下的交流檔案類型。 */
     profileTypeSnapshot: text("profile_type_snapshot", {
@@ -226,7 +228,7 @@ export const contactLogs = sqliteTable(
     profileWantsSnapshot: text("profile_wants_snapshot").notNull(),
     /** Application 送出當下的交流檔案自由描述。 */
     profileDescriptionSnapshot: text("profile_description_snapshot"),
-    /** 接收者第一次開啟詳情的時間；null 代表未讀。 */
+    /** 接收者第一次讀取的時間；null 代表未讀。 */
     readAt: timestamp("read_at"),
     /** Application 送出時間。 */
     createdAt: createdAtColumn(),

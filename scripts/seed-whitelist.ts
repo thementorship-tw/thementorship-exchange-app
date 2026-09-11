@@ -2,7 +2,7 @@ import { createClient } from "@libsql/client";
 import dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/libsql";
 
-import { whitelist } from "../src/db/schema";
+import { whitelist } from "../src/server/db/schema";
 
 dotenv.config({ path: ".env.local", quiet: true });
 dotenv.config({ quiet: true });

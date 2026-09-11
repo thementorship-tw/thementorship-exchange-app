@@ -46,10 +46,10 @@ export function Dialog({
         event.preventDefault();
         onClose();
       }}
-      className={`m-auto w-[calc(100%-2rem)] rounded-20 bg-surface p-0 text-primary shadow-xl backdrop:bg-overlay backdrop:backdrop-blur-[1px] ${size === "lg" ? "max-w-3xl" : "max-w-xl"}`}
+      className={`m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-hidden rounded-20 bg-surface p-0 text-primary shadow-xl outline-none backdrop:bg-overlay backdrop:backdrop-blur-[1px] ${size === "lg" ? "max-w-3xl" : "max-w-xl"}`}
     >
       <div
-        className={`relative p-6 sm:p-8 ${scrollable ? "flex max-h-[calc(100dvh-2rem)] flex-col" : ""}`}
+        className={`relative p-6 sm:p-8 ${scrollable ? "flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden" : ""}`}
       >
         {showCloseButton && (
           <button
@@ -80,7 +80,7 @@ export function Dialog({
         </h2>
         <div
           id={descriptionId}
-          className={`mt-4 text-body-lg text-secondary ${scrollable ? "min-h-0 overflow-y-auto pr-2 focus-visible:rounded-4 focus-visible:outline-2 focus-visible:outline-brand" : ""}`}
+          className={`mt-4 text-body-lg text-secondary ${scrollable ? "min-h-0 flex-1 overscroll-contain overflow-y-auto pr-2 outline-none" : ""}`}
         >
           {children}
         </div>

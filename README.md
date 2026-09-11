@@ -28,7 +28,7 @@ pnpm dev                  # http://localhost:3000
 
 ## Database workflow
 
-`src/db/schema.ts` is the single source of truth. Migrations are generated from
+`src/server/db/schema.ts` is the single source of truth. Migrations are generated from
 it and committed, so every environment applies the same reviewed SQL.
 
 ```bash
@@ -50,7 +50,7 @@ Query the database from a request handler, not at module scope, so builds
 without credentials keep working:
 
 ```ts
-import { getDb, schema } from "@/db";
+import { getDb, schema } from "@/server/db";
 
 const db = getDb();
 const users = await db.select().from(schema.users);
@@ -87,13 +87,46 @@ later story, alongside the shared-domain evaluation in US-41.
 
 ## Layout
 
+This is a full-stack Next.js application. Keep HTTP transport, server-only
+implementation, and client/server contracts separate so it is clear where a
+change belongs and which code is safe to import from the browser.
+
 ```
 src/
-  app/          # routes, layouts, pages
-  db/
-    index.ts    # lazily-constructed Drizzle client
-    schema.ts   # table definitions — source of truth for migrations
-  env.ts        # validated server-side environment variables
-drizzle/        # generated SQL migrations (committed)
-docs/           # design notes and runbooks
+├── app/                            # Routes and UI. Route Handlers stay thin: parse -> auth -> validate -> call server -> respond
+│   ├── api/                        # One route.ts per <feature>; no Drizzle queries or business logic here
+│   │   └── auth/                   # Auth.js endpoints
+│   ├── (protected)/                # Signed-in pages
+│   └── login/                      # Login page and UI
+│
+├── server/                         # Server-only. Never imported from a Client Component
+│   ├── api/                        # Cross-feature HTTP helpers only (no feature-specific rules); empty until the first shared helper lands
+│   ├── auth/
+│   │   ├── login.service.ts        # Login use cases and transactions
+│   │   ├── user.repository.ts      # Authenticated user lookup
+│   │   ├── whitelist.repository.ts # Login eligibility lookup
+│   │   ├── consent.repository.ts   # Consent log persistence
+│   │   └── consent-receipt.ts      # Signed pre-login consent cookie
+│   ├── <feature>/                  # service.ts is the entry point; add *.repository.ts / mapper.ts only once a feature needs them
+│   └── db/
+│       ├── index.ts                # Lazily constructed Drizzle client
+│       └── schema.ts               # Table definitions; migration source
+│
+├── shared/                         # Importable from browser AND server -> no secrets, db clients, cookies, or Node-only APIs
+│   ├── consent-versions.ts         # Current terms/privacy versions
+│   └── profile-types.ts            # Shared profile enum and type
+│
+├── components/                     # Reusable React UI components
+├── styles/                         # Shared CSS tokens and typography
+├── auth.ts                         # Auth.js configuration and auth resolution
+├── proxy.ts                        # Next.js route protection/redirect proxy
+└── env.ts                          # Server environment variable access
+
+drizzle/                            # Generated SQL migrations (committed)
+docs/                               # Design notes and operational runbooks
+scripts/                            # Local development and maintenance scripts
 ```
+
+No `src/utils` or `src/types` dumping grounds — code lives in the feature
+directory it belongs to, and only moves to `shared/` once something across the
+client/server boundary actually needs it.

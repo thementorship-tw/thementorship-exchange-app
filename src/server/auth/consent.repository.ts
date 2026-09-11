@@ -1,6 +1,6 @@
-import type { ConsentVersions } from "@/consent-versions";
-import type { Database } from "@/db";
-import { consentLogs } from "@/db/schema";
+import type { Database } from "@/server/db";
+import { consentLogs } from "@/server/db/schema";
+import type { ConsentVersions } from "@/shared/consent-versions";
 
 /** 只要有 `insert` 就能寫入，因此 `getDb()` 與 transaction 都適用。 */
 type ConsentWriter = Pick<Database, "insert">;

@@ -132,7 +132,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
             <button
               type="button"
               onClick={() => setPolicyOpen(true)}
-              className="ml-2 cursor-pointer text-body-strong underline decoration-1 underline-offset-4 focus-visible:rounded-4 focus-visible:outline-2 focus-visible:outline-brand"
+              className="ml-2 cursor-pointer text-body-strong underline decoration-1 underline-offset-4 transition-colors focus-visible:decoration-2 focus-visible:outline-none"
             >
               規範與隱私政策
             </button>
