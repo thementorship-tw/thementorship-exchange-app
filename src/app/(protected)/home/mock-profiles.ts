@@ -24,8 +24,8 @@ export type ProfileListItem = {
 };
 
 export type ListProfilesOptions = {
-  /** null 代表不篩選類型。 */
-  type?: ProfileType | null;
+  /** 可複選；空陣列代表不篩選類型。 */
+  types?: ProfileType[];
   order?: SortOrder;
   limit?: number;
 };
@@ -101,14 +101,14 @@ const mockItems: (Omit<ProfileListItem, "createdAt"> & { agoMs: number })[] = [
 
 /** 讀取公開的交流檔案列表；目前回傳寫死的假資料。 */
 export async function listProfiles({
-  type = null,
+  types = [],
   order = "newest",
   limit = DEFAULT_LIMIT,
 }: ListProfilesOptions = {}): Promise<ProfileListItem[]> {
   const now = Date.now();
 
   return mockItems
-    .filter((item) => type === null || item.type === type)
+    .filter((item) => types.length === 0 || types.includes(item.type))
     .map(({ agoMs, ...item }) => ({
       ...item,
       createdAt: new Date(now - agoMs),

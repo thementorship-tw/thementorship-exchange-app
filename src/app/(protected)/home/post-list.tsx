@@ -7,9 +7,9 @@ import { postTypeLabels, type PostSummary } from "./posts";
 function EmptyState({ params }: { params: ListParams }) {
   return (
     <p className="flex flex-1 items-center justify-center px-4 text-center text-body text-secondary">
-      {params.type === null
+      {params.types.length === 0
         ? "還沒有人發文，成為第一個吧"
-        : `目前沒有「${postTypeLabels[params.type]}」的貼文`}
+        : `目前沒有「${params.types.map((type) => postTypeLabels[type]).join("、")}」的貼文`}
     </p>
   );
 }

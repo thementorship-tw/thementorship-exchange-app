@@ -30,12 +30,15 @@ export function FilterBar({ params }: { params: ListParams }) {
         </span>
 
         {profileTypes.map((type) => {
-          const active = params.type === type;
+          const active = params.types.includes(type);
+          const nextTypes = active
+            ? params.types.filter((value) => value !== type)
+            : [...params.types, type];
 
           return (
             <Link
               key={type}
-              href={buildListHref({ ...params, type: active ? null : type })}
+              href={buildListHref({ ...params, types: nextTypes })}
               prefetch={false}
               aria-current={active ? "true" : undefined}
               className={`${tagClasses.base} ${active ? tagClasses.selected : tagClasses.default}`}
