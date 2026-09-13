@@ -3,15 +3,21 @@ import type { ButtonHTMLAttributes } from "react";
 type ButtonVariant = "primary" | "secondary";
 type ButtonSize = "sm" | "md" | "lg" | "xl";
 
-export type ButtonProps = Omit<
-  ButtonHTMLAttributes<HTMLButtonElement>,
-  "className"
-> & {
+type ButtonStyleProps = {
   /** Use only for external layout such as margin, width, or responsive placement. */
   className?: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
 };
+
+export type ButtonProps = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  "className"
+> &
+  ButtonStyleProps;
+
+const base =
+  "inline-flex cursor-pointer items-center justify-center rounded-pill shadow-sm transition enabled:active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
@@ -31,19 +37,14 @@ export function buttonClassName({
   variant = "primary",
   size = "md",
   className = "",
-}: {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  /** Use only for external layout such as margin, width, or responsive placement. */
-  className?: string;
-} = {}) {
-  return `inline-flex cursor-pointer items-center justify-center rounded-pill shadow-sm transition enabled:active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+}: ButtonStyleProps = {}) {
+  return `${base} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`.trim();
 }
 
 export function Button({
-  className = "",
-  variant = "primary",
-  size = "md",
+  className,
+  variant,
+  size,
   type = "button",
   ...props
 }: ButtonProps) {

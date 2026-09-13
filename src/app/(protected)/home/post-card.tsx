@@ -4,6 +4,8 @@ import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { useId, useState } from "react";
 
+import { Tag } from "@/components/tag";
+
 import { postTypeLabels, type PostSummary } from "./posts";
 
 /** 交流列表的貼文卡片；有補充說明時可展開。 */
@@ -19,9 +21,7 @@ export function PostCard({ post }: { post: PostSummary }) {
         className={`flex flex-col gap-2 rounded-16 p-4 transition-colors md:landscape:p-5 lg:p-5 ${expanded ? "bg-brand-subtle" : "bg-surface-subtle"}`}
       >
         <div className="flex h-6 items-center justify-between gap-2">
-          <span className="flex h-6 items-center rounded-pill bg-brand-subtle px-3 text-caption text-brand">
-            #{postTypeLabels[post.type]}
-          </span>
+          <Tag variant="filled">#{postTypeLabels[post.type]}</Tag>
 
           {expandable && (
             <button
