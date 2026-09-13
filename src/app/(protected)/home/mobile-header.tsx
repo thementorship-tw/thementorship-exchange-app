@@ -1,4 +1,4 @@
-import { Menu } from "lucide-react";
+import { List } from "@phosphor-icons/react/ssr";
 
 import { SearchField } from "./search-field";
 
@@ -13,7 +13,7 @@ export function MobileHeader() {
           aria-label="開啟選單"
           className="-m-2.5 flex size-11 cursor-pointer items-center justify-center rounded-12 text-primary focus-visible:outline-2 focus-visible:outline-brand"
         >
-          <Menu className="size-6 shrink-0" />
+          <List className="size-6 shrink-0" />
         </button>
         <p className="flex-1 text-body-strong text-primary">
           曼陀號技能交換平台

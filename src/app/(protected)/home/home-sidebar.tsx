@@ -1,4 +1,4 @@
-import { Bell, Plus, UserRoundCog } from "lucide-react";
+import { Bell, Plus, UserCircleGear } from "@phosphor-icons/react/ssr";
 
 import { buttonClassName } from "@/components/button";
 
@@ -12,7 +12,7 @@ export function HomeSidebar({
 }) {
   const navItems = [
     { label: "系統通知", Icon: Bell, unread: hasUnreadNotifications },
-    { label: "設定中心", Icon: UserRoundCog },
+    { label: "設定中心", Icon: UserCircleGear },
   ];
 
   return (

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus } from "lucide-react";
+import { Plus } from "@phosphor-icons/react/ssr";
 
 import { requireActiveUser } from "@/auth";
 import { OceanScene } from "@/components/ocean-scene";

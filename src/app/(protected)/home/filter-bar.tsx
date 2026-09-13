@@ -1,4 +1,4 @@
-import { ArrowDownWideNarrow } from "lucide-react";
+import { SortAscending } from "@phosphor-icons/react/ssr";
 
 import { Tag } from "@/components/tag";
 
@@ -24,7 +24,7 @@ export function FilterBar() {
       </div>
 
       <span className="flex h-7 items-center gap-1 rounded-pill px-2 text-body whitespace-nowrap text-secondary">
-        <ArrowDownWideNarrow className="size-5" />
+        <SortAscending className="size-5" />
         <span className="hidden md:landscape:inline lg:inline">最新的</span>
       </span>
     </div>

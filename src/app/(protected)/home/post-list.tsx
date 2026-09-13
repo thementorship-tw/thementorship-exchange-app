@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import { FilterBar } from "./filter-bar";
 import { PostCard } from "./post-card";
 import type { PostSummary } from "./posts";
@@ -13,8 +17,9 @@ function EmptyState() {
   );
 }
 
-/** 交流列表；只負責呈現。 */
 export function PostList({ posts }: { posts: PostSummary[] }) {
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
+
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-5">
       {posts.length === 0 ? (
@@ -28,6 +33,12 @@ export function PostList({ posts }: { posts: PostSummary[] }) {
               <PostCard
                 key={post.id}
                 post={post}
+                expanded={expandedPostId === post.id}
+                onToggle={() =>
+                  setExpandedPostId((currentId) =>
+                    currentId === post.id ? null : post.id,
+                  )
+                }
               />
             ))}
           </ul>
