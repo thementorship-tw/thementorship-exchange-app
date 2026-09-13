@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 
-import { getDb } from "@/db";
-import { whitelist, type WhitelistEntry } from "@/db/schema";
+import { getDb } from "@/server/db";
+import { whitelist, type WhitelistEntry } from "@/server/db/schema";
 
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();

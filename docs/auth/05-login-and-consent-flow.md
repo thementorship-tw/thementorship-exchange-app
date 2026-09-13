@@ -229,7 +229,7 @@ sequenceDiagram
 
 ## 8. `consent_logs` 寫入規則
 
-現有 schema（[`src/db/schema.ts`](../../src/db/schema.ts)）不需要新增欄位：
+現有 schema（[`src/server/db/schema.ts`](../../src/server/db/schema.ts)）不需要新增欄位：
 
 | 欄位 | 放什麼 |
 |------|--------|

@@ -19,7 +19,7 @@
 
 **不是 DB 設計錯，是流程文件的寫入順序跟 DB 對不上。**
 
-`consent_logs.user_id` 有外鍵指向 `users.id`（[`src/db/schema.ts`](../../src/db/schema.ts)），但 05 的流程圖畫的是「先寫 `consent_logs` → 再建立學員資料」。首次登入的人 `users` 那列還不存在，照圖實作會直接違反外鍵。
+`consent_logs.user_id` 有外鍵指向 `users.id`（[`src/server/db/schema.ts`](../../src/server/db/schema.ts)），但 05 的流程圖畫的是「先寫 `consent_logs` → 再建立學員資料」。首次登入的人 `users` 那列還不存在，照圖實作會直接違反外鍵。
 
 已修正為 **建檔 → 寫同意紀錄**（05 v0.6）。schema 本身不需要改。
 

@@ -4,7 +4,7 @@ import { AuthError } from "next-auth";
 
 import { signIn } from "@/auth";
 
-import { issueConsentReceipt } from "@/consent-receipt";
+import { issueConsentReceipt } from "@/server/auth/consent-receipt";
 
 import { getSafeCallbackUrl } from "./callback-url";
 
