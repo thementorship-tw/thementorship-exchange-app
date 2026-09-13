@@ -8,8 +8,8 @@ import type { PostSummary } from "./posts";
 
 function EmptyState() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-1 px-4 text-center">
-      <p className="text-body-lg-strong text-primary">還沒有人發文</p>
+    <div className="flex flex-col items-center justify-center gap-4 rounded-20 bg-glass px-8 py-12 text-center md:landscape:flex-1 lg:flex-1">
+      <p className="text-h2 text-primary">還沒有人發文</p>
       <p className="text-body text-secondary">
         目前還沒有任何交換貼文。想交換的就自己先發文吧，第一個發文的人最容易被看見。
       </p>
@@ -28,7 +28,7 @@ export function PostList({ posts }: { posts: PostSummary[] }) {
         <>
           <FilterBar />
 
-          <ul className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-24 md:landscape:pb-0 lg:pb-0">
+          <ul className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-24 md:landscape:pr-2 md:landscape:pb-0 lg:pr-2 lg:pb-0">
             {posts.map((post) => (
               <PostCard
                 key={post.id}

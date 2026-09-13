@@ -9,7 +9,7 @@ export type PostSummary = {
   offersText: string;
   /** 「我想找」的內容。 */
   wantsText: string;
-  /** 自由描述；null 代表沒有補充說明，卡片不顯示展開按鈕。 */
+  /** 自由描述；null 代表沒有補充說明。 */
   description: string | null;
   author: {
     nickname: string;
