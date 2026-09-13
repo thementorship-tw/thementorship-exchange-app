@@ -1,5 +1,7 @@
-export const profileTypes = ["skillAndHobby", "career"] as const;
-export type ProfileType = (typeof profileTypes)[number];
+import { PROFILE_TYPES, type ProfileType } from "@/shared/profile-types";
+
+export const profileTypes = PROFILE_TYPES;
+export type { ProfileType };
 
 export type SortOrder = "newest" | "oldest";
 
@@ -34,7 +36,7 @@ const DAY = 24 * HOUR;
 const mockItems: (Omit<ProfileListItem, "createdAt"> & { agoMs: number })[] = [
   {
     id: "mock-1",
-    type: "skillAndHobby",
+    type: "skillAndInterest",
     offersText: "Figma 元件庫建置、設計系統導入",
     wantsText: "想找人帶我看 React 的狀態管理",
     description:
@@ -57,7 +59,7 @@ const mockItems: (Omit<ProfileListItem, "createdAt"> & { agoMs: number })[] = [
   },
   {
     id: "mock-3",
-    type: "skillAndHobby",
+    type: "skillAndInterest",
     offersText: "台北近郊路線推薦、裝備採購雷點",
     wantsText: "找一起爬山的夥伴，週末為主",
     description: "爬了五年，最近在練長程縱走。平日也可以約吃飯聊工作。",
@@ -68,7 +70,7 @@ const mockItems: (Omit<ProfileListItem, "createdAt"> & { agoMs: number })[] = [
   },
   {
     id: "mock-4",
-    type: "skillAndHobby",
+    type: "skillAndInterest",
     offersText: "資料分析、SQL 與 dbt 實務",
     wantsText: "想學怎麼把分析結果講成一個故事",
     description:

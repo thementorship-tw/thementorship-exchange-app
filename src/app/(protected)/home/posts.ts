@@ -22,7 +22,7 @@ export type PostSummary = {
 };
 
 export const postTypeLabels: Record<ProfileType, string> = {
-  skillAndHobby: "技能與興趣",
+  skillAndInterest: "技能與興趣",
   career: "職涯",
 };
 
