@@ -51,8 +51,12 @@ export function PostCard({
         </div>
 
         <div className="flex flex-col gap-1">
-          <p className="text-body-lg-strong text-primary">{post.offersText}</p>
-          <p className="text-body-lg-strong text-primary">{post.wantsText}</p>
+          <p className="text-body-lg-strong text-primary">
+            我能提供：{post.offersText}
+          </p>
+          <p className="text-body-lg-strong text-primary">
+            我想找：{post.wantsText}
+          </p>
         </div>
       </div>
 
@@ -97,6 +101,7 @@ export function PostCard({
           <Button
             variant="accent"
             shape="rounded"
+            className="w-full md:landscape:w-auto lg:w-auto"
           >
             申請交換
           </Button>
