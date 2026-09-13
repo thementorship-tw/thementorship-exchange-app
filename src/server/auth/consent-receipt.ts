@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
 import { decode, encode, type JWT } from "next-auth/jwt";
 
+import { serverEnv } from "@/env";
 import {
   CURRENT_CONSENT_VERSIONS,
   type ConsentVersions,
-} from "@/consent-versions";
-import { serverEnv } from "@/env";
+} from "@/shared/consent-versions";
 
 const MAX_AGE_SECONDS = 30 * 24 * 60 * 60; // 30 days
 const IS_PRODUCTION = process.env.NODE_ENV === "production";

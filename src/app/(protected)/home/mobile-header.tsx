@@ -49,7 +49,6 @@ export function MobileHeader({
       >
         <div className="flex h-full flex-col gap-6 p-6">
           <div className="flex items-center justify-between gap-2">
-            {/* 已經在首頁時換頁不會卸載抽屜，所以點擊時順手關掉。 */}
             <Link
               href="/home"
               onClick={() => drawerRef.current?.close()}

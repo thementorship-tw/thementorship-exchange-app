@@ -6,12 +6,14 @@ dotenv.config(); // .env fallback for transition, doesn't override .env.local
 
 const url = process.env.TURSO_DATABASE_URL;
 if (!url) {
-  throw new Error("TURSO_DATABASE_URL is required to run drizzle-kit. See .env.example.");
+  throw new Error(
+    "TURSO_DATABASE_URL is required to run drizzle-kit. See .env.example.",
+  );
 }
 
 export default defineConfig({
   dialect: "turso",
-  schema: "./src/db/schema.ts",
+  schema: "./src/server/db/schema.ts",
   out: "./drizzle",
   dbCredentials: {
     url,

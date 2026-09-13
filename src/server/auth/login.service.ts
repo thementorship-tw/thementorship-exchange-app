@@ -1,10 +1,10 @@
 import { and, eq, ne } from "drizzle-orm";
 
-import type { ConsentReceipt } from "@/consent-receipt";
-import { getDb } from "@/db";
-import { insertConsentLog } from "@/db/consent";
-import { users } from "@/db/schema";
-import { normalizeEmail } from "@/db/whitelist";
+import type { ConsentReceipt } from "@/server/auth/consent-receipt";
+import { getDb } from "@/server/db";
+import { insertConsentLog } from "@/server/auth/consent.repository";
+import { users } from "@/server/db/schema";
+import { normalizeEmail } from "@/server/auth/whitelist.repository";
 
 export type LoginInput = {
   sub: string;
