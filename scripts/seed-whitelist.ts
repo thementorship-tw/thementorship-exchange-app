@@ -32,7 +32,9 @@ const emails = [
 ];
 
 if (!Number.isSafeInteger(session) || session <= 0) {
-  throw new Error("DEV_WHITELIST_SESSION must be a positive integer. See .env.example.");
+  throw new Error(
+    "DEV_WHITELIST_SESSION must be a positive integer. See .env.example.",
+  );
 }
 
 if (emails.length === 0) {

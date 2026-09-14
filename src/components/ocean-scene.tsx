@@ -1,7 +1,13 @@
 import Image from "next/image";
 
+type BoatSide = "left" | "right";
+
+export type OceanSceneProps = {
+  boatSide?: BoatSide;
+};
+
 /** Shared decorative ocean scene used by login and full-page empty states. */
-export function OceanScene() {
+export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
   return (
     <div
       aria-hidden="true"
@@ -20,17 +26,19 @@ export function OceanScene() {
         fill
         fetchPriority="high"
         sizes="(min-width: 1024px) 1px, (min-width: 768px) and (orientation: landscape) 1px, 100vw"
-        className="object-cover object-left-bottom md:landscape:hidden lg:hidden"
+        className="object-cover object-bottom md:landscape:hidden lg:hidden"
       />
 
-      <div className="login-boat absolute right-0 bottom-8 z-10 hidden aspect-[1003/614] w-[40vw] md:landscape:block lg:block">
+      <div
+        className={`login-boat login-boat-${boatSide} absolute z-10 hidden aspect-1003/614 md:landscape:block lg:block`}
+      >
         <Image
           src="/images/login/boat.png"
           alt=""
           fill
           fetchPriority="high"
-          sizes="(min-width: 1024px) 42vw, (min-width: 768px) and (orientation: landscape) 42vw, 1px"
-          className="object-contain object-right-bottom"
+          sizes="(min-width: 1024px) 40vw, (min-width: 768px) and (orientation: landscape) 40vw, 1px"
+          className="object-contain object-(--boat-anchor)"
         />
       </div>
 

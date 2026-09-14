@@ -51,6 +51,20 @@ body {
   animation: login-boat-drift 3s ease-in-out infinite;
 }
 
+.login-boat-left {
+  left: -7vw;
+  bottom: 6rem;
+  width: 32vw;
+  --boat-anchor: left bottom;
+}
+
+.login-boat-right {
+  right: 0;
+  bottom: 2rem;
+  width: 40vw;
+  --boat-anchor: right bottom;
+}
+
 .login-wave {
   --login-wave-shift: -20px;
   animation: login-wave-drift 2s ease-in-out infinite;

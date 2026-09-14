@@ -15,6 +15,13 @@
       "when": 1787232679515,
       "tag": "0001_hot_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789290163394,
+      "tag": "0002_silky_black_bird",
+      "breakpoints": true
     }
   ]
 }
