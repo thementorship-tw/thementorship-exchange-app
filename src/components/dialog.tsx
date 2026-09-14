@@ -12,6 +12,7 @@ export type DialogProps = {
   showCloseButton?: boolean;
   size?: "md" | "lg";
   scrollable?: boolean;
+  className?: string;
 };
 
 export function Dialog({
@@ -24,6 +25,7 @@ export function Dialog({
   showCloseButton = false,
   size = "md",
   scrollable = false,
+  className = "",
 }: DialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -46,7 +48,7 @@ export function Dialog({
         event.preventDefault();
         onClose();
       }}
-      className={`m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-hidden rounded-20 bg-surface p-0 text-primary shadow-xl outline-none backdrop:bg-overlay backdrop:backdrop-blur-[1px] ${size === "lg" ? "max-w-3xl" : "max-w-xl"}`}
+      className={`m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-hidden rounded-20 bg-surface p-0 text-primary shadow-xl outline-none backdrop:bg-overlay backdrop:backdrop-blur-[1px] ${size === "lg" ? "max-w-3xl" : "max-w-xl"} ${className}`.trim()}
     >
       <div
         className={`relative p-6 sm:p-8 ${scrollable ? "flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden" : ""}`}

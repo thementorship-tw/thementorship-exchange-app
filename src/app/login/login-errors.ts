@@ -22,7 +22,7 @@ const DEFAULT_LOGIN_ERROR = LOGIN_ERROR.ACCESS_DENIED;
 
 const LOGIN_ERROR_CONTENT: Record<LoginErrorCode, LoginErrorContent> = {
   [LOGIN_ERROR.ACCESS_DENIED]: {
-    title: "登入遇到問題了嗎？",
+    title: "遇到問題了嗎？",
     body: [
       "請先確認你使用報名曼陀號時的帳號登入，如仍無法登入，",
       { text: "請點此回報專案小組", href: CONTACT_URL },
