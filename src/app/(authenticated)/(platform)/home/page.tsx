@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { Plus } from "@phosphor-icons/react/ssr";
 
-import { requireActiveUser } from "@/auth";
-import { OceanScene } from "@/components/ocean-scene";
-
-import { HomeSidebar } from "./home-sidebar";
 import { MobileHeader } from "./mobile-header";
 import { listProfiles } from "./mock-profiles";
 import { PostList } from "./post-list";
@@ -16,23 +12,16 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  await requireActiveUser("/home");
-
   const items = await listProfiles();
   const now = new Date();
   const posts = items.map((item) => toPostSummary(item, now));
 
   return (
-    <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-page">
-      <OceanScene boatSide="left" />
-
+    <>
       <MobileHeader />
 
-      <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col gap-6 px-4 pb-2 md:px-6 md:landscape:flex-row md:landscape:py-6 lg:flex-row lg:py-6 xl:px-20">
+      <div className="flex min-h-0 flex-1 flex-col px-4 pb-2 md:px-0 md:landscape:pb-0 lg:pb-0">
         <h1 className="sr-only">交流列表</h1>
-
-        <HomeSidebar />
-
         <PostList posts={posts} />
       </div>
 
@@ -44,6 +33,6 @@ export default async function HomePage() {
       >
         <Plus className="size-6" />
       </button>
-    </main>
+    </>
   );
 }

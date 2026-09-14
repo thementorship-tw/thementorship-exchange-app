@@ -6,8 +6,9 @@ import { useId } from "react";
 
 import { Button } from "@/components/button";
 import { Tag } from "@/components/tag";
+import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 
-import { postTypeLabels, type PostSummary } from "./posts";
+import type { PostSummary } from "./posts";
 
 export function PostCard({
   post,
@@ -33,7 +34,7 @@ export function PostCard({
             variant="filled"
             tone={expanded ? "white" : "brand"}
           >
-            #{postTypeLabels[post.type]}
+            #{PROFILE_TYPE_LABELS[post.type]}
           </Tag>
 
           <button
