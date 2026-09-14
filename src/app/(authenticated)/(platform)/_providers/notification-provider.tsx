@@ -2,7 +2,10 @@
 
 import { createContext, useContext, useMemo, useState } from "react";
 
-import { initialNotifications, type NotificationItem } from "./notifications";
+import {
+  initialNotifications,
+  type NotificationItem,
+} from "../notifications/notifications";
 
 type NotificationContextValue = {
   notifications: NotificationItem[];

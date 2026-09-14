@@ -6,7 +6,7 @@ import { useRef } from "react";
 
 import { HomeNav } from "./home-nav";
 import { SearchField } from "./search-field";
-import { useNotifications } from "../notifications/notification-context";
+import { useNotifications } from "../_providers/notification-provider";
 
 export function MobileHeader() {
   const drawerRef = useRef<HTMLDialogElement>(null);

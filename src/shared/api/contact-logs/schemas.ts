@@ -5,6 +5,7 @@ import {
   CONTACT_LOG_CONTACT_INFO_MAX_LENGTH,
   CONTACT_LOG_DEFAULT_PAGE_SIZE,
   CONTACT_LOG_MAX_PAGE_SIZE,
+  CONTACT_LOG_MAX_WITHIN_DAYS,
   CONTACT_LOG_MOTIVATION_MAX_LENGTH,
   CONTACT_LOG_OFFERED_RESOURCE_MAX_LENGTH,
   CONTACT_LOG_WANTED_ITEM_MAX_LENGTH,
@@ -102,11 +103,20 @@ function positiveIntegerString() {
 function withinDaysSchema() {
   return positiveIntegerString()
     .meta({
-      description: "只回傳／標記 createdAt 在過去 N 天內的紀錄；不帶則不限制",
+      description: `只回傳／標記 createdAt 在過去 N 天內的紀錄；不帶則不限制，最大 ${CONTACT_LOG_MAX_WITHIN_DAYS}`,
     })
     .transform((value) => (value === undefined ? undefined : Number(value)))
     .pipe(
-      z.number().int().positive("Must be a positive integer").safe().optional(),
+      z
+        .number()
+        .int()
+        .positive("Must be a positive integer")
+        .max(
+          CONTACT_LOG_MAX_WITHIN_DAYS,
+          `Must be ${CONTACT_LOG_MAX_WITHIN_DAYS} or fewer`,
+        )
+        .safe()
+        .optional(),
     );
 }
 

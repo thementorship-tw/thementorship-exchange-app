@@ -5,7 +5,7 @@ import { Plus } from "@phosphor-icons/react/ssr";
 
 import { buttonClassName } from "@/components/button";
 
-import { useNotifications } from "../notifications/notification-context";
+import { useNotifications } from "../_providers/notification-provider";
 import { HomeNav } from "./home-nav";
 import { SearchField } from "./search-field";
 

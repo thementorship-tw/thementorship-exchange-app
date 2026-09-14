@@ -6,7 +6,7 @@ import Link from "next/link";
 import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 import { formatPostTime } from "@/utils/format";
 
-import { useNotifications } from "./notification-context";
+import { useNotifications } from "../_providers/notification-provider";
 import {
   notificationTargetLabels,
   type NotificationItem,

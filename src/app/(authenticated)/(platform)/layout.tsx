@@ -1,7 +1,7 @@
 import { OceanScene } from "@/components/ocean-scene";
 
 import { HomeSidebar } from "./home/home-sidebar";
-import { NotificationProvider } from "./notifications/notification-context";
+import { NotificationProvider } from "./_providers/notification-provider";
 
 export default function PlatformLayout({
   children,
