@@ -2,7 +2,11 @@ import { createClient } from "@libsql/client";
 import dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/libsql";
 
-import { whitelist } from "../src/server/db/schema";
+import {
+  type MemberGroup,
+  memberGroups,
+  whitelist,
+} from "../src/server/db/schema";
 
 dotenv.config({ path: ".env.local", quiet: true });
 dotenv.config({ quiet: true });
@@ -22,6 +26,7 @@ if (!configuredDatabaseUrl.startsWith("file:")) {
 const databaseUrl: string = configuredDatabaseUrl;
 
 const session = Number.parseInt(process.env.DEV_WHITELIST_SESSION ?? "", 10);
+const configuredGroup = process.env.DEV_WHITELIST_GROUP ?? "";
 const emails = [
   ...new Set(
     (process.env.DEV_WHITELIST_EMAILS ?? "")
@@ -36,6 +41,18 @@ if (!Number.isSafeInteger(session) || session <= 0) {
     "DEV_WHITELIST_SESSION must be a positive integer. See .env.example.",
   );
 }
+
+function isMemberGroup(value: string): value is MemberGroup {
+  return (memberGroups as readonly string[]).includes(value);
+}
+
+if (!isMemberGroup(configuredGroup)) {
+  throw new Error(
+    `DEV_WHITELIST_GROUP must be one of: ${memberGroups.join(", ")}. See .env.example.`,
+  );
+}
+
+const group: MemberGroup = configuredGroup;
 
 if (emails.length === 0) {
   throw new Error(
@@ -55,6 +72,7 @@ async function main(): Promise<void> {
         emails.map((email) => ({
           email,
           session,
+          group,
           active: true,
         })),
       )
@@ -62,6 +80,7 @@ async function main(): Promise<void> {
         target: whitelist.email,
         set: {
           session,
+          group,
           active: true,
           updatedAt: now,
           deactivatedAt: null,

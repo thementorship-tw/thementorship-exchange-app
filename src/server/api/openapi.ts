@@ -1,5 +1,20 @@
 import { createDocument } from "zod-openapi";
 
+import {
+  apiErrorResponseDoc,
+  createExchangeInfoResponseDoc,
+  createExchangeInfoSchema,
+  exchangeInfoListQuerySchema,
+  exchangeInfoListResponseDoc,
+} from "@/shared/api/exchange-info/schemas";
+
+function errorResponse(description: string) {
+  return {
+    description,
+    content: { "application/json": { schema: apiErrorResponseDoc } },
+  };
+}
+
 // Contact Logs isn't ready to ship yet. The full path registration is kept
 // commented out below for reference and should be restored once that
 // feature merges — it depends on schemas/response docs that don't exist on
@@ -37,6 +52,45 @@ export function buildOpenApiDocument() {
       version: "1.0.0",
     },
     paths: {
+      "/api/exchange-info": {
+        get: {
+          tags: ["Exchange Info"],
+          summary: "交換資訊列表（無限滾動，每頁 10 筆）",
+          requestParams: { query: exchangeInfoListQuerySchema },
+          responses: {
+            "200": {
+              description: "OK",
+              content: {
+                "application/json": { schema: exchangeInfoListResponseDoc },
+              },
+            },
+            "401": errorResponse("Authentication required"),
+            "403": errorResponse("Account inactive or consent required"),
+            "422": errorResponse("Request validation failed"),
+          },
+        },
+        post: {
+          tags: ["Exchange Info"],
+          summary: "新增交換資訊",
+          requestBody: {
+            content: {
+              "application/json": { schema: createExchangeInfoSchema },
+            },
+          },
+          responses: {
+            "201": {
+              description: "Created",
+              content: {
+                "application/json": { schema: createExchangeInfoResponseDoc },
+              },
+            },
+            "400": errorResponse("Request body must be valid JSON"),
+            "401": errorResponse("Authentication required"),
+            "403": errorResponse("Account inactive or consent required"),
+            "422": errorResponse("Request validation failed"),
+          },
+        },
+      },
       // "/api/contact-logs": {
       //   post: {
       //     tags: ["Contact Logs"],

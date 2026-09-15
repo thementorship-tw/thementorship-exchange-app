@@ -5,7 +5,6 @@ import { List, X } from "@phosphor-icons/react/ssr";
 import { useRef } from "react";
 
 import { HomeNav } from "./home-nav";
-import { SearchField } from "./search-field";
 
 export function MobileHeader({
   hasUnreadNotifications = false,
@@ -16,7 +15,7 @@ export function MobileHeader({
   const drawerRef = useRef<HTMLDialogElement>(null);
 
   return (
-    <header className="flex flex-col gap-4 px-4 pt-3 pb-2 md:landscape:hidden lg:hidden">
+    <header className="px-4 pt-3 pb-4 md:landscape:hidden lg:hidden">
       <div className="flex items-center gap-6">
         <button
           type="button"
@@ -36,8 +35,6 @@ export function MobileHeader({
           </Link>
         </p>
       </div>
-
-      <SearchField />
 
       <dialog
         ref={drawerRef}

@@ -1,22 +1,12 @@
+import type { ExchangeInfoListResponseItem } from "@/shared/api/exchange-info/schemas";
+import type { ProfileType } from "@/shared/profile-types";
 import { formatPostTime } from "@/utils/format";
 
-import type { ProfileListItem, ProfileType } from "./mock-profiles";
-
-export type PostSummary = {
-  id: string;
-  type: ProfileType;
-  /** 「我能提供」的內容。 */
-  offersText: string;
-  /** 「我想找」的內容。 */
-  wantsText: string;
-  /** 自由描述；null 代表沒有補充說明。 */
-  description: string | null;
-  author: {
-    nickname: string;
-    /** 職稱或專長領域，例如 UI/UX。 */
-    jobTitle: string | null;
-    avatarUrl: string | null;
-  };
+/**
+ * 卡片用的單筆交換資訊：欄位與 API 相同，createdAt 換成格式化好的 timeLabel。
+ * 作者的 group 是學員組別，例如 UIUX。
+ */
+export type PostSummary = Omit<ExchangeInfoListResponseItem, "createdAt"> & {
   /** 已格式化的發文時間 */
   timeLabel: string;
 };
@@ -26,7 +16,19 @@ export const postTypeLabels: Record<ProfileType, string> = {
   career: "職涯",
 };
 
-export function toPostSummary(item: ProfileListItem, now: Date): PostSummary {
+/**
+ * 轉成卡片用的格式。
+ * API 回傳的 JSON 裡 createdAt 是字串，repository 與假資料是 Date，兩種都收。
+ */
+export function toPostSummary(
+  {
+    createdAt,
+    ...item
+  }: Omit<ExchangeInfoListResponseItem, "createdAt"> & {
+    createdAt: Date | string;
+  },
+  now: Date,
+): PostSummary {
   return {
     id: item.id,
     type: item.type,
@@ -34,10 +36,10 @@ export function toPostSummary(item: ProfileListItem, now: Date): PostSummary {
     wantsText: item.wantsText,
     description: item.description,
     author: {
-      nickname: item.authorNickname,
-      jobTitle: item.authorJobTitle,
-      avatarUrl: item.authorAvatarUrl,
+      nickname: item.author.nickname,
+      group: item.author.group,
+      avatarUrl: item.author.avatarUrl,
     },
-    timeLabel: formatPostTime(item.createdAt, now),
+    timeLabel: formatPostTime(new Date(createdAt), now),
   };
 }
