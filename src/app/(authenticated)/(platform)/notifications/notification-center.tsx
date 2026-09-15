@@ -3,20 +3,17 @@
 import { ArrowLeft } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 
+import { DataLoadError } from "@/components/data-load-error";
 import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 import { formatPostTime } from "@/utils/format";
 
 import { useNotifications } from "../_providers/notification-provider";
-import {
-  notificationTargetLabels,
-  type NotificationItem,
-} from "./notifications";
+import type { NotificationItem } from "./notifications";
 
 function NotificationRow({ item }: { item: NotificationItem }) {
   const { markAsRead } = useNotifications();
   const unread = item.readAt === null;
   const profileTypeLabel = PROFILE_TYPE_LABELS[item.profileType];
-  const targetLabel = notificationTargetLabels[item.targetType];
   const timeLabel = formatPostTime(item.createdAt, new Date());
 
   return (
@@ -37,8 +34,7 @@ function NotificationRow({ item }: { item: NotificationItem }) {
             className={`block text-body-lg ${unread ? "text-brand" : "text-primary"}`}
           >
             {item.fromUserNickname} 想和你交換「{profileTypeLabel}
-            」，快去看看他的
-            {targetLabel}。
+            」，快去看看他的申請。
           </span>
           <span className="mt-0.5 block text-body text-secondary">
             {timeLabel}
@@ -57,7 +53,8 @@ function NotificationRow({ item }: { item: NotificationItem }) {
 }
 
 export function NotificationCenter() {
-  const { notifications, unreadCount, markAllAsRead } = useNotifications();
+  const { loadFailed, notifications, unreadCount, markAllAsRead } =
+    useNotifications();
 
   return (
     <section className="flex min-h-0 flex-1 flex-col px-4 pt-4 pb-6 md:px-0 md:landscape:pt-2 lg:pt-2">
@@ -71,33 +68,41 @@ export function NotificationCenter() {
         </Link>
       </div>
 
-      <header className="mb-4 flex items-center justify-between gap-4 md:landscape:mb-5 lg:mb-5">
-        <h1 className="text-body-strong text-secondary">
-          {unreadCount > 0 ? `你有未讀通知 (${unreadCount})` : "目前沒有新通知"}
-        </h1>
-        <button
-          type="button"
-          onClick={markAllAsRead}
-          disabled={unreadCount === 0}
-          className="min-h-9 shrink-0 cursor-pointer rounded-pill border border-line bg-surface px-4 text-body-strong text-primary transition-colors hover:bg-surface-subtle disabled:cursor-default disabled:opacity-60 focus-visible:bg-surface-subtle focus-visible:outline-none"
-        >
-          已讀全部
-        </button>
-      </header>
-
-      {notifications.length === 0 ? (
-        <div className="rounded-20 bg-surface px-6 py-12 text-center text-body text-secondary">
-          目前還沒有任何通知。
-        </div>
+      {loadFailed ? (
+        <DataLoadError className="flex-1" />
       ) : (
-        <ul className="min-h-0 overflow-y-auto rounded-20 bg-surface md:landscape:rounded-20 lg:rounded-20">
-          {notifications.map((item) => (
-            <NotificationRow
-              key={item.id}
-              item={item}
-            />
-          ))}
-        </ul>
+        <>
+          <header className="mb-4 flex items-center justify-between gap-4 md:landscape:mb-5 lg:mb-5">
+            <h1 className="text-body-strong text-secondary">
+              {unreadCount > 0
+                ? `你有未讀通知 (${unreadCount})`
+                : "目前沒有新通知"}
+            </h1>
+            <button
+              type="button"
+              onClick={markAllAsRead}
+              disabled={unreadCount === 0}
+              className="min-h-9 shrink-0 cursor-pointer rounded-pill border border-line bg-surface px-4 text-body-strong text-primary transition-colors hover:bg-surface-subtle disabled:cursor-default disabled:opacity-60 focus-visible:bg-surface-subtle focus-visible:outline-none"
+            >
+              已讀全部
+            </button>
+          </header>
+
+          {notifications.length === 0 ? (
+            <div className="rounded-20 bg-surface px-6 py-12 text-center text-body text-secondary">
+              目前還沒有任何通知。
+            </div>
+          ) : (
+            <ul className="min-h-0 overflow-y-auto rounded-20 bg-surface md:landscape:rounded-20 lg:rounded-20">
+              {notifications.map((item) => (
+                <NotificationRow
+                  key={item.id}
+                  item={item}
+                />
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </section>
   );

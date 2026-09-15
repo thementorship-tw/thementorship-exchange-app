@@ -38,6 +38,7 @@ export function buildOpenApiDocument() {
           tags: ["Contact Logs"],
           summary: "建立「我想聊」交流紀錄",
           requestBody: {
+            required: true,
             content: { "application/json": { schema: createContactLogSchema } },
           },
           responses: {

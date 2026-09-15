@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import { cache } from "react";
 
 import { getSafeCallbackUrl } from "@/app/login/callback-url";
 import { LOGIN_ERROR } from "@/app/login/login-errors";
@@ -203,8 +204,12 @@ export async function requireActiveUser(
   return { user: result.user, consent: result.consent };
 }
 
-/** 驗證 session、平台帳號與條款，不決定失敗時要 redirect 或回傳 HTTP error。 */
-export async function resolveActiveUser(): Promise<ActiveUserResult> {
+/**
+ * 驗證 session、平台帳號與條款，不決定失敗時要 redirect 或回傳 HTTP error。
+ * 用 React cache() 包起來，同一個 request 內（例如多層 layout 各自呼叫
+ * requireActiveUser）只會真的查一次 DB。
+ */
+export const resolveActiveUser = cache(async (): Promise<ActiveUserResult> => {
   const session = await auth();
 
   if (session?.user === undefined || session.sub === null) {
@@ -221,4 +226,4 @@ export async function resolveActiveUser(): Promise<ActiveUserResult> {
   }
 
   return { ok: true, user, consent };
-}
+});
