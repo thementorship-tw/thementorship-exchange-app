@@ -19,8 +19,9 @@
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",
-    "@scalar/nextjs-api-reference": "^0.11.18",
     "@phosphor-icons/react": "^2.1.10",
+    "@reactuses/core": "^6.5.6",
+    "@scalar/nextjs-api-reference": "^0.11.18",
     "drizzle-orm": "^0.45.2",
     "next": "16.3.0",
     "next-auth": "5.0.0-beta.32",

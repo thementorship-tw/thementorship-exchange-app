@@ -1,0 +1,192 @@
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  inArray,
+  isNull,
+  lt,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
+
+import { getDb } from "@/server/db";
+import { profiles, users } from "@/server/db/schema";
+import {
+  EXCHANGE_INFO_PAGE_SIZE,
+  type CreateExchangeInfoInput,
+  type ExchangeInfoListResponseItem,
+  type ExchangeInfoSortOrder,
+} from "@/shared/api/exchange-info/schemas";
+import type { ProfileType } from "@/shared/profile-types";
+
+/** 與 API 回傳的單筆資料相同，只是 createdAt 在 server 端還是 Date。 */
+export type ExchangeInfoListItem = Omit<
+  ExchangeInfoListResponseItem,
+  "createdAt"
+> & {
+  createdAt: Date;
+};
+
+type Author = ExchangeInfoListItem["author"];
+
+export type ExchangeInfoCursor = { createdAt: Date; id: string };
+
+export type ListExchangeInfoOptions = {
+  types: ProfileType[];
+  /** 比對標題（我能提供、我想找）與展開後的內文。 */
+  keyword?: string;
+  sort: ExchangeInfoSortOrder;
+  cursor?: ExchangeInfoCursor;
+};
+
+/** cursor 是拿最後一筆的 createdAt（單位：秒）與 id，用 base64url 包起來。 */
+export function encodeExchangeInfoCursor({
+  createdAt,
+  id,
+}: ExchangeInfoCursor): string {
+  const seconds = Math.floor(createdAt.getTime() / 1000);
+  return Buffer.from(`${seconds}:${id}`).toString("base64url");
+}
+
+export function decodeExchangeInfoCursor(
+  raw: string,
+): ExchangeInfoCursor | null {
+  const decoded = Buffer.from(raw, "base64url").toString();
+  const separator = decoded.indexOf(":");
+  if (separator <= 0) return null;
+
+  const seconds = Number(decoded.slice(0, separator));
+  const id = decoded.slice(separator + 1);
+  if (!Number.isSafeInteger(seconds) || !id) return null;
+
+  return { createdAt: new Date(seconds * 1000), id };
+}
+
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, (char) => `\\${char}`);
+}
+
+const exchangeInfoListColumns = {
+  id: profiles.id,
+  type: profiles.type,
+  offersText: profiles.offersText,
+  wantsText: profiles.wantsText,
+  description: profiles.description,
+  createdAt: profiles.createdAt,
+  authorNickname: users.nickname,
+  authorGroup: users.group,
+  authorAvatarUrl: users.avatarUrl,
+};
+
+type ExchangeInfoListRow = Omit<ExchangeInfoListItem, "author"> & {
+  authorNickname: Author["nickname"];
+  authorGroup: Author["group"];
+  authorAvatarUrl: Author["avatarUrl"];
+};
+
+function toExchangeInfoListItem({
+  authorNickname,
+  authorGroup,
+  authorAvatarUrl,
+  ...row
+}: ExchangeInfoListRow): ExchangeInfoListItem {
+  return {
+    ...row,
+    author: {
+      nickname: authorNickname,
+      group: authorGroup,
+      avatarUrl: authorAvatarUrl,
+    },
+  };
+}
+
+/**
+ * 公開的交換資訊列表，以 (createdAt, id) 做 keyset 分頁。
+ * 已下架、已刪除或刊登者帳號停用的交換資訊不會出現。
+ */
+export async function listExchangeInfo({
+  types,
+  keyword,
+  sort,
+  cursor,
+}: ListExchangeInfoOptions): Promise<{
+  items: ExchangeInfoListItem[];
+  nextCursor: string | null;
+}> {
+  const conditions: (SQL | undefined)[] = [
+    eq(profiles.visible, true),
+    isNull(profiles.deletedAt),
+    eq(users.active, true),
+  ];
+
+  if (types.length > 0) conditions.push(inArray(profiles.type, types));
+
+  if (keyword) {
+    const pattern = `%${escapeLike(keyword)}%`;
+    conditions.push(
+      or(
+        sql`${profiles.offersText} LIKE ${pattern} ESCAPE '\\'`,
+        sql`${profiles.wantsText} LIKE ${pattern} ESCAPE '\\'`,
+        sql`${profiles.description} LIKE ${pattern} ESCAPE '\\'`,
+      ),
+    );
+  }
+
+  if (cursor) {
+    const after = sort === "newest" ? lt : gt;
+    conditions.push(
+      or(
+        after(profiles.createdAt, cursor.createdAt),
+        and(
+          eq(profiles.createdAt, cursor.createdAt),
+          after(profiles.id, cursor.id),
+        ),
+      ),
+    );
+  }
+
+  const direction = sort === "newest" ? desc : asc;
+
+  const rows = await getDb()
+    .select(exchangeInfoListColumns)
+    .from(profiles)
+    .innerJoin(users, eq(profiles.userId, users.id))
+    .where(and(...conditions))
+    .orderBy(direction(profiles.createdAt), direction(profiles.id))
+    .limit(EXCHANGE_INFO_PAGE_SIZE + 1);
+
+  const hasMore = rows.length > EXCHANGE_INFO_PAGE_SIZE;
+  const items = rows
+    .slice(0, EXCHANGE_INFO_PAGE_SIZE)
+    .map(toExchangeInfoListItem);
+  const last = items.at(-1);
+
+  return {
+    items,
+    nextCursor: hasMore && last ? encodeExchangeInfoCursor(last) : null,
+  };
+}
+
+export async function createExchangeInfo(
+  userId: string,
+  input: CreateExchangeInfoInput,
+): Promise<ExchangeInfoListItem> {
+  const db = getDb();
+
+  const [created] = await db
+    .insert(profiles)
+    .values({ ...input, userId, createdBy: userId })
+    .returning({ id: profiles.id });
+
+  const [row] = await db
+    .select(exchangeInfoListColumns)
+    .from(profiles)
+    .innerJoin(users, eq(profiles.userId, users.id))
+    .where(eq(profiles.id, created.id))
+    .limit(1);
+
+  return toExchangeInfoListItem(row);
+}

@@ -79,11 +79,7 @@ export function PostCard({
               />
             )}
             <span className="text-body text-primary">{author.nickname}</span>
-            {author.jobTitle !== null && (
-              <span className="text-body-strong text-gold">
-                {author.jobTitle}
-              </span>
-            )}
+            <span className="text-body-strong text-gold">{author.group}</span>
           </div>
 
           <span className="shrink-0 text-body text-secondary">

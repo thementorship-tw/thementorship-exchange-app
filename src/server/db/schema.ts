@@ -9,13 +9,19 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
+import { MEMBER_GROUPS, type MemberGroup } from "@/shared/member-groups";
 import { PROFILE_TYPES, type ProfileType } from "@/shared/profile-types";
 
 export const profileTypes = PROFILE_TYPES;
 export type { ProfileType };
+export const memberGroups = MEMBER_GROUPS;
+export type { MemberGroup };
 
 const profileTypeSqlValues = sql.raw(
   profileTypes.map((type) => `'${type}'`).join(", "),
+);
+const memberGroupSqlValues = sql.raw(
+  memberGroups.map((group) => `'${group}'`).join(", "),
 );
 
 const id = () =>
@@ -52,6 +58,8 @@ export const whitelist = sqliteTable(
     email: text("email").notNull().unique(),
     /** 學員屆次。 */
     session: integer("session").notNull(),
+    /** 學員組別。 */
+    group: text("group", { enum: memberGroups }).notNull(),
     /** 目前是否具備登入資格；false 時拒絕登入。 */
     active: boolean("active").notNull().default(true),
     /** 白名單資料建立或匯入時間；預設為當前時間。 */
@@ -65,6 +73,10 @@ export const whitelist = sqliteTable(
     check(
       "whitelist_email_lowercase_check",
       sql`${table.email} = lower(${table.email})`,
+    ),
+    check(
+      "whitelist_group_check",
+      sql`${table.group} IN (${memberGroupSqlValues})`,
     ),
   ],
 );
@@ -84,6 +96,8 @@ export const users = sqliteTable(
     email: text("email").notNull().unique(),
     /** 首次建檔時由 whitelist 複製的學員屆次。 */
     session: integer("session").notNull(),
+    /** 首次建檔時由 whitelist 複製的學員組別。 */
+    group: text("group", { enum: memberGroups }).notNull(),
     /** Google 帳號提供的原始姓名。 */
     googleName: text("google_name").notNull(),
     /** 平台顯示暱稱；首次建檔時預設為 googleName，之後可修改。 */
@@ -113,6 +127,10 @@ export const users = sqliteTable(
     check(
       "users_email_lowercase_check",
       sql`${table.email} = lower(${table.email})`,
+    ),
+    check(
+      "users_group_check",
+      sql`${table.group} IN (${memberGroupSqlValues})`,
     ),
   ],
 );

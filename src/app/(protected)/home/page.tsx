@@ -3,24 +3,32 @@ import { Plus } from "@phosphor-icons/react/ssr";
 
 import { requireActiveUser } from "@/auth";
 import { OceanScene } from "@/components/ocean-scene";
+import { EXCHANGE_INFO_KEYWORD_MAX_LENGTH } from "@/shared/api/exchange-info/constants";
 
+import { FilterBar } from "./filter-bar";
 import { HomeSidebar } from "./home-sidebar";
+import { buildExchangeInfoApiQuery, parseListParams } from "./list-params";
 import { MobileHeader } from "./mobile-header";
-import { listProfiles } from "./mock-profiles";
 import { PostList } from "./post-list";
-import { toPostSummary } from "./posts";
 
 export const metadata: Metadata = {
   title: "交流列表｜The Mentorship Exchange",
   description: "瀏覽曼陀號社群的技能與興趣、職涯交流貼文。",
 };
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: PageProps<"/home">) {
   await requireActiveUser("/home");
 
-  const items = await listProfiles();
-  const now = new Date();
-  const posts = items.map((item) => toPostSummary(item, now));
+  const params = await searchParams;
+  const { q } = params;
+  const keyword =
+    typeof q === "string"
+      ? q.trim().slice(0, EXCHANGE_INFO_KEYWORD_MAX_LENGTH)
+      : "";
+  const { types, sort } = parseListParams(params);
+
+  // TODO: 關鍵字搜尋由夥伴串接，屆時把 keyword 帶進 buildExchangeInfoApiQuery。
+  const apiQuery = buildExchangeInfoApiQuery({ types, sort });
 
   return (
     <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-page">
@@ -28,15 +36,18 @@ export default async function HomePage() {
 
       <MobileHeader />
 
-      <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col gap-6 px-4 pb-2 md:px-6 md:landscape:flex-row md:landscape:py-6 lg:flex-row lg:py-6 xl:px-20">
+      <div className="mx-auto grid min-h-0 w-full max-w-360 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-2 px-4 pb-2 md:px-6 md:landscape:grid-cols-[18.375rem_minmax(0,1fr)] md:landscape:grid-rows-[minmax(0,1fr)] md:landscape:gap-6 md:landscape:py-6 lg:grid-cols-[18.375rem_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-6 lg:py-6 xl:px-20">
         <h1 className="sr-only">交流列表</h1>
 
         <HomeSidebar />
 
-        <PostList posts={posts} />
+        <PostList
+          apiQuery={apiQuery}
+          filterBar={<FilterBar params={{ types, sort, keyword }} />}
+          filtered={types.length > 0}
+        />
       </div>
 
-      {/* TODO: 發文流程 尚未實作。 */}
       <button
         type="button"
         aria-label="我要發文"
