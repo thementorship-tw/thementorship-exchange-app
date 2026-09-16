@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { createDocument } from "zod-openapi";
 
+import { apiErrorResponseDoc } from "@/server/api/response-docs";
 import {
-  apiErrorResponseDoc,
   contactLogListResponseDoc,
   createContactLogResponseDoc,
   markAllContactLogsReadResponseDoc,

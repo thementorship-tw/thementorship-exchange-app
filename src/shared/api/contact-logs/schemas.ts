@@ -10,10 +10,13 @@ import {
   CONTACT_LOG_OFFERED_RESOURCE_MAX_LENGTH,
   CONTACT_LOG_WANTED_ITEM_MAX_LENGTH,
 } from "@/shared/api/contact-logs/constants";
+import {
+  positiveIntegerString,
+  requiredText,
+  validationResult,
+  type ValidationResult,
+} from "@/shared/api/validation";
 import { PROFILE_TYPES } from "@/shared/profile-types";
-
-type ValidationResult<T> =
-  { ok: true; value: T } | { ok: false; fields: Record<string, string> };
 
 /**
  * Response shape. There is no runtime response validation to reuse
@@ -55,19 +58,6 @@ export const contactLogResponseSchema = z
   })
   .meta({ id: "ContactLog" });
 
-/**
- * 字數上限以 JS string length（UTF-16 code unit）計算，不特別處理 Unicode
- * code point。少數 emoji 會被算成 2，屬於可接受的誤差，換取這個 schema能
- * 直接被 zod-openapi 讀出 minLength/maxLength，不用另外維護一份文件 schema。
- */
-function requiredText(maxLength: number) {
-  return z
-    .string({ error: "Required" })
-    .trim()
-    .min(1, "Required")
-    .max(maxLength, `Must be ${maxLength} characters or fewer`);
-}
-
 export const createContactLogSchema = z.object({
   profileId: z
     .string({ error: "Required" })
@@ -93,11 +83,6 @@ export const createContactLogSchema = z.object({
 });
 
 export type CreateContactLogValues = z.output<typeof createContactLogSchema>;
-
-/** query string 值一律是 `string | undefined`，讓 `.optional()` 直接處理缺值。 */
-function positiveIntegerString() {
-  return z.string().regex(/^\d+$/, "Must be a positive integer").optional();
-}
 
 /** 只回傳／標記 createdAt 在過去 N 天內的紀錄；不帶則不限制。GET 列表與批次已讀共用。 */
 function withinDaysSchema() {
@@ -174,26 +159,6 @@ export const contactLogListQuerySchema = z
   }));
 
 export type ContactLogListQuery = z.output<typeof contactLogListQuerySchema>;
-
-function fieldsFromError(error: z.ZodError): Record<string, string> {
-  const fields: Record<string, string> = {};
-
-  for (const issue of error.issues) {
-    const field = issue.path[0];
-    const key = typeof field === "string" ? field : "body";
-    fields[key] ??= issue.message;
-  }
-
-  return fields;
-}
-
-function validationResult<T>(
-  result: z.ZodSafeParseResult<T>,
-): ValidationResult<T> {
-  return result.success
-    ? { ok: true, value: result.data }
-    : { ok: false, fields: fieldsFromError(result.error) };
-}
 
 export function validateCreateContactLog(
   input: unknown,
