@@ -1,0 +1,10 @@
+export const CONTACT_LOG_OFFERED_RESOURCE_MAX_LENGTH = 200;
+export const CONTACT_LOG_WANTED_ITEM_MAX_LENGTH = 200;
+export const CONTACT_LOG_MOTIVATION_MAX_LENGTH = 500;
+export const CONTACT_LOG_CONTACT_INFO_MAX_LENGTH = 200;
+
+export const CONTACT_LOG_DEFAULT_PAGE_SIZE = 20;
+export const CONTACT_LOG_MAX_PAGE_SIZE = 50;
+
+/** 保守的技術安全上限，避免過大的 withinDays 產生無效日期；不是業務限制。 */
+export const CONTACT_LOG_MAX_WITHIN_DAYS = 3650;

@@ -1,9 +1,9 @@
 import { SortAscending } from "@phosphor-icons/react/ssr";
 
 import { Tag } from "@/components/tag";
+import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 
 import { profileTypes } from "./mock-profiles";
-import { postTypeLabels } from "./posts";
 
 /**
  * 快速篩選標籤與排序切換。
@@ -19,7 +19,7 @@ export function FilterBar() {
         </span>
 
         {profileTypes.map((type) => (
-          <Tag key={type}>{postTypeLabels[type]}</Tag>
+          <Tag key={type}>{PROFILE_TYPE_LABELS[type]}</Tag>
         ))}
       </div>
 

@@ -21,11 +21,6 @@ export type PostSummary = {
   timeLabel: string;
 };
 
-export const postTypeLabels: Record<ProfileType, string> = {
-  skillAndInterest: "技能與興趣",
-  career: "職涯",
-};
-
 export function toPostSummary(item: ProfileListItem, now: Date): PostSummary {
   return {
     id: item.id,

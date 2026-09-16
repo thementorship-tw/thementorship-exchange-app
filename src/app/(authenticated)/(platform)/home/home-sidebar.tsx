@@ -1,17 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import { Plus } from "@phosphor-icons/react/ssr";
 
 import { buttonClassName } from "@/components/button";
 
+import { useNotifications } from "../_providers/notification-provider";
 import { HomeNav } from "./home-nav";
 import { SearchField } from "./search-field";
 
-export function HomeSidebar({
-  hasUnreadNotifications = false,
-}: {
-  /** 系統通知有未讀時，在選項右側顯示小圓點。 */
-  hasUnreadNotifications?: boolean;
-}) {
+export function HomeSidebar() {
+  const { unreadCount } = useNotifications();
+
   return (
     <aside className="hidden w-73.5 shrink-0 flex-col gap-6 rounded-20 border border-line bg-glass p-6 backdrop-blur-sm md:landscape:flex lg:flex">
       <p className="py-2 text-center text-body-strong text-primary">
@@ -26,7 +26,7 @@ export function HomeSidebar({
       <div className="flex flex-1 flex-col gap-2">
         <SearchField />
 
-        <HomeNav hasUnreadNotifications={hasUnreadNotifications} />
+        <HomeNav unreadCount={unreadCount} />
       </div>
 
       {/* TODO: 尚未實作。 */}
