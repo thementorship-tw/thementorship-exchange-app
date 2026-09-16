@@ -6,5 +6,5 @@ export const CONTACT_LOG_CONTACT_INFO_MAX_LENGTH = 200;
 export const CONTACT_LOG_DEFAULT_PAGE_SIZE = 20;
 export const CONTACT_LOG_MAX_PAGE_SIZE = 50;
 
-/** 上限只是為了避免 withinDays * 一天的毫秒數溢位 Date 的有效範圍，不是業務限制。 */
+/** 保守的技術安全上限，避免過大的 withinDays 產生無效日期；不是業務限制。 */
 export const CONTACT_LOG_MAX_WITHIN_DAYS = 3650;

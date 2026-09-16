@@ -12,6 +12,12 @@ import type { CreateContactLogValues } from "@/shared/api/contact-logs/schemas";
 
 const fromUsers = alias(users, "from_users");
 const toUsers = alias(users, "to_users");
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function createdWithinDaysCondition(withinDays: number) {
+  const cutoff = new Date(Date.now() - withinDays * MILLISECONDS_PER_DAY);
+  return gte(contactLogs.createdAt, cutoff);
+}
 
 export type ContactLogView = Omit<
   ContactLogResponse,
@@ -144,10 +150,7 @@ export async function listContactLogs(
     conditions.push(isNull(contactLogs.readAt));
   }
   if (input.withinDays !== undefined) {
-    const cutoff = new Date(
-      Date.now() - input.withinDays * 24 * 60 * 60 * 1000,
-    );
-    conditions.push(gte(contactLogs.createdAt, cutoff));
+    conditions.push(createdWithinDaysCondition(input.withinDays));
   }
   const where = and(...conditions);
   const db = getDb();
@@ -269,8 +272,7 @@ export async function markAllContactLogsRead(
     isNull(contactLogs.readAt),
   ];
   if (withinDays !== undefined) {
-    const cutoff = new Date(Date.now() - withinDays * 24 * 60 * 60 * 1000);
-    conditions.push(gte(contactLogs.createdAt, cutoff));
+    conditions.push(createdWithinDaysCondition(withinDays));
   }
 
   const updated = await getDb()
