@@ -11,15 +11,6 @@ export type PostSummary = Omit<ExchangeInfoListResponseItem, "createdAt"> & {
   timeLabel: string;
 };
 
-export const postTypeLabels: Record<ProfileType, string> = {
-  skillAndInterest: "技能與興趣",
-  career: "職涯",
-};
-
-/**
- * 轉成卡片用的格式。
- * API 回傳的 JSON 裡 createdAt 是字串，repository 與假資料是 Date，兩種都收。
- */
 export function toPostSummary(
   {
     createdAt,

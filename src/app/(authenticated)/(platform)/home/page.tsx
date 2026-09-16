@@ -17,8 +17,6 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage({ searchParams }: PageProps<"/home">) {
-  await requireActiveUser("/home");
-
   const params = await searchParams;
   const { q } = params;
   const keyword =
@@ -31,9 +29,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
   const apiQuery = buildExchangeInfoApiQuery({ types, sort });
 
   return (
-    <main className="relative isolate flex h-dvh flex-col overflow-hidden bg-page">
-      <OceanScene boatSide="left" />
-
+    <>
       <MobileHeader />
 
       <div className="mx-auto grid min-h-0 w-full max-w-360 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-2 px-4 pb-2 md:px-6 md:landscape:grid-cols-[18.375rem_minmax(0,1fr)] md:landscape:grid-rows-[minmax(0,1fr)] md:landscape:gap-6 md:landscape:py-6 lg:grid-cols-[18.375rem_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-6 lg:py-6 xl:px-20">
@@ -55,6 +51,6 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
       >
         <Plus className="size-6" />
       </button>
-    </main>
+    </>
   );
 }

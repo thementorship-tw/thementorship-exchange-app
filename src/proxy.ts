@@ -7,5 +7,5 @@ export const config = {
    * 否則未知路由會在 Next.js 判斷 404 之前被導回登入頁。
    * 新增受保護的頂層路由時，請在這裡加入對應前綴。
    */
-  matcher: ["/home/:path*"],
+  matcher: ["/home/:path*", "/notifications/:path*", "/settings/:path*"],
 };

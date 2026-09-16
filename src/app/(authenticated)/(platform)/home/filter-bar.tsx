@@ -2,8 +2,9 @@ import Link from "next/link";
 import { SortAscending, SortDescending } from "@phosphor-icons/react/ssr";
 
 import { Tag } from "@/components/tag";
-import { PROFILE_TYPES } from "@/shared/profile-types";
+import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 
+import { profileTypes } from "./mock-profiles";
 import { buildListHref, type ListParams } from "./list-params";
 import { postTypeLabels } from "./posts";
 
@@ -20,7 +21,7 @@ export function FilterBar({ params }: { params: ListParams }) {
           快速篩選
         </span>
 
-        {PROFILE_TYPES.map((type) => {
+        {profileTypes.map((type) => {
           const active = types.includes(type);
           const nextTypes = active
             ? types.filter((value) => value !== type)
@@ -35,7 +36,7 @@ export function FilterBar({ params }: { params: ListParams }) {
               aria-current={active ? "true" : undefined}
               className="rounded-pill focus-visible:outline-2 focus-visible:outline-brand"
             >
-              <Tag active={active}>{postTypeLabels[type]}</Tag>
+              <Tag active={active}>{PROFILE_TYPE_LABELS[type]}</Tag>
             </Link>
           );
         })}

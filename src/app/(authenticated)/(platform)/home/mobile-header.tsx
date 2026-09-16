@@ -5,14 +5,12 @@ import { List, X } from "@phosphor-icons/react/ssr";
 import { useRef } from "react";
 
 import { HomeNav } from "./home-nav";
+import { SearchField } from "./search-field";
+import { useNotifications } from "../_providers/notification-provider";
 
-export function MobileHeader({
-  hasUnreadNotifications = false,
-}: {
-  /** 系統通知有未讀時，在選項右側顯示小圓點。 */
-  hasUnreadNotifications?: boolean;
-}) {
+export function MobileHeader() {
   const drawerRef = useRef<HTMLDialogElement>(null);
+  const { unreadCount } = useNotifications();
 
   return (
     <header className="px-4 pt-3 pb-4 md:landscape:hidden lg:hidden">
@@ -63,7 +61,7 @@ export function MobileHeader({
             </button>
           </div>
 
-          <HomeNav hasUnreadNotifications={hasUnreadNotifications} />
+          <HomeNav unreadCount={unreadCount} />
         </div>
       </dialog>
     </header>
