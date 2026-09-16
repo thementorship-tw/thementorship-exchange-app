@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 
-import { listProfiles } from "../src/app/(protected)/home/mock-profiles";
+import { listProfiles } from "../src/app/(authenticated)/(platform)/home/mock-profiles";
 import { profiles, users } from "../src/server/db/schema";
 
 dotenv.config({ path: ".env.local", quiet: true });

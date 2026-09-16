@@ -1,5 +1,4 @@
 import type { ExchangeInfoListResponseItem } from "@/shared/api/exchange-info/schemas";
-import type { ProfileType } from "@/shared/profile-types";
 import { formatPostTime } from "@/utils/format";
 
 /**

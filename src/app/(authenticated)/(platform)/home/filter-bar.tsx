@@ -6,7 +6,6 @@ import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 
 import { profileTypes } from "./mock-profiles";
 import { buildListHref, type ListParams } from "./list-params";
-import { postTypeLabels } from "./posts";
 
 const sortLabels = { newest: "最新的", oldest: "最舊的" } as const;
 

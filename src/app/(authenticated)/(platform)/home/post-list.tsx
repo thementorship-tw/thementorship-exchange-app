@@ -1,12 +1,12 @@
 "use client";
 
-import { useInfiniteScroll } from "@reactuses/core";
+import { CircleNotch } from "@phosphor-icons/react/ssr";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/button";
 
 import { PostCard } from "./post-card";
-import { useExchangeInfoFeed } from "./use-exchange-info-feed";
+import { useExchangeInfoFeed, type FeedStatus } from "./use-exchange-info-feed";
 
 function EmptyState() {
   return (
@@ -47,14 +47,29 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-function LoadingState() {
+function LoadingIndicator() {
   return (
-    <p
+    <div
       role="status"
-      className="py-6 text-center text-body text-secondary"
+      aria-label="載入中"
+      className="flex justify-center py-6"
     >
-      載入中…
-    </p>
+      <CircleNotch className="size-6 animate-spin text-secondary" />
+    </div>
+  );
+}
+
+function LoadingOrError({
+  status,
+  onRetry,
+}: {
+  status: FeedStatus;
+  onRetry: () => void;
+}) {
+  return status === "error" ? (
+    <ErrorState onRetry={onRetry} />
+  ) : (
+    <LoadingIndicator />
   );
 }
 
@@ -96,27 +111,25 @@ function PostFeed({
 
   const listRef = useRef<HTMLUListElement>(null);
 
-  useInfiniteScroll(
-    listRef,
-    ([, , , arrived]) => {
-      if (arrived.bottom) loadMore();
-    },
-    { distance: 200 },
-  );
-
+  /** 滑到底部 200px 內、或內容還沒填滿可視範圍時，自動載入下一頁。 */
   useEffect(() => {
-    if (!hasMore || status !== "ready") return;
-    const frame = requestAnimationFrame(() => {
-      const list = listRef.current;
-      if (
-        list &&
-        list.scrollHeight - list.scrollTop - list.clientHeight <= 200
-      ) {
+    const list = listRef.current;
+    if (!list) return;
+
+    const loadMoreIfNearBottom = () => {
+      if (list.scrollHeight - list.scrollTop - list.clientHeight <= 200) {
         loadMore();
       }
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [hasMore, status, loadMore, expandedPostId]);
+    };
+
+    const frame = requestAnimationFrame(loadMoreIfNearBottom);
+    list.addEventListener("scroll", loadMoreIfNearBottom, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      list.removeEventListener("scroll", loadMoreIfNearBottom);
+    };
+  }, [loadMore, expandedPostId]);
 
   const firstPageSettled = posts.length > 0 || status === "ready";
 
@@ -132,12 +145,12 @@ function PostFeed({
     <section className="flex min-h-0 flex-1 flex-col gap-5">
       {filterBar}
 
-      {!firstPageSettled &&
-        (status === "error" ? (
-          <ErrorState onRetry={retry} />
-        ) : (
-          <LoadingState />
-        ))}
+      {!firstPageSettled && (
+        <LoadingOrError
+          status={status}
+          onRetry={retry}
+        />
+      )}
 
       {status === "ready" && posts.length === 0 && <NoMatchState />}
 
@@ -162,11 +175,10 @@ function PostFeed({
 
           {hasMore && (
             <li className="list-none">
-              {status === "error" ? (
-                <ErrorState onRetry={retry} />
-              ) : (
-                <LoadingState />
-              )}
+              <LoadingOrError
+                status={status}
+                onRetry={retry}
+              />
             </li>
           )}
         </ul>

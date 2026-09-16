@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import { Plus } from "@phosphor-icons/react/ssr";
 
-import { requireActiveUser } from "@/auth";
-import { OceanScene } from "@/components/ocean-scene";
 import { EXCHANGE_INFO_KEYWORD_MAX_LENGTH } from "@/shared/api/exchange-info/constants";
 
 import { FilterBar } from "./filter-bar";
-import { HomeSidebar } from "./home-sidebar";
 import { buildExchangeInfoApiQuery, parseListParams } from "./list-params";
 import { MobileHeader } from "./mobile-header";
 import { PostList } from "./post-list";
@@ -32,11 +29,9 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
     <>
       <MobileHeader />
 
-      <div className="mx-auto grid min-h-0 w-full max-w-360 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-2 px-4 pb-2 md:px-6 md:landscape:grid-cols-[18.375rem_minmax(0,1fr)] md:landscape:grid-rows-[minmax(0,1fr)] md:landscape:gap-6 md:landscape:py-6 lg:grid-cols-[18.375rem_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-6 lg:py-6 xl:px-20">
-        <h1 className="sr-only">交流列表</h1>
+      <h1 className="sr-only">交流列表</h1>
 
-        <HomeSidebar />
-
+      <div className="mx-auto grid min-h-0 w-full max-w-360 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] gap-2 px-4 pb-2 md:px-0 md:landscape:gap-6 md:landscape:py-6 lg:gap-6 lg:py-6">
         <PostList
           apiQuery={apiQuery}
           filterBar={<FilterBar params={{ types, sort, keyword }} />}
