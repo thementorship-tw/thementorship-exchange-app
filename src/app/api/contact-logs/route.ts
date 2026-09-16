@@ -1,3 +1,5 @@
+import { after } from "next/server";
+
 import { withApiAuth } from "@/server/api/middleware/auth";
 import { apiError, PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
 import {
@@ -5,6 +7,7 @@ import {
   listContactLogs,
   type ContactLogView,
 } from "@/server/contact-logs/service";
+import { sendContactLogPushNotification } from "@/server/notifications/push";
 import {
   validateContactLogListQuery,
   validateCreateContactLog,
@@ -12,7 +15,7 @@ import {
 import type { ContactLogResponse } from "@/shared/api/contact-logs/types";
 
 // 將 Date 物件轉換為 ISO 字串
-function serializeContactLog(log: ContactLogView): ContactLogResponse {
+export function serializeContactLog(log: ContactLogView): ContactLogResponse {
   return {
     ...log,
     readAt: log.readAt?.toISOString() ?? null,
@@ -59,6 +62,21 @@ export const POST = withApiAuth(
         "You cannot contact your own profile",
       );
     }
+    if (result.status === "duplicate_contact_today") {
+      return apiError(
+        409,
+        "DUPLICATE_CONTACT_TODAY",
+        "You already contacted this profile recently",
+      );
+    }
+
+    after(() =>
+      sendContactLogPushNotification({
+        toUserId: result.log.toUser.id,
+        fromUserNickname: result.log.fromUser.nickname,
+        targetHref: "/home",
+      }),
+    );
 
     return Response.json(
       { data: serializeContactLog(result.log) },

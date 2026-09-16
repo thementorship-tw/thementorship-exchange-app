@@ -2,6 +2,7 @@
 
 import { ArrowLeft } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
+import { useState, useSyncExternalStore } from "react";
 
 import { DataLoadError } from "@/components/data-load-error";
 import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
@@ -9,6 +10,68 @@ import { formatPostTime } from "@/utils/format";
 
 import { useNotifications } from "../_providers/notification-provider";
 import type { NotificationItem } from "./notifications";
+
+type PushPermissionState = "unsupported" | "default" | "granted" | "denied";
+
+function subscribeToNothing() {
+  // `Notification.permission` 沒有變更事件，只需要在 mount 後讀取一次正確值。
+  return () => {};
+}
+
+function getPushPermissionSnapshot(): PushPermissionState {
+  return typeof Notification === "undefined"
+    ? "unsupported"
+    : Notification.permission;
+}
+
+/**
+ * 用 useSyncExternalStore 而不是 useEffect + setState，避免 SSR 階段（沒有
+ * `Notification` 全域）跟 client 第一次 render 的結果不一致。
+ */
+function usePushPermissionState(): PushPermissionState {
+  return useSyncExternalStore(
+    subscribeToNothing,
+    getPushPermissionSnapshot,
+    () => "unsupported" as const,
+  );
+}
+
+function EnablePushButton() {
+  const { enablePushNotifications } = useNotifications();
+  const permission = usePushPermissionState();
+  const [pending, setPending] = useState(false);
+  const [justEnabled, setJustEnabled] = useState(false);
+
+  if (permission === "unsupported") return null;
+
+  if (permission === "granted" || justEnabled) {
+    return <span className="text-body text-secondary">推播通知已開啟</span>;
+  }
+
+  if (permission === "denied") {
+    return (
+      <span className="text-body text-secondary">
+        通知已被瀏覽器封鎖，請至網站設定重新開啟
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        setPending(true);
+        const enabled = await enablePushNotifications();
+        setPending(false);
+        setJustEnabled(enabled);
+      }}
+      disabled={pending}
+      className="min-h-9 shrink-0 cursor-pointer rounded-pill border border-line bg-surface px-4 text-body-strong text-primary transition-colors hover:bg-surface-subtle disabled:cursor-default disabled:opacity-60 focus-visible:bg-surface-subtle focus-visible:outline-none"
+    >
+      {pending ? "開啟中…" : "開啟推播通知"}
+    </button>
+  );
+}
 
 function NotificationRow({ item }: { item: NotificationItem }) {
   const { markAsRead } = useNotifications();
@@ -78,14 +141,17 @@ export function NotificationCenter() {
                 ? `你有未讀通知 (${unreadCount})`
                 : "目前沒有新通知"}
             </h1>
-            <button
-              type="button"
-              onClick={markAllAsRead}
-              disabled={unreadCount === 0}
-              className="min-h-9 shrink-0 cursor-pointer rounded-pill border border-line bg-surface px-4 text-body-strong text-primary transition-colors hover:bg-surface-subtle disabled:cursor-default disabled:opacity-60 focus-visible:bg-surface-subtle focus-visible:outline-none"
-            >
-              已讀全部
-            </button>
+            <div className="flex shrink-0 items-center gap-3">
+              <EnablePushButton />
+              <button
+                type="button"
+                onClick={markAllAsRead}
+                disabled={unreadCount === 0}
+                className="min-h-9 shrink-0 cursor-pointer rounded-pill border border-line bg-surface px-4 text-body-strong text-primary transition-colors hover:bg-surface-subtle disabled:cursor-default disabled:opacity-60 focus-visible:bg-surface-subtle focus-visible:outline-none"
+              >
+                已讀全部
+              </button>
+            </div>
           </header>
 
           {notifications.length === 0 ? (

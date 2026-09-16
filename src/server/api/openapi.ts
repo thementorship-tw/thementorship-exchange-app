@@ -13,6 +13,7 @@ import {
   createContactLogSchema,
   markAllContactLogsReadQuerySchema,
 } from "@/shared/api/contact-logs/schemas";
+import { CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS } from "@/shared/api/contact-logs/constants";
 
 function errorResponse(description: string) {
   return {
@@ -52,7 +53,10 @@ export function buildOpenApiDocument() {
             "401": errorResponse("Authentication required"),
             "403": errorResponse("Account inactive or consent required"),
             "404": errorResponse("Profile not found"),
-            "409": errorResponse("Cannot contact your own profile"),
+            "409": errorResponse(
+              "Cannot contact your own profile, or you already contacted this profile in the last " +
+                `${CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS} day(s)`,
+            ),
             "422": errorResponse("Request validation failed"),
           },
         },

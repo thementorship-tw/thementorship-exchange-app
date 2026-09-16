@@ -5,9 +5,7 @@ export const CONTACT_LOG_CONTACT_INFO_MAX_LENGTH = 200;
 
 export const CONTACT_LOG_DEFAULT_PAGE_SIZE = 20;
 /**
- * 純防禦性上限，避免單一 request 被要求撈出不受控筆數；跟目前資料量無關。
- * 目前唯一的呼叫端（通知中心）一次抓一整頁、不做分批載入，
- * 100 只是給它足夠餘裕，不代表業務上真的預期會用到這麼多。
+ * 需求條件：通知中心一次抓一整頁、不做分批載入，上限 100 筆。
  */
 export const CONTACT_LOG_MAX_PAGE_SIZE = 100;
 
@@ -16,3 +14,6 @@ export const CONTACT_LOG_MAX_WITHIN_DAYS = 3650;
 
 /** 通知中心的保留期限；GET 列表跟批次已讀都要帶這個值 */
 export const NOTIFICATION_RETENTION_DAYS = 30;
+
+/** 同一人對同一份 Profile，過去 N 天內已建立過紀錄就擋下重複申請。 */
+export const CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS = 1;

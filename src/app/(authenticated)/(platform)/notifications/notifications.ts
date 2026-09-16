@@ -1,4 +1,5 @@
 import type { ContactLogView } from "@/server/contact-logs/service";
+import type { ContactLogResponse } from "@/shared/api/contact-logs/types";
 import type { ProfileType } from "@/shared/profile-types";
 
 export type NotificationItem = {
@@ -19,5 +20,19 @@ export function toNotificationItem(log: ContactLogView): NotificationItem {
     targetHref: "/home",
     readAt: log.readAt,
     createdAt: log.createdAt,
+  };
+}
+
+/** 與 toNotificationItem 相同的對應，但輸入是 client fetch 拿到的 JSON（日期為 ISO 字串）。 */
+export function notificationItemFromResponse(
+  log: ContactLogResponse,
+): NotificationItem {
+  return {
+    id: log.id,
+    fromUserNickname: log.fromUser.nickname,
+    profileType: log.profile.type,
+    targetHref: "/home",
+    readAt: log.readAt === null ? null : new Date(log.readAt),
+    createdAt: new Date(log.createdAt),
   };
 }
