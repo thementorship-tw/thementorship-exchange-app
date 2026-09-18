@@ -29,7 +29,6 @@ const LOGIN_ERROR_CONTENT: Record<LoginErrorCode, LoginErrorContent> = {
       "，我們將儘快與你聯絡。",
     ],
   },
-  // CHECK: 設計稿尚未定義以下狀態
   [LOGIN_ERROR.CONFIGURATION]: {
     title: "系統暫時無法登入",
     body: [

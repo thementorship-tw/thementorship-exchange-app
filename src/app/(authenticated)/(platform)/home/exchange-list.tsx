@@ -1,9 +1,18 @@
 "use client";
 
-import { CircleNotch } from "@phosphor-icons/react/ssr";
+import { CircleNotch, WifiSlash } from "@phosphor-icons/react/ssr";
+import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/button";
+import {
+  ErrorState,
+  LOAD_FAILED_ERROR_DESCRIPTION,
+  LOAD_FAILED_ERROR_TITLE,
+  OFFLINE_ERROR_DESCRIPTION,
+  OFFLINE_ERROR_TITLE,
+} from "@/components/error-state";
+import { useIsOffline } from "@/hooks/use-is-offline";
 
 import { ExchangeCard } from "./exchange-card";
 import { useExchangeInfoFeed, type FeedStatus } from "./use-exchange-info-feed";
@@ -28,14 +37,13 @@ function NoMatchState() {
   );
 }
 
-function ErrorState({ onRetry }: { onRetry: () => void }) {
+function LoadMoreErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <div
       role="alert"
       className="flex flex-col items-center gap-3 py-6 text-center"
     >
-      {/* TODO: 確認文案 */}
-      <p className="text-body text-secondary">貼文載入失敗，請稍後再試。</p>
+      <p className="text-body text-secondary">載入更多失敗，請稍後再試。</p>
       <Button
         variant="secondary"
         size="sm"
@@ -67,7 +75,7 @@ function LoadingOrError({
   onRetry: () => void;
 }) {
   return status === "error" ? (
-    <ErrorState onRetry={onRetry} />
+    <LoadMoreErrorState onRetry={onRetry} />
   ) : (
     <LoadingIndicator />
   );
@@ -106,6 +114,7 @@ function ExchangeFeed({
   const { cards, status, hasMore, loadMore, retry } =
     useExchangeInfoFeed(apiQuery);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const isOffline = useIsOffline();
 
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -143,12 +152,33 @@ function ExchangeFeed({
     <section className="flex min-h-0 flex-1 flex-col gap-5">
       {filterBar}
 
-      {!firstPageSettled && (
-        <LoadingOrError
-          status={status}
-          onRetry={retry}
-        />
-      )}
+      {!firstPageSettled &&
+        (status === "error" ? (
+          isOffline ? (
+            <ErrorState
+              image={<WifiSlash className="size-8 text-error" />}
+              title={OFFLINE_ERROR_TITLE}
+              description={OFFLINE_ERROR_DESCRIPTION}
+              onRetry={retry}
+            />
+          ) : (
+            <ErrorState
+              image={
+                <Image
+                  src="/images/server-error.svg"
+                  alt=""
+                  width={32}
+                  height={32}
+                />
+              }
+              title={LOAD_FAILED_ERROR_TITLE}
+              description={LOAD_FAILED_ERROR_DESCRIPTION}
+              onRetry={retry}
+            />
+          )
+        ) : (
+          <LoadingIndicator />
+        ))}
 
       {status === "ready" && cards.length === 0 && <NoMatchState />}
 

@@ -31,7 +31,6 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <section className="mx-auto flex min-h-dvh w-full max-w-7xl items-start justify-center px-4 pt-[26.5vh] md:landscape:justify-start md:landscape:px-16 md:landscape:pt-[31vh] lg:justify-start lg:px-16 lg:pt-[31vh] xl:px-36">
         <div className="relative z-10 flex w-full max-w-2xl flex-col items-center text-center md:landscape:max-w-[54vw] lg:max-w-[54vw]">
           <h1 className="sr-only">登入 The Mentorship Exchange</h1>
-          {/* CHECK: 重簽提示文案設計稿尚未定義 */}
           <p className="mb-5 text-body-lg text-brand md:landscape:mb-8 lg:mb-8">
             {needsReconsent
               ? "規範與隱私政策已更新，請重新勾選同意後登入"
