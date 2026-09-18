@@ -6,6 +6,11 @@ export const EXCHANGE_INFO_PAGE_SIZE = 10;
 /** 關鍵字（q）去頭尾空白後的最大字數。 */
 export const EXCHANGE_INFO_KEYWORD_MAX_LENGTH = 100;
 
+/** 我能提供、我想找、自由描述 最大字數。 */
+export const EXCHANGE_INFO_OFFERS_TEXT_MAX_LENGTH = 100;
+export const EXCHANGE_INFO_WANTS_TEXT_MAX_LENGTH = 100;
+export const EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH = 300;
+
 export const exchangeInfoSortOrders = ["newest", "oldest"] as const;
 export type ExchangeInfoSortOrder = (typeof exchangeInfoSortOrders)[number];
 

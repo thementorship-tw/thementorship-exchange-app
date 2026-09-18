@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ExchangeInfoListResponse } from "@/shared/api/exchange-info/schemas";
 
-import { toPostSummary, type PostSummary } from "./posts";
+import { toCardSummary, type CardSummary } from "./card-summary";
 
 export type FeedStatus = "loading" | "ready" | "error";
 
@@ -30,12 +30,11 @@ async function fetchExchangeInfoPage(
  * @param query 不含 cursor 的查詢字串，例如 "type=career&sort=oldest"
  */
 export function useExchangeInfoFeed(query: string) {
-  const [posts, setPosts] = useState<PostSummary[]>([]);
+  const [cards, setCards] = useState<CardSummary[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [status, setStatus] = useState<FeedStatus>("loading");
   const controllerRef = useRef<AbortController | null>(null);
 
-  // state 只在 promise callback 裡更新，effect 裡呼叫時才不會同步 setState。
   const fetchPage = useCallback(
     (cursor: string | null) => {
       controllerRef.current?.abort();
@@ -45,10 +44,10 @@ export function useExchangeInfoFeed(query: string) {
       return fetchExchangeInfoPage(query, cursor, controller.signal).then(
         (page) => {
           const now = new Date();
-          const nextPosts = page.data.map((item) => toPostSummary(item, now));
+          const nextCards = page.data.map((item) => toCardSummary(item, now));
 
-          setPosts((current) =>
-            cursor ? [...current, ...nextPosts] : nextPosts,
+          setCards((current) =>
+            cursor ? [...current, ...nextCards] : nextCards,
           );
           setNextCursor(page.nextCursor);
           setStatus("ready");
@@ -68,21 +67,20 @@ export function useExchangeInfoFeed(query: string) {
     return () => controllerRef.current?.abort();
   }, [fetchPage]);
 
-  /** 載入下一頁；正在載入、出錯或沒有下一頁時不做事。 */
+  /** 載入下一頁。 */
   const loadMore = useCallback(() => {
     if (status !== "ready" || nextCursor === null) return;
     setStatus("loading");
     void fetchPage(nextCursor);
   }, [status, nextCursor, fetchPage]);
 
-  /** 出錯後重試；還沒有資料就重拿第一頁，否則重拿下一頁。 */
   const retry = useCallback(() => {
     setStatus("loading");
-    void fetchPage(posts.length === 0 ? null : nextCursor);
-  }, [posts.length, nextCursor, fetchPage]);
+    void fetchPage(cards.length === 0 ? null : nextCursor);
+  }, [cards.length, nextCursor, fetchPage]);
 
   return {
-    posts,
+    cards,
     status,
     hasMore: nextCursor !== null,
     loadMore,

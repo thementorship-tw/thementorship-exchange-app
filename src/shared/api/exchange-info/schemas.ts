@@ -5,14 +5,20 @@ import { PROFILE_TYPES } from "@/shared/profile-types";
 
 import {
   DEFAULT_EXCHANGE_INFO_SORT,
+  EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH,
   EXCHANGE_INFO_KEYWORD_MAX_LENGTH,
+  EXCHANGE_INFO_OFFERS_TEXT_MAX_LENGTH,
+  EXCHANGE_INFO_WANTS_TEXT_MAX_LENGTH,
   exchangeInfoSortOrders,
 } from "./constants";
 
 export {
   DEFAULT_EXCHANGE_INFO_SORT,
+  EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH,
   EXCHANGE_INFO_KEYWORD_MAX_LENGTH,
+  EXCHANGE_INFO_OFFERS_TEXT_MAX_LENGTH,
   EXCHANGE_INFO_PAGE_SIZE,
+  EXCHANGE_INFO_WANTS_TEXT_MAX_LENGTH,
   exchangeInfoSortOrders,
   type ExchangeInfoSortOrder,
 } from "./constants";
@@ -41,12 +47,16 @@ export const exchangeInfoListQuerySchema = z.object({
 
 export const createExchangeInfoSchema = z.object({
   type: exchangeInfoTypeSchema,
-  offersText: z.string().trim().min(1).max(500),
-  wantsText: z.string().trim().min(1).max(500),
+  offersText: z
+    .string()
+    .trim()
+    .min(1)
+    .max(EXCHANGE_INFO_OFFERS_TEXT_MAX_LENGTH),
+  wantsText: z.string().trim().min(1).max(EXCHANGE_INFO_WANTS_TEXT_MAX_LENGTH),
   description: z
     .string()
     .trim()
-    .max(2000)
+    .max(EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH)
     .nullish()
     .transform((value) => (value ? value : null)),
 });
@@ -68,13 +78,8 @@ const exchangeInfoItemDoc = z
   })
   .meta({ id: "ExchangeInfoListItem" });
 
-/**
- * 單筆交換資訊的唯一來源；repository、假資料與卡片的型別都從這裡推導。
- * 這是 API 回傳的 JSON，createdAt 是 ISO 字串。
- */
 export type ExchangeInfoListResponseItem = z.infer<typeof exchangeInfoItemDoc>;
 
-/** GET /api/exchange-info 回傳的 JSON。 */
 export type ExchangeInfoListResponse = z.infer<
   typeof exchangeInfoListResponseDoc
 >;
@@ -90,13 +95,3 @@ export const exchangeInfoListResponseDoc = z.object({
 export const createExchangeInfoResponseDoc = z.object({
   data: exchangeInfoItemDoc,
 });
-
-export const apiErrorResponseDoc = z
-  .object({
-    error: z.object({
-      code: z.string(),
-      message: z.string(),
-      fields: z.record(z.string(), z.string()).optional(),
-    }),
-  })
-  .meta({ id: "ApiError" });

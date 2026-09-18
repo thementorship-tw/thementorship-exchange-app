@@ -1,13 +1,8 @@
 import type { ExchangeInfoSortOrder } from "@/shared/api/exchange-info/constants";
 import type { ExchangeInfoListItem } from "@/server/exchange-info/exchange-info.repository";
-import { PROFILE_TYPES, type ProfileType } from "@/shared/profile-types";
-
-export const profileTypes = PROFILE_TYPES;
-export type { ProfileType };
+import type { ProfileType } from "@/shared/profile-types";
 
 export type SortOrder = ExchangeInfoSortOrder;
-
-/** 假資料與 API 列表共用同一個型別（repository 的 ExchangeInfoListItem）。 */
 export type ProfileListItem = ExchangeInfoListItem;
 
 export type ListProfilesOptions = {
@@ -23,9 +18,6 @@ const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-/**
- * createdAt 用「離現在多久」表示，卡片上的相對時間才不會隨著日子過去愈來愈舊。
- */
 const mockItems: (Omit<ProfileListItem, "createdAt"> & { agoMs: number })[] = [
   {
     id: "mock-1",

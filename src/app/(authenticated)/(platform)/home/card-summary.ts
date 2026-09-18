@@ -3,14 +3,13 @@ import { formatPostTime } from "@/utils/format";
 
 /**
  * 卡片用的單筆交換資訊：欄位與 API 相同，createdAt 換成格式化好的 timeLabel。
- * 作者的 group 是學員組別，例如 UIUX。
  */
-export type PostSummary = Omit<ExchangeInfoListResponseItem, "createdAt"> & {
+export type CardSummary = Omit<ExchangeInfoListResponseItem, "createdAt"> & {
   /** 已格式化的發文時間 */
   timeLabel: string;
 };
 
-export function toPostSummary(
+export function toCardSummary(
   {
     createdAt,
     ...item
@@ -18,7 +17,7 @@ export function toPostSummary(
     createdAt: Date | string;
   },
   now: Date,
-): PostSummary {
+): CardSummary {
   return {
     id: item.id,
     type: item.type,

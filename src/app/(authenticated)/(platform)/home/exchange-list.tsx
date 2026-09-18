@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/button";
 
-import { PostCard } from "./post-card";
+import { ExchangeCard } from "./exchange-card";
 import { useExchangeInfoFeed, type FeedStatus } from "./use-exchange-info-feed";
 
 function EmptyState() {
@@ -73,20 +73,18 @@ function LoadingOrError({
   );
 }
 
-export function PostList({
+export function ExchangeList({
   apiQuery,
   filterBar,
   filtered,
 }: {
-  /** 傳給 /api/exchange-info 的查詢字串，不含 cursor。 */
   apiQuery: string;
-  /** 由 server 端渲染的篩選列。 */
   filterBar: ReactNode;
   /** 目前是否有套用篩選；決定沒資料時顯示哪一種空狀態。 */
   filtered: boolean;
 }) {
   return (
-    <PostFeed
+    <ExchangeFeed
       // 篩選或排序改變時重新掛載，已載入的資料與展開狀態一起歸零。
       key={apiQuery}
       apiQuery={apiQuery}
@@ -96,7 +94,7 @@ export function PostList({
   );
 }
 
-function PostFeed({
+function ExchangeFeed({
   apiQuery,
   filterBar,
   filtered,
@@ -105,9 +103,9 @@ function PostFeed({
   filterBar: ReactNode;
   filtered: boolean;
 }) {
-  const { posts, status, hasMore, loadMore, retry } =
+  const { cards, status, hasMore, loadMore, retry } =
     useExchangeInfoFeed(apiQuery);
-  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
 
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -129,11 +127,11 @@ function PostFeed({
       cancelAnimationFrame(frame);
       list.removeEventListener("scroll", loadMoreIfNearBottom);
     };
-  }, [loadMore, expandedPostId]);
+  }, [loadMore, expandedCardId]);
 
-  const firstPageSettled = posts.length > 0 || status === "ready";
+  const firstPageSettled = cards.length > 0 || status === "ready";
 
-  if (status === "ready" && posts.length === 0 && !filtered) {
+  if (status === "ready" && cards.length === 0 && !filtered) {
     return (
       <section className="flex min-h-0 flex-1 flex-col gap-5">
         <EmptyState />
@@ -152,22 +150,22 @@ function PostFeed({
         />
       )}
 
-      {status === "ready" && posts.length === 0 && <NoMatchState />}
+      {status === "ready" && cards.length === 0 && <NoMatchState />}
 
-      {posts.length > 0 && (
+      {cards.length > 0 && (
         <ul
           ref={listRef}
           aria-busy={status === "loading"}
           className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-24 md:landscape:pr-2 md:landscape:pb-0 lg:pr-2 lg:pb-0"
         >
-          {posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              expanded={expandedPostId === post.id}
+          {cards.map((card) => (
+            <ExchangeCard
+              key={card.id}
+              card={card}
+              expanded={expandedCardId === card.id}
               onToggle={() =>
-                setExpandedPostId((currentId) =>
-                  currentId === post.id ? null : post.id,
+                setExpandedCardId((currentId) =>
+                  currentId === card.id ? null : card.id,
                 )
               }
             />

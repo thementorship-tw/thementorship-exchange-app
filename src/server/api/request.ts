@@ -18,6 +18,20 @@ export function validationError(fields: Record<string, string>): Response {
 
 type ParseResult<T> = { ok: true; data: T } | { ok: false; response: Response };
 
+function parseWithSchema<TSchema extends z.ZodType>(
+  schema: TSchema,
+  raw: unknown,
+): ParseResult<z.output<TSchema>> {
+  const result = schema.safeParse(raw);
+  if (!result.success) {
+    return {
+      ok: false,
+      response: validationError(toFieldErrors(result.error)),
+    };
+  }
+  return { ok: true, data: result.data };
+}
+
 export async function parseJsonBody<TSchema extends z.ZodType>(
   request: Request,
   schema: TSchema,
@@ -36,12 +50,13 @@ export async function parseJsonBody<TSchema extends z.ZodType>(
     };
   }
 
-  const result = schema.safeParse(body);
-  if (!result.success) {
-    return {
-      ok: false,
-      response: validationError(toFieldErrors(result.error)),
-    };
-  }
-  return { ok: true, data: result.data };
+  return parseWithSchema(schema, body);
+}
+
+/** 驗證從 `URLSearchParams` 取出、組成物件的 query string 參數。 */
+export function parseQuery<TSchema extends z.ZodType>(
+  schema: TSchema,
+  raw: unknown,
+): ParseResult<z.output<TSchema>> {
+  return parseWithSchema(schema, raw);
 }

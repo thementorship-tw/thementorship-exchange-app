@@ -3,10 +3,10 @@ import { Plus } from "@phosphor-icons/react/ssr";
 
 import { EXCHANGE_INFO_KEYWORD_MAX_LENGTH } from "@/shared/api/exchange-info/constants";
 
+import { ExchangeList } from "./exchange-list";
 import { FilterBar } from "./filter-bar";
 import { buildExchangeInfoApiQuery, parseListParams } from "./list-params";
 import { MobileHeader } from "./mobile-header";
-import { PostList } from "./post-list";
 
 export const metadata: Metadata = {
   title: "交流列表｜The Mentorship Exchange",
@@ -32,7 +32,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
       <h1 className="sr-only">交流列表</h1>
 
       <div className="mx-auto grid min-h-0 w-full max-w-360 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] gap-2 px-4 pb-2 md:px-0 md:landscape:gap-6 md:landscape:py-6 lg:gap-6 lg:py-6">
-        <PostList
+        <ExchangeList
           apiQuery={apiQuery}
           filterBar={<FilterBar params={{ types, sort, keyword }} />}
           filtered={types.length > 0}

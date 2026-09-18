@@ -1,7 +1,7 @@
 import { withApiAuth } from "@/server/api/middleware/auth";
 import {
   parseJsonBody,
-  toFieldErrors,
+  parseQuery,
   validationError,
 } from "@/server/api/request";
 import { PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
@@ -19,15 +19,15 @@ import {
 export const GET = withApiAuth("GET /api/exchange-info", async (request) => {
   const { searchParams } = new URL(request.url);
 
-  const parsed = exchangeInfoListQuerySchema.safeParse({
+  const validation = parseQuery(exchangeInfoListQuerySchema, {
     type: searchParams.getAll("type"),
     q: searchParams.get("q") ?? undefined,
     sort: searchParams.get("sort") ?? undefined,
     cursor: searchParams.get("cursor") ?? undefined,
   });
-  if (!parsed.success) return validationError(toFieldErrors(parsed.error));
+  if (!validation.ok) return validation.response;
 
-  const { type, q, sort, cursor } = parsed.data;
+  const { type, q, sort, cursor } = validation.data;
 
   const decodedCursor = cursor ? decodeExchangeInfoCursor(cursor) : undefined;
   if (decodedCursor === null) {

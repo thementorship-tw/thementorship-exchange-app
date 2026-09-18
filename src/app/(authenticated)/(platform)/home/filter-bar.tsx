@@ -2,9 +2,8 @@ import Link from "next/link";
 import { SortAscending, SortDescending } from "@phosphor-icons/react/ssr";
 
 import { Tag } from "@/components/tag";
-import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
+import { PROFILE_TYPE_LABELS, PROFILE_TYPES } from "@/shared/profile-types";
 
-import { profileTypes } from "./mock-profiles";
 import { buildListHref, type ListParams } from "./list-params";
 
 const sortLabels = { newest: "最新的", oldest: "最舊的" } as const;
@@ -20,7 +19,7 @@ export function FilterBar({ params }: { params: ListParams }) {
           快速篩選
         </span>
 
-        {profileTypes.map((type) => {
+        {PROFILE_TYPES.map((type) => {
           const active = types.includes(type);
           const nextTypes = active
             ? types.filter((value) => value !== type)

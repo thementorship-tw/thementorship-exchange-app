@@ -8,19 +8,19 @@ import { Button } from "@/components/button";
 import { Tag } from "@/components/tag";
 import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 
-import type { PostSummary } from "./posts";
+import type { CardSummary } from "./card-summary";
 
-export function PostCard({
-  post,
+export function ExchangeCard({
+  card,
   expanded,
   onToggle,
 }: {
-  post: PostSummary;
+  card: CardSummary;
   expanded: boolean;
   onToggle: () => void;
 }) {
   const expandedContentId = useId();
-  const { author, description } = post;
+  const { type, offersText, wantsText, timeLabel, author, description } = card;
 
   return (
     <li
@@ -34,7 +34,7 @@ export function PostCard({
             variant="filled"
             tone={expanded ? "white" : "brand"}
           >
-            #{PROFILE_TYPE_LABELS[post.type]}
+            #{PROFILE_TYPE_LABELS[type]}
           </Tag>
 
           <button
@@ -53,10 +53,10 @@ export function PostCard({
 
         <div className="flex flex-col gap-1">
           <p className="text-body-lg-strong text-primary">
-            我能提供：{post.offersText}
+            我能提供：{offersText}
           </p>
           <p className="text-body-lg-strong text-primary">
-            我想找：{post.wantsText}
+            我想找：{wantsText}
           </p>
         </div>
       </div>
@@ -83,9 +83,7 @@ export function PostCard({
             <span className="text-body-strong text-gold">{author.group}</span>
           </div>
 
-          <span className="shrink-0 text-body text-secondary">
-            {post.timeLabel}
-          </span>
+          <span className="shrink-0 text-body text-secondary">{timeLabel}</span>
         </div>
       </div>
 
