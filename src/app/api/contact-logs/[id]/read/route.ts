@@ -3,7 +3,7 @@ import { apiError, PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
 import { markContactLogRead } from "@/server/contact-logs/service";
 
 export const PATCH = withApiAuth<RouteContext<"/api/contact-logs/[id]/read">>(
-  "Failed to mark contact log as read",
+  "PATCH /api/contact-logs/[id]/read",
   async (_request, context, user) => {
     const { id } = await context.params;
     const result = await markContactLogRead(id, user.id);

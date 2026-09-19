@@ -10,12 +10,7 @@ import {
   CONTACT_LOG_OFFERED_RESOURCE_MAX_LENGTH,
   CONTACT_LOG_WANTED_ITEM_MAX_LENGTH,
 } from "@/shared/api/contact-logs/constants";
-import {
-  positiveIntegerString,
-  requiredText,
-  validationResult,
-  type ValidationResult,
-} from "@/shared/api/validation";
+import { positiveIntegerString, requiredText } from "@/shared/api/validation";
 import { PROFILE_TYPES } from "@/shared/profile-types";
 
 /**
@@ -160,26 +155,6 @@ export const contactLogListQuerySchema = z
 
 export type ContactLogListQuery = z.output<typeof contactLogListQuerySchema>;
 
-export function validateCreateContactLog(
-  input: unknown,
-): ValidationResult<CreateContactLogValues> {
-  return validationResult(createContactLogSchema.safeParse(input));
-}
-
-export function validateContactLogListQuery(
-  searchParams: URLSearchParams,
-): ValidationResult<ContactLogListQuery> {
-  return validationResult(
-    contactLogListQuerySchema.safeParse({
-      role: searchParams.get("role") ?? undefined,
-      page: searchParams.get("page") ?? undefined,
-      pageSize: searchParams.get("pageSize") ?? undefined,
-      unread: searchParams.get("unread") ?? undefined,
-      withinDays: searchParams.get("withinDays") ?? undefined,
-    }),
-  );
-}
-
 export const markAllContactLogsReadQuerySchema = z.object({
   withinDays: withinDaysSchema(),
 });
@@ -187,13 +162,3 @@ export const markAllContactLogsReadQuerySchema = z.object({
 export type MarkAllContactLogsReadQuery = z.output<
   typeof markAllContactLogsReadQuerySchema
 >;
-
-export function validateMarkAllContactLogsReadQuery(
-  searchParams: URLSearchParams,
-): ValidationResult<MarkAllContactLogsReadQuery> {
-  return validationResult(
-    markAllContactLogsReadQuerySchema.safeParse({
-      withinDays: searchParams.get("withinDays") ?? undefined,
-    }),
-  );
-}

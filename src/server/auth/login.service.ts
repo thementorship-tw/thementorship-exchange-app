@@ -3,7 +3,7 @@ import { and, eq, ne } from "drizzle-orm";
 import type { ConsentReceipt } from "@/server/auth/consent-receipt";
 import { getDb } from "@/server/db";
 import { insertConsentLog } from "@/server/auth/consent.repository";
-import { users } from "@/server/db/schema";
+import { type MemberGroup, users } from "@/server/db/schema";
 import { normalizeEmail } from "@/server/auth/whitelist.repository";
 
 export type LoginInput = {
@@ -12,6 +12,7 @@ export type LoginInput = {
   googleName: string;
   avatarUrl: string | null;
   session: number;
+  group: MemberGroup;
   receipt: ConsentReceipt;
 };
 
@@ -42,6 +43,7 @@ export async function createUserOnFirstLogin(input: LoginInput): Promise<void> {
       sub: input.sub,
       email,
       session: input.session,
+      group: input.group,
       googleName: input.googleName,
       // 暱稱首次建檔時預設為 Google 姓名，之後由使用者自行修改。
       nickname: input.googleName,

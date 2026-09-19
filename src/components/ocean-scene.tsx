@@ -17,6 +17,7 @@ export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
         src="/images/login/background-lg.png"
         alt=""
         fill
+        loading="eager"
         sizes="(min-width: 1024px) 100vw, (min-width: 768px) and (orientation: landscape) 100vw, 1px"
         className="hidden -translate-y-20 object-cover object-[left_90%] md:landscape:block lg:block"
       />
@@ -24,6 +25,7 @@ export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
         src="/images/login/background-sm.png"
         alt=""
         fill
+        loading="eager"
         fetchPriority="high"
         sizes="(min-width: 1024px) 1px, (min-width: 768px) and (orientation: landscape) 1px, 100vw"
         className="object-cover object-bottom md:landscape:hidden lg:hidden"
