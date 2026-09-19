@@ -1,26 +1,21 @@
 import { withApiAuth } from "@/server/api/middleware/auth";
-import { apiError, PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
+import { parseQuery } from "@/server/api/request";
+import { PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
 import { markAllContactLogsRead } from "@/server/contact-logs/service";
-import { validateMarkAllContactLogsReadQuery } from "@/shared/api/contact-logs/schemas";
+import { markAllContactLogsReadQuerySchema } from "@/shared/api/contact-logs/schemas";
 
 export const PATCH = withApiAuth(
-  "Failed to mark all contact logs as read",
+  "PATCH /api/contact-logs/read-all",
   async (request, _context, user) => {
-    const validation = validateMarkAllContactLogsReadQuery(
-      new URL(request.url).searchParams,
-    );
-    if (!validation.ok) {
-      return apiError(
-        422,
-        "VALIDATION_ERROR",
-        "Request validation failed",
-        validation.fields,
-      );
-    }
+    const { searchParams } = new URL(request.url);
+    const validation = parseQuery(markAllContactLogsReadQuerySchema, {
+      withinDays: searchParams.get("withinDays") ?? undefined,
+    });
+    if (!validation.ok) return validation.response;
 
     const result = await markAllContactLogsRead(
       user.id,
-      validation.value.withinDays,
+      validation.data.withinDays,
     );
 
     return Response.json(

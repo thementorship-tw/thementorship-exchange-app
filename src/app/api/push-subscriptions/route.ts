@@ -1,37 +1,21 @@
 import { withApiAuth } from "@/server/api/middleware/auth";
+import { parseJsonBody } from "@/server/api/request";
 import { apiError, PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
 import {
   deactivatePushSubscription,
   upsertPushSubscription,
 } from "@/server/push-subscriptions/service";
-import {
-  validateDeactivatePushSubscription,
-  validateRegisterPushSubscription,
-} from "@/shared/api/push-subscriptions/schemas";
+import { pushSubscriptionSchema } from "@/shared/api/push-subscriptions/schemas";
 
 export const POST = withApiAuth(
-  "Failed to register push subscription",
+  "POST /api/push-subscriptions",
   async (request, _context, user) => {
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return apiError(400, "INVALID_JSON", "Request body must be valid JSON");
-    }
-
-    const validation = validateRegisterPushSubscription(body);
-    if (!validation.ok) {
-      return apiError(
-        422,
-        "VALIDATION_ERROR",
-        "Request validation failed",
-        validation.fields,
-      );
-    }
+    const body = await parseJsonBody(request, pushSubscriptionSchema);
+    if (!body.ok) return body.response;
 
     await upsertPushSubscription({
       userId: user.id,
-      fcmToken: validation.value.fcmToken,
+      fcmToken: body.data.fcmToken,
       userAgent: request.headers.get("user-agent"),
     });
 
@@ -43,28 +27,14 @@ export const POST = withApiAuth(
 );
 
 export const DELETE = withApiAuth(
-  "Failed to deactivate push subscription",
+  "DELETE /api/push-subscriptions",
   async (request, _context, user) => {
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return apiError(400, "INVALID_JSON", "Request body must be valid JSON");
-    }
-
-    const validation = validateDeactivatePushSubscription(body);
-    if (!validation.ok) {
-      return apiError(
-        422,
-        "VALIDATION_ERROR",
-        "Request validation failed",
-        validation.fields,
-      );
-    }
+    const body = await parseJsonBody(request, pushSubscriptionSchema);
+    if (!body.ok) return body.response;
 
     const result = await deactivatePushSubscription(
       user.id,
-      validation.value.fcmToken,
+      body.data.fcmToken,
     );
     if (result.status === "not_found") {
       return apiError(

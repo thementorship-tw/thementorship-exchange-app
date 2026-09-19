@@ -13,7 +13,7 @@ export function MobileHeader() {
   const { unreadCount } = useNotifications();
 
   return (
-    <header className="flex flex-col gap-4 px-4 pt-3 pb-2 md:landscape:hidden lg:hidden">
+    <header className="flex flex-col gap-3 px-4 pt-3 pb-4 md:landscape:hidden lg:hidden">
       <div className="flex items-center gap-6">
         <button
           type="button"

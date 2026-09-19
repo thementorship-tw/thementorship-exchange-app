@@ -22,6 +22,7 @@ export function LoginErrorDialog({
       title={title}
       onClose={onClose}
       showCloseButton
+      className="text-left"
     >
       <p className="text-left">
         {body.map((part, index) =>

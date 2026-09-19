@@ -1,6 +1,7 @@
 import { after } from "next/server";
 
 import { withApiAuth } from "@/server/api/middleware/auth";
+import { parseJsonBody, parseQuery } from "@/server/api/request";
 import { apiError, PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
 import {
   createContactLog,
@@ -9,8 +10,8 @@ import {
 } from "@/server/contact-logs/service";
 import { sendContactLogPushNotification } from "@/server/notifications/push";
 import {
-  validateContactLogListQuery,
-  validateCreateContactLog,
+  contactLogListQuerySchema,
+  createContactLogSchema,
 } from "@/shared/api/contact-logs/schemas";
 import type { ContactLogResponse } from "@/shared/api/contact-logs/types";
 
@@ -24,27 +25,13 @@ export function serializeContactLog(log: ContactLogView): ContactLogResponse {
 }
 
 export const POST = withApiAuth(
-  "Failed to create contact log",
+  "POST /api/contact-logs",
   async (request, _context, user) => {
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return apiError(400, "INVALID_JSON", "Request body must be valid JSON");
-    }
-
-    const validation = validateCreateContactLog(body);
-    if (!validation.ok) {
-      return apiError(
-        422,
-        "VALIDATION_ERROR",
-        "Request validation failed",
-        validation.fields,
-      );
-    }
+    const body = await parseJsonBody(request, createContactLogSchema);
+    if (!body.ok) return body.response;
 
     const result = await createContactLog({
-      ...validation.value,
+      ...body.data,
       fromUser: {
         id: user.id,
         nickname: user.nickname,
@@ -86,22 +73,20 @@ export const POST = withApiAuth(
 );
 
 export const GET = withApiAuth(
-  "Failed to list contact logs",
+  "GET /api/contact-logs",
   async (request, _context, user) => {
-    const validation = validateContactLogListQuery(
-      new URL(request.url).searchParams,
-    );
-    if (!validation.ok) {
-      return apiError(
-        422,
-        "VALIDATION_ERROR",
-        "Request validation failed",
-        validation.fields,
-      );
-    }
+    const { searchParams } = new URL(request.url);
+    const validation = parseQuery(contactLogListQuerySchema, {
+      role: searchParams.get("role") ?? undefined,
+      page: searchParams.get("page") ?? undefined,
+      pageSize: searchParams.get("pageSize") ?? undefined,
+      unread: searchParams.get("unread") ?? undefined,
+      withinDays: searchParams.get("withinDays") ?? undefined,
+    });
+    if (!validation.ok) return validation.response;
 
     const { direction, page, pageSize, unreadOnly, withinDays } =
-      validation.value;
+      validation.data;
     const result = await listContactLogs({
       userId: user.id,
       direction,

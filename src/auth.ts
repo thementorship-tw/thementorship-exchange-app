@@ -131,6 +131,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           googleName,
           avatarUrl,
           session: whitelistEntry.session,
+          group: whitelistEntry.group,
           receipt,
         });
       } catch (error) {
