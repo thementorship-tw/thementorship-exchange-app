@@ -1,7 +1,6 @@
 "use client";
 
 import { CircleNotch, WifiSlash } from "@phosphor-icons/react/ssr";
-import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/button";
@@ -166,14 +165,6 @@ function ExchangeFeed({
             />
           ) : (
             <ErrorState
-              image={
-                <Image
-                  src="/images/server-error.svg"
-                  alt=""
-                  width={32}
-                  height={32}
-                />
-              }
               title={LOAD_FAILED_ERROR_TITLE}
               description={LOAD_FAILED_ERROR_DESCRIPTION}
               onRetry={retry}
