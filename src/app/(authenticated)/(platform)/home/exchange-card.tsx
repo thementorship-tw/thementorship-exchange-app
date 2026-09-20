@@ -2,24 +2,32 @@
 
 import Image from "next/image";
 import { CaretDown } from "@phosphor-icons/react/ssr";
-import { useId } from "react";
+import { useId, useState } from "react";
 
 import { Button } from "@/components/button";
 import { Tag } from "@/components/tag";
+import { Toast } from "@/components/toast";
 import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 
 import type { CardSummary } from "./card-summary";
+import { ExchangeApplicationDialog } from "./exchange-application-dialog";
 
 export function ExchangeCard({
   card,
   expanded,
   onToggle,
+  appliedWithinCooldown,
+  onApplicationSent,
 }: {
   card: CardSummary;
   expanded: boolean;
   onToggle: () => void;
+  appliedWithinCooldown: boolean;
+  onApplicationSent: () => void;
 }) {
   const expandedContentId = useId();
+  const [applicationDialogOpen, setApplicationDialogOpen] = useState(false);
+  const [duplicateToastOpen, setDuplicateToastOpen] = useState(false);
   const { type, offersText, wantsText, timeLabel, author, description } = card;
 
   return (
@@ -92,16 +100,42 @@ export function ExchangeCard({
           id={expandedContentId}
           className="flex justify-center py-1"
         >
-          {/* TODO: 申請交換流程尚未實作。 */}
-          <Button
-            variant="accent"
-            shape="rounded"
-            className="w-full md:landscape:w-auto lg:w-auto"
-          >
-            申請交換
-          </Button>
+          {appliedWithinCooldown ? (
+            <button
+              type="button"
+              onClick={() => setDuplicateToastOpen(true)}
+              className="cursor-pointer rounded-8 px-4 py-3 text-body-lg-strong text-brand focus-visible:outline-2 focus-visible:outline-brand"
+            >
+              已申請過
+            </button>
+          ) : (
+            <Button
+              variant="accent"
+              shape="rounded"
+              onClick={() => setApplicationDialogOpen(true)}
+              className="w-full md:landscape:w-auto lg:w-auto"
+            >
+              申請交換
+            </Button>
+          )}
         </div>
       )}
+
+      <ExchangeApplicationDialog
+        profileId={card.id}
+        open={applicationDialogOpen}
+        onClose={() => setApplicationDialogOpen(false)}
+        onSent={onApplicationSent}
+      />
+
+      <Toast
+        open={duplicateToastOpen}
+        variant="error"
+        placement="homeContent"
+        onClose={() => setDuplicateToastOpen(false)}
+      >
+        你今日已申請交換過該貼文，不可重複申請
+      </Toast>
     </li>
   );
 }

@@ -114,6 +114,9 @@ function ExchangeFeed({
   const { cards, status, hasMore, loadMore, retry } =
     useExchangeInfoFeed(apiQuery);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [sentProfileIds, setSentProfileIds] = useState<Set<string>>(
+    () => new Set(),
+  ); // 記錄已送出申請的貼文 ID
   const isOffline = useIsOffline();
 
   const listRef = useRef<HTMLUListElement>(null);
@@ -193,6 +196,16 @@ function ExchangeFeed({
               key={card.id}
               card={card}
               expanded={expandedCardId === card.id}
+              appliedWithinCooldown={
+                card.appliedWithinCooldown || sentProfileIds.has(card.id)
+              }
+              onApplicationSent={() =>
+                setSentProfileIds((current) => {
+                  const next = new Set(current);
+                  next.add(card.id);
+                  return next;
+                })
+              }
               onToggle={() =>
                 setExpandedCardId((currentId) =>
                   currentId === card.id ? null : card.id,

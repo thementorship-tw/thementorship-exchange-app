@@ -16,36 +16,40 @@ import {
 } from "@/shared/api/exchange-info/schemas";
 
 /** 交換資訊列表：無限滾動分頁，支援標籤、關鍵字篩選與新舊排序。 */
-export const GET = withApiAuth("GET /api/exchange-info", async (request) => {
-  const { searchParams } = new URL(request.url);
+export const GET = withApiAuth(
+  "GET /api/exchange-info",
+  async (request, _, user) => {
+    const { searchParams } = new URL(request.url);
 
-  const validation = parseQuery(exchangeInfoListQuerySchema, {
-    type: searchParams.getAll("type"),
-    q: searchParams.get("q") ?? undefined,
-    sort: searchParams.get("sort") ?? undefined,
-    cursor: searchParams.get("cursor") ?? undefined,
-  });
-  if (!validation.ok) return validation.response;
+    const validation = parseQuery(exchangeInfoListQuerySchema, {
+      type: searchParams.getAll("type"),
+      q: searchParams.get("q") ?? undefined,
+      sort: searchParams.get("sort") ?? undefined,
+      cursor: searchParams.get("cursor") ?? undefined,
+    });
+    if (!validation.ok) return validation.response;
 
-  const { type, q, sort, cursor } = validation.data;
+    const { type, q, sort, cursor } = validation.data;
 
-  const decodedCursor = cursor ? decodeExchangeInfoCursor(cursor) : undefined;
-  if (decodedCursor === null) {
-    return validationError({ cursor: "Invalid cursor" });
-  }
+    const decodedCursor = cursor ? decodeExchangeInfoCursor(cursor) : undefined;
+    if (decodedCursor === null) {
+      return validationError({ cursor: "Invalid cursor" });
+    }
 
-  const { items, nextCursor } = await listExchangeInfo({
-    types: type,
-    keyword: q || undefined,
-    sort,
-    cursor: decodedCursor,
-  });
+    const { items, nextCursor } = await listExchangeInfo({
+      viewerUserId: user.id,
+      types: type,
+      keyword: q || undefined,
+      sort,
+      cursor: decodedCursor,
+    });
 
-  return Response.json(
-    { data: items, nextCursor },
-    { headers: PRIVATE_NO_STORE_HEADERS },
-  );
-});
+    return Response.json(
+      { data: items, nextCursor },
+      { headers: PRIVATE_NO_STORE_HEADERS },
+    );
+  },
+);
 
 /** 新增交換資訊。 */
 export const POST = withApiAuth(

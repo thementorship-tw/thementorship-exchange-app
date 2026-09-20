@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 
-import { listProfiles } from "../src/app/(authenticated)/(platform)/home/mock-profiles";
 import { profiles, users } from "../src/server/db/schema";
+import { listProfiles } from "./mock-profile-data";
 
 dotenv.config({ path: ".env.local", quiet: true });
 dotenv.config({ quiet: true });
@@ -31,7 +31,7 @@ async function main(): Promise<void> {
   const db = drizzle(client);
 
   try {
-    // 用 mock-profiles 的假資料；createdAt 以執行當下往回推，重跑會刷新時間。
+    // 用 seed 專屬假資料；createdAt 以執行當下往回推，重跑會刷新時間。
     const items = await listProfiles({ limit: Number.MAX_SAFE_INTEGER });
     const groupByNickname = new Map(
       items.map(({ author }) => [author.nickname, author.group]),

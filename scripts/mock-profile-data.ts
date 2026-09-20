@@ -1,6 +1,6 @@
-import type { ExchangeInfoSortOrder } from "@/shared/api/exchange-info/constants";
-import type { ExchangeInfoListItem } from "@/server/exchange-info/exchange-info.repository";
-import type { ProfileType } from "@/shared/profile-types";
+import type { ExchangeInfoSortOrder } from "../src/shared/api/exchange-info/constants";
+import type { ExchangeInfoListItem } from "../src/server/exchange-info/exchange-info.repository";
+import type { ProfileType } from "../src/shared/profile-types";
 
 export type SortOrder = ExchangeInfoSortOrder;
 export type ProfileListItem = ExchangeInfoListItem;
@@ -18,7 +18,10 @@ const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-const mockItems: (Omit<ProfileListItem, "createdAt"> & { agoMs: number })[] = [
+const mockItems: (Omit<
+  ProfileListItem,
+  "createdAt" | "appliedWithinCooldown"
+> & { agoMs: number })[] = [
   {
     id: "mock-1",
     type: "skillAndInterest",
@@ -272,6 +275,7 @@ export async function listProfiles({
     )
     .map(({ agoMs, ...item }) => ({
       ...item,
+      appliedWithinCooldown: false,
       createdAt: new Date(now - agoMs),
     }))
     .sort((a, b) =>

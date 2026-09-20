@@ -16,7 +16,7 @@ import {
 import type { ContactLogResponse } from "@/shared/api/contact-logs/types";
 
 // 將 Date 物件轉換為 ISO 字串
-export function serializeContactLog(log: ContactLogView): ContactLogResponse {
+function serializeContactLog(log: ContactLogView): ContactLogResponse {
   return {
     ...log,
     readAt: log.readAt?.toISOString() ?? null,
@@ -53,7 +53,7 @@ export const POST = withApiAuth(
       return apiError(
         409,
         "DUPLICATE_CONTACT_TODAY",
-        "You already contacted this profile recently",
+        "You already applied to this profile today",
       );
     }
 

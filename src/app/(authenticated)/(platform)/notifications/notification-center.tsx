@@ -147,7 +147,7 @@ export function NotificationCenter() {
                 type="button"
                 onClick={markAllAsRead}
                 disabled={unreadCount === 0}
-                className="min-h-9 shrink-0 cursor-pointer rounded-pill border border-line bg-surface px-4 text-body-strong text-primary transition-colors hover:bg-surface-subtle disabled:cursor-default disabled:opacity-60 focus-visible:bg-surface-subtle focus-visible:outline-none"
+                className="min-h-9 shrink-0 cursor-default rounded-pill border border-line bg-surface px-4 text-body-strong text-primary transition-colors enabled:cursor-pointer enabled:hover:bg-surface-subtle enabled:focus-visible:bg-surface-subtle enabled:focus-visible:outline-none disabled:opacity-60"
               >
                 已讀全部
               </button>
