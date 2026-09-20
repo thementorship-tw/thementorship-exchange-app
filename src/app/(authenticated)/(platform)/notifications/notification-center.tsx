@@ -4,7 +4,7 @@ import { ArrowLeft } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 
-import { DataLoadError } from "@/components/data-load-error";
+import { ErrorState } from "@/components/error-state";
 import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 import { formatPostTime } from "@/utils/format";
 
@@ -132,7 +132,7 @@ export function NotificationCenter() {
       </div>
 
       {loadFailed ? (
-        <DataLoadError className="flex-1" />
+        <ErrorState className="flex-1" />
       ) : (
         <>
           <header className="mb-4 flex items-center justify-between gap-4 md:landscape:mb-5 lg:mb-5">

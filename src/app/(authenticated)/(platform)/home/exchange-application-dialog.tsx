@@ -243,7 +243,7 @@ export function ExchangeApplicationDialog({
                 <span className="flex items-center justify-between gap-3 text-primary">
                   <span className="text-body-lg-strong">{label}</span>
                   <span className="text-body text-secondary">
-                    ({values[key].length}/{maxLength})
+                    ({values[key].trim().length}/{maxLength})
                   </span>
                 </span>
                 <AutoGrowTextarea
