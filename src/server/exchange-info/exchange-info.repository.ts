@@ -216,3 +216,60 @@ export async function createExchangeInfo(
 
   return toExchangeInfoListItem(row);
 }
+
+export type MyExchangeProfileRow = {
+  id: string;
+  type: ProfileType;
+  visible: boolean;
+  offersText: string;
+  wantsText: string;
+  description: string | null;
+  createdAt: Date;
+};
+
+/** 設定中心「我的發文」：含已下架、不含已刪除。 */
+export async function listMyExchangeProfiles(
+  userId: string,
+): Promise<MyExchangeProfileRow[]> {
+  return getDb()
+    .select({
+      id: profiles.id,
+      type: profiles.type,
+      visible: profiles.visible,
+      offersText: profiles.offersText,
+      wantsText: profiles.wantsText,
+      description: profiles.description,
+      createdAt: profiles.createdAt,
+    })
+    .from(profiles)
+    .where(and(eq(profiles.userId, userId), isNull(profiles.deletedAt)))
+    .orderBy(desc(profiles.createdAt), desc(profiles.id));
+}
+
+export async function delistMyExchangeProfile(
+  userId: string,
+  profileId: string,
+): Promise<MyExchangeProfileRow | null> {
+  const db = getDb();
+  const [updated] = await db
+    .update(profiles)
+    .set({ visible: false, updatedBy: userId })
+    .where(
+      and(
+        eq(profiles.id, profileId),
+        eq(profiles.userId, userId),
+        isNull(profiles.deletedAt),
+      ),
+    )
+    .returning({
+      id: profiles.id,
+      type: profiles.type,
+      visible: profiles.visible,
+      offersText: profiles.offersText,
+      wantsText: profiles.wantsText,
+      description: profiles.description,
+      createdAt: profiles.createdAt,
+    });
+
+  return updated ?? null;
+}

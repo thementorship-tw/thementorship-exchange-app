@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 
 import { FORCE_SIGN_OUT_PATH, requireActiveUser } from "@/auth";
 import { findSettingsProfileByUserId } from "@/server/auth/user.repository";
+import { listMyExchangeProfiles } from "@/server/exchange-info/exchange-info.repository";
+import { serializeMyProfileItem } from "@/server/exchange-info/my-profiles";
 
+import { toMyPost } from "./my-posts";
 import { SettingsCenter } from "./settings-center";
 
 export const metadata: Metadata = {
@@ -19,5 +22,13 @@ export default async function SettingsPage() {
     redirect(FORCE_SIGN_OUT_PATH);
   }
 
-  return <SettingsCenter profile={profile} />;
+  const rows = await listMyExchangeProfiles(user.id);
+  const initialPosts = rows.map((row) => toMyPost(serializeMyProfileItem(row)));
+
+  return (
+    <SettingsCenter
+      profile={profile}
+      initialPosts={initialPosts}
+    />
+  );
 }

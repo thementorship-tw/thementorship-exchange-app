@@ -7,10 +7,17 @@ import { useState } from "react";
 import type { SettingsProfile } from "@/shared/api/users/schemas";
 
 import { MyPostList } from "./my-post-list";
+import type { MyPost } from "./settings-mock-data";
 import { SettingsProfileHeader } from "./settings-profile-header";
 import { SettingsTabs, type SettingsTab } from "./settings-tabs";
 
-export function SettingsCenter({ profile }: { profile: SettingsProfile }) {
+export function SettingsCenter({
+  profile,
+  initialPosts,
+}: {
+  profile: SettingsProfile;
+  initialPosts: MyPost[];
+}) {
   const [activeTab, setActiveTab] = useState<SettingsTab>("posts");
 
   return (
@@ -42,7 +49,7 @@ export function SettingsCenter({ profile }: { profile: SettingsProfile }) {
           className="flex min-h-0 flex-1 flex-col pt-2"
         >
           {activeTab === "posts" ? (
-            <MyPostList />
+            <MyPostList initialPosts={initialPosts} />
           ) : (
             <div className="flex flex-1 items-center justify-center rounded-20 bg-glass px-6 py-12 text-body text-secondary">
               即將推出

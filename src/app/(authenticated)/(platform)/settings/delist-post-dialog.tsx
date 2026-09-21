@@ -5,10 +5,12 @@ import { Dialog } from "@/components/dialog";
 
 export function DelistPostDialog({
   open,
+  confirming = false,
   onClose,
   onConfirm,
 }: {
   open: boolean;
+  confirming?: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }) {
@@ -23,15 +25,17 @@ export function DelistPostDialog({
           <Button
             variant="secondary"
             size="sm"
+            disabled={confirming}
             onClick={onClose}
           >
             取消
           </Button>
           <Button
             size="sm"
+            disabled={confirming}
             onClick={onConfirm}
           >
-            確定下架
+            {confirming ? "下架中…" : "確定下架"}
           </Button>
         </>
       }
