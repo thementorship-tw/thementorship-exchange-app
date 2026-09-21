@@ -11,6 +11,7 @@ import {
   CONTACT_LOG_WANTED_ITEM_MAX_LENGTH,
 } from "@/shared/api/contact-logs/constants";
 import { positiveIntegerString, requiredText } from "@/shared/api/validation";
+import { MEMBER_GROUPS } from "@/shared/member-groups";
 import { PROFILE_TYPES } from "@/shared/profile-types";
 
 /**
@@ -23,6 +24,7 @@ export const contactLogUserSchema = z
   .object({
     id: z.string(),
     nickname: z.string(),
+    group: z.enum(MEMBER_GROUPS),
     avatarUrl: z.string().nullable(),
   })
   .meta({ id: "ContactLogUser" });

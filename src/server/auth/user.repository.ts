@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { getDb } from "@/server/db";
-import { users } from "@/server/db/schema";
+import { type MemberGroup, users } from "@/server/db/schema";
 import type { SettingsProfile } from "@/shared/api/users/schemas";
 
 export type SessionUser = {
@@ -28,6 +28,18 @@ export async function findUserBySub(sub: string): Promise<SessionUser | null> {
     .limit(1);
 
   return user ?? null;
+}
+
+export async function findMemberGroupByUserId(
+  userId: string,
+): Promise<MemberGroup | null> {
+  const [row] = await getDb()
+    .select({ group: users.group })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  return row?.group ?? null;
 }
 
 /** 設定中心 Profile 區塊：Google 原名、組別、暱稱與頭像。 */

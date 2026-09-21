@@ -1,5 +1,6 @@
 import { after } from "next/server";
 
+import { findMemberGroupByUserId } from "@/server/auth/user.repository";
 import { withApiAuth } from "@/server/api/middleware/auth";
 import { parseJsonBody, parseQuery } from "@/server/api/request";
 import { apiError, PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
@@ -30,11 +31,17 @@ export const POST = withApiAuth(
     const body = await parseJsonBody(request, createContactLogSchema);
     if (!body.ok) return body.response;
 
+    const group = await findMemberGroupByUserId(user.id);
+    if (group === null) {
+      throw new Error(`Member group missing for user ${user.id}`);
+    }
+
     const result = await createContactLog({
       ...body.data,
       fromUser: {
         id: user.id,
         nickname: user.nickname,
+        group,
         avatarUrl: user.avatarUrl,
       },
     });
