@@ -25,21 +25,6 @@ export type MyPost = {
   receivedApplications: ReceivedApplication[];
 };
 
-export type SettingsProfile = {
-  googleName: string;
-  group: string;
-  nickname: string;
-  avatarUrl: string | null;
-};
-
-/** Phase A mock；API 串接前供 UI 對稿。 */
-export const MOCK_SETTINGS_PROFILE: SettingsProfile = {
-  googleName: "Pahgygf 0228",
-  group: "UIUX",
-  nickname: "Lena Liang",
-  avatarUrl: null,
-};
-
 export const MOCK_MY_POSTS: MyPost[] = [
   {
     id: "post-1",

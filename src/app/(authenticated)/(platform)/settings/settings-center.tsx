@@ -4,13 +4,13 @@ import { ArrowLeft } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { useState } from "react";
 
+import type { SettingsProfile } from "@/shared/api/users/schemas";
+
 import { MyPostList } from "./my-post-list";
-import { MOCK_SETTINGS_PROFILE } from "./settings-mock-data";
 import { SettingsProfileHeader } from "./settings-profile-header";
 import { SettingsTabs, type SettingsTab } from "./settings-tabs";
 
-/** 設定中心 Phase A：靜態 UI + mock 互動，尚未串 API。 */
-export function SettingsCenter() {
+export function SettingsCenter({ profile }: { profile: SettingsProfile }) {
   const [activeTab, setActiveTab] = useState<SettingsTab>("posts");
 
   return (
@@ -26,7 +26,7 @@ export function SettingsCenter() {
       </div>
 
       <div className="mb-6 md:landscape:mb-8 lg:mb-8">
-        <SettingsProfileHeader profile={MOCK_SETTINGS_PROFILE} />
+        <SettingsProfileHeader profile={profile} />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-2">

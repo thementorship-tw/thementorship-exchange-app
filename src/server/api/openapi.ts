@@ -21,6 +21,7 @@ import {
   exchangeInfoListQuerySchema,
   exchangeInfoListResponseDoc,
 } from "@/shared/api/exchange-info/schemas";
+import { meResponseDoc, updateMeSchema } from "@/shared/api/users/schemas";
 
 function errorResponse(description: string) {
   return {
@@ -37,6 +38,42 @@ export function buildOpenApiDocument() {
       version: "1.0.0",
     },
     paths: {
+      "/api/me": {
+        get: {
+          tags: ["Users"],
+          summary: "取得目前登入者的設定中心 Profile 資料",
+          responses: {
+            "200": {
+              description: "OK",
+              content: {
+                "application/json": { schema: meResponseDoc },
+              },
+            },
+            "401": errorResponse("Authentication required"),
+            "403": errorResponse("Account inactive or consent required"),
+          },
+        },
+        patch: {
+          tags: ["Users"],
+          summary: "更新目前登入者的設定中心 Profile（目前僅支援 nickname）",
+          requestBody: {
+            required: true,
+            content: { "application/json": { schema: updateMeSchema } },
+          },
+          responses: {
+            "200": {
+              description: "OK",
+              content: {
+                "application/json": { schema: meResponseDoc },
+              },
+            },
+            "400": errorResponse("Request body must be valid JSON"),
+            "401": errorResponse("Authentication required"),
+            "403": errorResponse("Account inactive or consent required"),
+            "422": errorResponse("Request validation failed"),
+          },
+        },
+      },
       "/api/exchange-info": {
         get: {
           tags: ["Exchange Info"],
