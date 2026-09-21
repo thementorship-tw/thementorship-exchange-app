@@ -216,3 +216,15 @@ export async function createExchangeInfo(
 
   return toExchangeInfoListItem(row);
 }
+
+/** 目前使用者尚未刪除的貼文類型；下架貼文仍占用該類型。 */
+export async function listPublishedExchangeInfoTypes(
+  userId: string,
+): Promise<ProfileType[]> {
+  const rows = await getDb()
+    .select({ type: profiles.type })
+    .from(profiles)
+    .where(and(eq(profiles.userId, userId), isNull(profiles.deletedAt)));
+
+  return rows.map(({ type }) => type);
+}

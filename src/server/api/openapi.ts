@@ -18,6 +18,7 @@ import { CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS } from "@/shared/api/contact-logs/c
 import {
   createExchangeInfoResponseDoc,
   createExchangeInfoSchema,
+  exchangeInfoAvailabilityResponseDoc,
   exchangeInfoListQuerySchema,
   exchangeInfoListResponseDoc,
 } from "@/shared/api/exchange-info/schemas";
@@ -72,7 +73,26 @@ export function buildOpenApiDocument() {
             "400": errorResponse("Request body must be valid JSON"),
             "401": errorResponse("Authentication required"),
             "403": errorResponse("Account inactive or consent required"),
+            "409": errorResponse("A profile of this type already exists"),
             "422": errorResponse("Request validation failed"),
+          },
+        },
+      },
+      "/api/exchange-info/availability": {
+        get: {
+          tags: ["Exchange Info"],
+          summary: "取得目前使用者已刊登與仍可刊登的貼文類型",
+          responses: {
+            "200": {
+              description: "OK",
+              content: {
+                "application/json": {
+                  schema: exchangeInfoAvailabilityResponseDoc,
+                },
+              },
+            },
+            "401": errorResponse("Authentication required"),
+            "403": errorResponse("Account inactive or consent required"),
           },
         },
       },

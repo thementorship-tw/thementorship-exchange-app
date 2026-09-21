@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Plus } from "@phosphor-icons/react/ssr";
 
 import { EXCHANGE_INFO_KEYWORD_MAX_LENGTH } from "@/shared/api/exchange-info/constants";
 
@@ -7,6 +6,7 @@ import { ExchangeList } from "./exchange-list";
 import { FilterBar } from "./filter-bar";
 import { buildExchangeInfoApiQuery, parseListParams } from "./list-params";
 import { MobileHeader } from "./mobile-header";
+import { PublishExchangeButton } from "./publish-exchange-button";
 
 export const metadata: Metadata = {
   title: "交流列表｜The Mentorship Exchange",
@@ -39,13 +39,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
         />
       </div>
 
-      <button
-        type="button"
-        aria-label="我要發文"
-        className="fixed right-4 bottom-6 z-20 flex size-12 cursor-pointer items-center justify-center rounded-pill bg-brand text-inverse shadow-lg transition active:translate-y-px focus-visible:outline-2 focus-visible:outline-brand md:landscape:hidden lg:hidden"
-      >
-        <Plus className="size-6" />
-      </button>
+      <PublishExchangeButton />
     </>
   );
 }

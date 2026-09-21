@@ -7,7 +7,12 @@ import {
 } from "@/shared/api/contact-logs/constants";
 
 import { HomeSidebar } from "./home/home-sidebar";
+import {
+  PublishExchangeContent,
+  PublishExchangeProvider,
+} from "./_providers/publish-exchange-provider";
 import { NotificationProvider } from "./_providers/notification-provider";
+import { PublishExchangeDialogContainer } from "./home/publish-exchange-dialog";
 import { toNotificationItem } from "./notifications/notifications";
 import type { NotificationItem } from "./notifications/notifications";
 
@@ -42,10 +47,13 @@ export default async function PlatformLayout({
         initialLoadFailed={notificationLoadFailed}
         initialNotifications={initialNotifications}
       >
-        <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col md:px-6 md:landscape:flex-row md:landscape:gap-6 md:landscape:py-6 lg:flex-row lg:gap-6 lg:px-6 lg:py-6 xl:px-20">
-          <HomeSidebar />
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">{children}</div>
-        </div>
+        <PublishExchangeProvider>
+          <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col md:px-6 md:landscape:flex-row md:landscape:gap-6 md:landscape:py-6 lg:flex-row lg:gap-6 lg:px-6 lg:py-6 xl:px-20">
+            <HomeSidebar />
+            <PublishExchangeContent>{children}</PublishExchangeContent>
+          </div>
+          <PublishExchangeDialogContainer />
+        </PublishExchangeProvider>
       </NotificationProvider>
     </main>
   );
