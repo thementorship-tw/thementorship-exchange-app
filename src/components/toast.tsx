@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect, useEffectEvent, useRef } from "react";
 
-type ToastVariant = "info" | "success" | "error";
+type ToastVariant = "info" | "success" | "error" | "brand";
 
 export type ToastProps = {
   open: boolean;
@@ -18,6 +18,7 @@ const variantClasses: Record<ToastVariant, string> = {
   info: "bg-gold text-inverse",
   success: "bg-success text-inverse",
   error: "bg-error text-inverse",
+  brand: "bg-brand text-inverse",
 };
 
 export function Toast({
