@@ -19,12 +19,14 @@ export function MyPostRow({
   post,
   menuOpen,
   onMenuOpenChange,
+  onEdit,
   onDelist,
   targetApplicationId,
 }: {
   post: MyPost;
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
+  onEdit: () => void;
   onDelist: () => void;
   /** 從通知點過來的目標申請；非 undefined 代表這篇貼文是導航目標，掛載時要捲過去。 */
   targetApplicationId?: string;
@@ -85,6 +87,7 @@ export function MyPostRow({
             <PostActionMenu
               open={menuOpen}
               onOpenChange={onMenuOpenChange}
+              onEdit={onEdit}
               onDelist={onDelist}
             />
           )}

@@ -8,9 +8,7 @@ import { Toast } from "@/components/toast";
 import type { MeResponse, SettingsProfile } from "@/shared/api/users/schemas";
 import { NICKNAME_MAX_LENGTH } from "@/shared/api/users/constants";
 
-type ApiErrorBody = {
-  error?: { message?: string; fields?: Record<string, string> };
-};
+import { readApiError } from "./api-error";
 
 export function SettingsProfileHeader({
   profile: initialProfile,
@@ -24,6 +22,7 @@ export function SettingsProfileHeader({
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const inputRef = useRef<HTMLInputElement>(null);
   const ignoreBlurSaveRef = useRef(false);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     if (!editing) return;
@@ -32,6 +31,9 @@ export function SettingsProfileHeader({
   }, [editing]);
 
   function startEditing() {
+    // Escape 取消時 input 會直接被移除，瀏覽器不會補發 blur，旗標會留在上一輪
+    // 的 true；每次進入編輯先歸零，才不會吃掉這一輪的第一次 blur 存檔。
+    ignoreBlurSaveRef.current = false;
     setDraft(profile.nickname);
     setEditing(true);
   }
@@ -42,6 +44,10 @@ export function SettingsProfileHeader({
   }
 
   async function saveNickname() {
+    // 按 Enter 會讓 input 變 disabled，依規格焦點會被收走並觸發 blur，blur 又會
+    // 再存一次；用 ref 而非 saving state 擋，才不受 render 時序影響。
+    if (savingRef.current) return;
+
     const nextNickname = draft.trim();
     if (nextNickname === profile.nickname) {
       setEditing(false);
@@ -53,6 +59,7 @@ export function SettingsProfileHeader({
       return;
     }
 
+    savingRef.current = true;
     setSaving(true);
     try {
       const response = await fetch("/api/me", {
@@ -62,7 +69,7 @@ export function SettingsProfileHeader({
       });
 
       if (!response.ok) {
-        const body = (await response.json()) as ApiErrorBody;
+        const body = await readApiError(response);
         const fieldError = body.error?.fields?.nickname;
         setErrorMessage(fieldError ?? body.error?.message ?? "暱稱更新失敗");
         return;
@@ -75,6 +82,7 @@ export function SettingsProfileHeader({
     } catch {
       setErrorMessage("暱稱更新失敗");
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }

@@ -4,17 +4,13 @@ import { type CSSProperties, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
-import { Tag } from "@/components/tag";
 import { Toast } from "@/components/toast";
-import {
-  EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH,
-  EXCHANGE_INFO_OFFERS_TEXT_MAX_LENGTH,
-  EXCHANGE_INFO_WANTS_TEXT_MAX_LENGTH,
-  type ExchangeInfoAvailabilityResponse,
-} from "@/shared/api/exchange-info/schemas";
-import { PROFILE_TYPE_LABELS, type ProfileType } from "@/shared/profile-types";
+import type { ExchangeInfoAvailabilityResponse } from "@/shared/api/exchange-info/schemas";
+import type { ProfileType } from "@/shared/profile-types";
 
 import { usePublishExchange } from "../_providers/publish-exchange-provider";
+import { ExchangePostFormFields } from "./exchange-post-form-fields";
+import { validateExchangePostFormValues } from "./exchange-post-form";
 
 type ToastState = { variant: "success" | "error"; message: string } | null;
 
@@ -57,8 +53,6 @@ export function PublishExchangeDialog({
   onCreated: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const offersTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const wantsTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [loadingTypes, setLoadingTypes] = useState(false);
   const [availableTypes, setAvailableTypes] = useState<ProfileType[]>([]);
   const [type, setType] = useState<ProfileType | null>(null);
@@ -70,6 +64,18 @@ export function PublishExchangeDialog({
   const [showErrors, setShowErrors] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
   const [dialogBounds, setDialogBounds] = useState<DialogBounds | null>(null);
+
+  const formValues = { offersText, wantsText, description };
+  const { offersInvalid, wantsInvalid, descriptionInvalid } =
+    validateExchangePostFormValues(formValues);
+  const formInvalid =
+    type === null || offersInvalid || wantsInvalid || descriptionInvalid;
+
+  const tagHint = loadingTypes
+    ? "載入可用標籤中…"
+    : availableTypes.length === 0
+      ? "目前沒有可發佈的標籤"
+      : "點擊選擇，一種類標籤僅能發佈一篇貼文";
 
   const measureDialogBounds = () => {
     if (!window.matchMedia(DESKTOP_PUBLISHER_MEDIA).matches) {
@@ -99,17 +105,6 @@ export function PublishExchangeDialog({
     window.addEventListener("resize", measureDialogBounds);
     return () => window.removeEventListener("resize", measureDialogBounds);
   }, [open]);
-
-  useEffect(() => {
-    for (const textarea of [
-      offersTextareaRef.current,
-      wantsTextareaRef.current,
-    ]) {
-      if (!textarea) continue;
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  }, [offersText, wantsText, open]);
 
   const resetForm = () => {
     setAvailableTypes([]);
@@ -162,17 +157,6 @@ export function PublishExchangeDialog({
     onClose();
     resetForm();
   };
-
-  const offersInvalid =
-    offersText.trim().length === 0 ||
-    offersText.trim().length > EXCHANGE_INFO_OFFERS_TEXT_MAX_LENGTH;
-  const wantsInvalid =
-    wantsText.trim().length === 0 ||
-    wantsText.trim().length > EXCHANGE_INFO_WANTS_TEXT_MAX_LENGTH;
-  const descriptionInvalid =
-    description.trim().length > EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH;
-  const formInvalid =
-    type === null || offersInvalid || wantsInvalid || descriptionInvalid;
 
   const requestConfirmation = () => {
     setShowErrors(true);
@@ -265,111 +249,26 @@ export function PublishExchangeDialog({
             發布貼文
           </h2>
 
-          <div className="rounded-16 bg-surface-subtle p-3 md:landscape:p-4 lg:p-4">
-            <fieldset disabled={loadingTypes || submitting}>
-              <legend className="sr-only">選擇貼文標籤</legend>
-              <div className="flex flex-wrap items-center gap-2">
-                {availableTypes.map((availableType) => (
-                  <button
-                    key={availableType}
-                    type="button"
-                    aria-pressed={type === availableType}
-                    onClick={() => setType(availableType)}
-                    className="cursor-pointer rounded-pill focus-visible:outline-2 focus-visible:outline-brand"
-                  >
-                    <Tag
-                      variant="filled"
-                      tone={type === availableType ? "brand" : "white"}
-                    >
-                      #{PROFILE_TYPE_LABELS[availableType]}
-                    </Tag>
-                  </button>
-                ))}
-                <span className="text-caption text-secondary">
-                  {loadingTypes
-                    ? "載入可用標籤中…"
-                    : availableTypes.length === 0
-                      ? "目前沒有可發佈的標籤"
-                      : "點擊選擇，一種類標籤僅能發佈一篇貼文"}
-                </span>
-              </div>
-            </fieldset>
-
-            <label className="mt-3 grid grid-cols-[auto_1fr_auto] items-start gap-x-1 text-body">
-              <span className="text-body-strong">我能提供：</span>
-              <textarea
-                ref={offersTextareaRef}
-                rows={1}
-                value={offersText}
-                onChange={(event) => setOffersText(event.target.value)}
-                maxLength={EXCHANGE_INFO_OFFERS_TEXT_MAX_LENGTH}
-                disabled={submitting}
-                aria-invalid={showErrors && offersInvalid}
-                placeholder="你能提供的是？"
-                className="max-h-24 min-w-0 resize-none overflow-y-auto bg-transparent text-primary outline-none placeholder:text-secondary"
-              />
-              <span
-                className={
-                  offersInvalid && offersText.length > 0
-                    ? "text-error"
-                    : "text-secondary"
-                }
-              >
-                ({offersText.length}/{EXCHANGE_INFO_OFFERS_TEXT_MAX_LENGTH})
-              </span>
-            </label>
-
-            <label className="mt-2 grid grid-cols-[auto_1fr_auto] items-start gap-x-1 text-body">
-              <span className="text-body-strong">我想找：</span>
-              <textarea
-                ref={wantsTextareaRef}
-                rows={1}
-                value={wantsText}
-                onChange={(event) => setWantsText(event.target.value)}
-                maxLength={EXCHANGE_INFO_WANTS_TEXT_MAX_LENGTH}
-                disabled={submitting}
-                aria-invalid={showErrors && wantsInvalid}
-                placeholder="你想尋找交換的是？"
-                className="max-h-24 min-w-0 resize-none overflow-y-auto bg-transparent text-primary outline-none placeholder:text-secondary"
-              />
-              <span
-                className={
-                  wantsInvalid && wantsText.length > 0
-                    ? "text-error"
-                    : "text-secondary"
-                }
-              >
-                ({wantsText.length}/{EXCHANGE_INFO_WANTS_TEXT_MAX_LENGTH})
-              </span>
-            </label>
-          </div>
-
-          <label className="relative min-h-36 flex-1 md:landscape:min-h-28 lg:min-h-28">
-            <span className="sr-only">貼文詳細描述</span>
-            <textarea
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              maxLength={EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH}
-              disabled={submitting}
-              aria-invalid={descriptionInvalid}
-              placeholder="輸入想要徵求／交換／尋找的內容描述，至多 300 字……"
-              className="size-full resize-none bg-transparent pb-7 text-body text-primary outline-none placeholder:text-secondary"
-            />
-            <span
-              className={`absolute right-0 bottom-0 text-body ${descriptionInvalid ? "text-error" : "text-secondary"}`}
-            >
-              ({description.length}/{EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH})
-            </span>
-          </label>
-
-          {showErrors && type === null && availableTypes.length > 0 && (
-            <p
-              role="alert"
-              className="text-caption text-error"
-            >
-              請選擇貼文標籤。
-            </p>
-          )}
+          <ExchangePostFormFields
+            values={formValues}
+            onOffersTextChange={setOffersText}
+            onWantsTextChange={setWantsText}
+            onDescriptionChange={setDescription}
+            selectableTypes={availableTypes}
+            selectedType={type}
+            onSelectType={setType}
+            tagHint={tagHint}
+            tagsDisabled={loadingTypes}
+            fieldsDisabled={submitting}
+            showErrors={showErrors}
+            offersInvalid={offersInvalid}
+            wantsInvalid={wantsInvalid}
+            descriptionInvalid={descriptionInvalid}
+            showTypeError={
+              showErrors && type === null && availableTypes.length > 0
+            }
+            autoGrowKey={open}
+          />
 
           <div className="flex justify-end gap-2">
             <Button

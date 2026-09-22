@@ -1,6 +1,7 @@
 import { z } from "zod";
 import "zod-openapi";
 
+import { createExchangeInfoSchema } from "@/shared/api/exchange-info/schemas";
 import { PROFILE_TYPES } from "@/shared/profile-types";
 
 const myProfileTypeSchema = z.enum(PROFILE_TYPES);
@@ -26,10 +27,20 @@ export const myProfileListResponseDoc = z.object({
 
 export type MyProfileListResponse = z.infer<typeof myProfileListResponseDoc>;
 
-/** 設定中心下架貼文；目前僅支援 visible=false。 */
-export const patchMyProfileSchema = z.object({
+/** 設定中心下架貼文。 */
+export const patchMyProfileDelistSchema = z.object({
   visible: z.literal(false).meta({ description: "設為 false 代表下架" }),
 });
+
+/** 設定中心修改貼文內容（不可變更 type）。 */
+export const patchMyProfileContentSchema = createExchangeInfoSchema.omit({
+  type: true,
+});
+
+export const patchMyProfileSchema = z.union([
+  patchMyProfileDelistSchema,
+  patchMyProfileContentSchema,
+]);
 
 export type PatchMyProfileInput = z.infer<typeof patchMyProfileSchema>;
 

@@ -69,14 +69,16 @@ export async function updateNicknameByUserId(
   userId: string,
   nickname: string,
 ): Promise<SettingsProfile | null> {
-  const db = getDb();
-  const [updated] = await db
+  const [updated] = await getDb()
     .update(users)
     .set({ nickname, updatedBy: userId })
     .where(eq(users.id, userId))
-    .returning({ id: users.id });
+    .returning({
+      googleName: users.googleName,
+      group: users.group,
+      nickname: users.nickname,
+      avatarUrl: users.avatarUrl,
+    });
 
-  if (updated === undefined) return null;
-
-  return findSettingsProfileByUserId(userId);
+  return updated ?? null;
 }

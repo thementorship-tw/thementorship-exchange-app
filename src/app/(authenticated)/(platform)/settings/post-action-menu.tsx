@@ -6,10 +6,12 @@ import { useEffect, useId, useRef } from "react";
 export function PostActionMenu({
   open,
   onOpenChange,
+  onEdit,
   onDelist,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEdit: () => void;
   onDelist: () => void;
 }) {
   const menuId = useId();
@@ -65,10 +67,11 @@ export function PostActionMenu({
           <button
             type="button"
             role="menuitem"
-            disabled
-            title="尚未開放"
-            onClick={() => onOpenChange(false)}
-            className="flex w-full cursor-not-allowed items-center justify-center px-4 py-3 text-body-strong text-secondary opacity-45"
+            onClick={() => {
+              onOpenChange(false);
+              onEdit();
+            }}
+            className="flex w-full cursor-pointer items-center justify-center px-4 py-3 text-body-strong text-secondary transition hover:bg-surface focus-visible:outline-2 focus-visible:outline-brand"
           >
             修改
           </button>

@@ -274,6 +274,44 @@ export async function delistMyExchangeProfile(
   return updated ?? null;
 }
 
+export async function updateMyExchangeProfile(
+  userId: string,
+  profileId: string,
+  input: {
+    offersText: string;
+    wantsText: string;
+    description: string | null;
+  },
+): Promise<MyExchangeProfileRow | null> {
+  const db = getDb();
+  const [updated] = await db
+    .update(profiles)
+    .set({
+      offersText: input.offersText,
+      wantsText: input.wantsText,
+      description: input.description,
+      updatedBy: userId,
+    })
+    .where(
+      and(
+        eq(profiles.id, profileId),
+        eq(profiles.userId, userId),
+        isNull(profiles.deletedAt),
+      ),
+    )
+    .returning({
+      id: profiles.id,
+      type: profiles.type,
+      visible: profiles.visible,
+      offersText: profiles.offersText,
+      wantsText: profiles.wantsText,
+      description: profiles.description,
+      createdAt: profiles.createdAt,
+    });
+
+  return updated ?? null;
+}
+
 /** 目前使用者仍上架中的貼文類型；下架後可再次刊登同類型。 */
 export async function listPublishedExchangeInfoTypes(
   userId: string,

@@ -99,7 +99,7 @@ export function buildOpenApiDocument() {
       "/api/me/profiles/{id}": {
         patch: {
           tags: ["Users"],
-          summary: "下架目前登入者的我的發文",
+          summary: "下架或修改目前登入者的我的發文",
           requestParams: {
             path: z.object({
               id: z.string().meta({ description: "Profile ID" }),

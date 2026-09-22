@@ -4,13 +4,15 @@ import { useState } from "react";
 
 import { Toast } from "@/components/toast";
 
+import { readApiError } from "./api-error";
 import { DelistPostDialog } from "./delist-post-dialog";
+import { EditPostDialog } from "./edit-post-dialog";
+import type { MyProfileResponse } from "@/shared/api/me-profiles/schemas";
+
+import type { ExchangePostFormValues } from "../home/exchange-post-form";
+
 import type { MyPost } from "./settings-items";
 import { MyPostRow } from "./my-post-row";
-
-type ApiErrorBody = {
-  error?: { message?: string };
-};
 
 export function MyPostList({
   initialPosts,
@@ -23,12 +25,23 @@ export function MyPostList({
 }) {
   const [posts, setPosts] = useState(initialPosts);
   const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
+  const [editPostId, setEditPostId] = useState<string | null>(null);
   const [delistPostId, setDelistPostId] = useState<string | null>(null);
+  const [editToastOpen, setEditToastOpen] = useState(false);
   const [delistToastOpen, setDelistToastOpen] = useState(false);
   const [delistErrorMessage, setDelistErrorMessage] = useState<
     string | undefined
   >();
   const [delisting, setDelisting] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editErrorMessage, setEditErrorMessage] = useState<
+    string | undefined
+  >();
+
+  const editingPost =
+    editPostId === null
+      ? null
+      : (posts.find((post) => post.id === editPostId) ?? null);
 
   async function confirmDelist() {
     if (delistPostId === null) return;
@@ -42,7 +55,7 @@ export function MyPostList({
       });
 
       if (!response.ok) {
-        const body = (await response.json()) as ApiErrorBody;
+        const body = await readApiError(response);
         setDelistErrorMessage(body.error?.message ?? "貼文下架失敗");
         return;
       }
@@ -58,6 +71,49 @@ export function MyPostList({
       setDelistErrorMessage("貼文下架失敗");
     } finally {
       setDelisting(false);
+    }
+  }
+
+  async function confirmEdit(values: ExchangePostFormValues) {
+    if (editingPost === null) return;
+
+    setSavingEdit(true);
+    try {
+      const response = await fetch(`/api/me/profiles/${editingPost.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          offersText: values.offersText,
+          wantsText: values.wantsText,
+          description: values.description || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await readApiError(response);
+        setEditErrorMessage(body.error?.message ?? "貼文更新失敗");
+        return;
+      }
+
+      const { data } = (await response.json()) as MyProfileResponse;
+      setPosts((current) =>
+        current.map((post) =>
+          post.id === editingPost.id
+            ? {
+                ...post,
+                offersText: data.offersText,
+                wantsText: data.wantsText,
+                description: data.description ?? "",
+              }
+            : post,
+        ),
+      );
+      setEditPostId(null);
+      setEditToastOpen(true);
+    } catch {
+      setEditErrorMessage("貼文更新失敗");
+    } finally {
+      setSavingEdit(false);
     }
   }
 
@@ -80,6 +136,7 @@ export function MyPostList({
             onMenuOpenChange={(open) =>
               setOpenMenuPostId(open ? post.id : null)
             }
+            onEdit={() => setEditPostId(post.id)}
             onDelist={() => setDelistPostId(post.id)}
             targetApplicationId={
               post.id === targetProfileId ? targetApplicationId : undefined
@@ -87,6 +144,20 @@ export function MyPostList({
           />
         ))}
       </ul>
+
+      {editingPost !== null && (
+        <EditPostDialog
+          key={editingPost.id}
+          post={editingPost}
+          open={editPostId !== null}
+          onClose={() => {
+            if (savingEdit) return;
+            setEditPostId(null);
+          }}
+          saving={savingEdit}
+          onSave={(values) => void confirmEdit(values)}
+        />
+      )}
 
       <DelistPostDialog
         open={delistPostId !== null}
@@ -97,6 +168,15 @@ export function MyPostList({
         }}
         onConfirm={() => void confirmDelist()}
       />
+
+      <Toast
+        open={editToastOpen}
+        variant="brand"
+        placement="homeContent"
+        onClose={() => setEditToastOpen(false)}
+      >
+        貼文已更新
+      </Toast>
 
       <Toast
         open={delistToastOpen}
@@ -113,6 +193,15 @@ export function MyPostList({
         onClose={() => setDelistErrorMessage(undefined)}
       >
         {delistErrorMessage}
+      </Toast>
+
+      <Toast
+        open={editErrorMessage !== undefined}
+        variant="error"
+        placement="homeContent"
+        onClose={() => setEditErrorMessage(undefined)}
+      >
+        {editErrorMessage}
       </Toast>
     </>
   );
