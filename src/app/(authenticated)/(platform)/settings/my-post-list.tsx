@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Toast } from "@/components/toast";
 
+import { readApiError } from "./api-error";
 import { DelistPostDialog } from "./delist-post-dialog";
 import { EditPostDialog } from "./edit-post-dialog";
 import type { MyProfileResponse } from "@/shared/api/me-profiles/schemas";
@@ -12,10 +13,6 @@ import type { ExchangePostFormValues } from "../home/exchange-post-form";
 
 import type { MyPost } from "./settings-mock-data";
 import { MyPostRow } from "./my-post-row";
-
-type ApiErrorBody = {
-  error?: { message?: string };
-};
 
 export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
   const [posts, setPosts] = useState(initialPosts);
@@ -50,7 +47,7 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
       });
 
       if (!response.ok) {
-        const body = (await response.json()) as ApiErrorBody;
+        const body = await readApiError(response);
         setDelistErrorMessage(body.error?.message ?? "貼文下架失敗");
         return;
       }
@@ -85,7 +82,7 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
       });
 
       if (!response.ok) {
-        const body = (await response.json()) as ApiErrorBody;
+        const body = await readApiError(response);
         setEditErrorMessage(body.error?.message ?? "貼文更新失敗");
         return;
       }
