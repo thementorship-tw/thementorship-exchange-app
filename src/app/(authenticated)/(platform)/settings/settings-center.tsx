@@ -17,13 +17,19 @@ export function SettingsCenter({
   initialPosts,
   initialSentApplications,
   initialSentTotalPages,
+  initialActiveTab = "posts",
+  targetProfileId,
+  targetApplicationId,
 }: {
   profile: SettingsProfile;
   initialPosts: MyPost[];
   initialSentApplications: SentApplication[];
   initialSentTotalPages: number;
+  initialActiveTab?: SettingsTab;
+  targetProfileId?: string;
+  targetApplicationId?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("posts");
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialActiveTab);
 
   return (
     <section className="flex min-h-0 flex-1 flex-col px-4 pt-4 pb-6 md:px-0 md:landscape:pt-2 md:landscape:pb-0 lg:pt-2 lg:pb-0">
@@ -54,7 +60,11 @@ export function SettingsCenter({
           hidden={activeTab !== "posts"}
           className="flex min-h-0 flex-1 flex-col pt-2"
         >
-          <MyPostList initialPosts={initialPosts} />
+          <MyPostList
+            initialPosts={initialPosts}
+            targetProfileId={targetProfileId}
+            targetApplicationId={targetApplicationId}
+          />
         </div>
 
         <div

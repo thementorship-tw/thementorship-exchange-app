@@ -15,6 +15,7 @@ import {
   createContactLogSchema,
 } from "@/shared/api/contact-logs/schemas";
 import type { ContactLogResponse } from "@/shared/api/contact-logs/types";
+import { buildContactLogTargetHref } from "@/shared/contact-log-target";
 
 // 將 Date 物件轉換為 ISO 字串
 function serializeContactLog(log: ContactLogView): ContactLogResponse {
@@ -68,7 +69,10 @@ export const POST = withApiAuth(
       sendContactLogPushNotification({
         toUserId: result.log.toUser.id,
         fromUserNickname: result.log.fromUser.nickname,
-        targetHref: "/home",
+        targetHref: buildContactLogTargetHref({
+          profileId: result.log.profileId,
+          applicationId: result.log.id,
+        }),
       }),
     );
 

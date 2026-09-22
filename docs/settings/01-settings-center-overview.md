@@ -25,7 +25,16 @@
 
 「載入更多」與「捲動載入」共用同一個 hook `use-contact-log-pagination.ts`（`useContactLogPagination`），差別只在觸發方式（按鈕 vs. 捲動）與是否帶 `profileId`。
 
-## 3. API 一覽
+## 3. 從通知點擊進來的深連結
+
+通知中心每一筆通知對應一筆 `contact_logs`，點擊行為：
+
+- **已讀邏輯不變**：click 當下呼叫 `markAsRead(id)`（`PATCH /api/contact-logs/:id/read`），只標記「這一筆」已讀。已讀狀態掛在每筆 `contact_logs.read_at`，不是掛在貼文或使用者身上，所以同一貼文其他人的申請不會被連帶標成已讀——這是刻意如此，跟信箱點開一封信不會連帶已讀其他信一樣。
+- **導航目標**：`targetHref` 組成 `/settings?tab=posts&profileId=<profileId>&applicationId=<contactLogId>`（見 `contact-log-target.ts`），站內通知與系統推播都不再固定回 `/home`。
+- **落地行為**：`SettingsPage` 讀這三個 query 參數 → 切到「我的發文」tab → 對應的 `MyPostRow` 掛載時捲到「目標那筆申請」本身（不是整篇貼文，貼文若申請很多筆會太長），並把 `expandedApplicationId` 預設成目標 id（展開那筆申請）；目標那筆會短暫高亮（`target-highlight` keyframe，2 秒淡出）幫助使用者確認捲到的是哪一筆。
+- **已知邊界情況**：如果目標申請剛好不在該貼文最新 20 筆內（要同貼文短時間湧入 20 筆以上更新申請才會發生，機率低），只會捲到貼文本身、不會自動翻頁去找，使用者要自己點「載入更多申請」。不影響已讀狀態，純粹是展開動畫不會自動觸發。
+
+## 4. API 一覽
 
 | Method | Path | 說明 |
 | --- | --- | --- |
@@ -37,7 +46,7 @@
 
 `profileId` 只能搭配 `role=received`，且仍強制 `toUserId = currentUser.id`，無法讀取他人收到的申請（見 [Contact Logs API 規格 §8](../notifications/01-contact-logs-spec.md#8-查詢交流紀錄--get-apicontact-logs)）。
 
-## 4. 已知限制
+## 5. 已知限制
 
 - 下架動作本身不可復原；要「復刊」得走發布流程重新建立同類型貼文。
 - 「我送出的申請」與「我的發文」收到的申請都沒有天數限制，理論上會隨使用時間持續增長，尚未評估長期資料量的效能。

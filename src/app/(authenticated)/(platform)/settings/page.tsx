@@ -20,7 +20,10 @@ export const metadata: Metadata = {
   description: "管理曼陀號社群帳號與偏好設定。",
 };
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: PageProps<"/settings">) {
+  const { tab, profileId, applicationId } = await searchParams;
   const { user } = await requireActiveUser("/settings");
 
   const profile = await findSettingsProfileByUserId(user.id);
@@ -67,15 +70,24 @@ export default async function SettingsPage() {
     };
   });
   const initialSentApplications = sentLogs.map((log) => toSentApplication(log));
+  const initialActiveTab =
+    tab === "sentApplications" ? "sentApplications" : "posts";
+  const targetProfileId = typeof profileId === "string" ? profileId : undefined;
+  const targetApplicationId =
+    typeof applicationId === "string" ? applicationId : undefined;
 
   return (
     <SettingsCenter
+      key={`${initialActiveTab}:${targetProfileId ?? ""}:${targetApplicationId ?? ""}`}
       profile={profile}
       initialPosts={initialPosts}
       initialSentApplications={initialSentApplications}
       initialSentTotalPages={Math.ceil(
         sentTotalItems / CONTACT_LOG_DEFAULT_PAGE_SIZE,
       )}
+      initialActiveTab={initialActiveTab}
+      targetProfileId={targetProfileId}
+      targetApplicationId={targetApplicationId}
     />
   );
 }

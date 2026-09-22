@@ -47,6 +47,18 @@ body {
   }
 }
 
+/**
+ * 從通知深連結捲到目標項目時的短暫高亮，幫助使用者確認捲到的是哪一筆。
+ */
+@keyframes target-highlight {
+  from {
+    background-color: var(--color-brand-subtle);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
 .login-boat {
   animation: login-boat-drift 3s ease-in-out infinite;
 }

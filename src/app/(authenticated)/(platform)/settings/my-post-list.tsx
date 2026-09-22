@@ -12,7 +12,15 @@ type ApiErrorBody = {
   error?: { message?: string };
 };
 
-export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
+export function MyPostList({
+  initialPosts,
+  targetProfileId,
+  targetApplicationId,
+}: {
+  initialPosts: MyPost[];
+  targetProfileId?: string;
+  targetApplicationId?: string;
+}) {
   const [posts, setPosts] = useState(initialPosts);
   const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
   const [delistPostId, setDelistPostId] = useState<string | null>(null);
@@ -73,6 +81,9 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
               setOpenMenuPostId(open ? post.id : null)
             }
             onDelist={() => setDelistPostId(post.id)}
+            targetApplicationId={
+              post.id === targetProfileId ? targetApplicationId : undefined
+            }
           />
         ))}
       </ul>

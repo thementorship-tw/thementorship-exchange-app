@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/button";
 import { Tag } from "@/components/tag";
@@ -19,11 +19,14 @@ export function MyPostRow({
   menuOpen,
   onMenuOpenChange,
   onDelist,
+  targetApplicationId,
 }: {
   post: MyPost;
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
   onDelist: () => void;
+  /** 從通知點過來的目標申請；非 undefined 代表這篇貼文是導航目標，掛載時要捲過去。 */
+  targetApplicationId?: string;
 }) {
   const isDelisted = post.status === "delisted";
   const {
@@ -41,10 +44,28 @@ export function MyPostRow({
   const hasApplications = !isDelisted && applications.length > 0;
   const [expandedApplicationId, setExpandedApplicationId] = useState<
     string | null
-  >(null);
+  >(targetApplicationId ?? null);
+  const rowRef = useRef<HTMLLIElement>(null);
+  const targetApplicationRowRef = useRef<HTMLDivElement>(null);
+  const [showHighlight, setShowHighlight] = useState(false);
+
+  useEffect(() => {
+    if (targetApplicationId === undefined) return;
+    // 優先捲到目標那筆申請本身；如果它不在已載入的第一頁裡（見已知邊界情況），
+    // 退回捲到整篇貼文，至少讓使用者看到正確的貼文。
+    const target = targetApplicationRowRef.current ?? rowRef.current;
+    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+    // 捲動本身是非同步的漸進動畫，跟高亮同時開始的話，畫面捲到定位時高亮
+    // 常常已經淡出大半，使用者幾乎看不到；延後一點再觸發高亮比較可靠。
+    const timer = setTimeout(() => setShowHighlight(true), 500);
+    return () => clearTimeout(timer);
+  }, [targetApplicationId]);
 
   return (
-    <li className="flex flex-col gap-1 rounded-20 bg-glass p-6">
+    <li
+      ref={rowRef}
+      className="flex flex-col gap-1 rounded-20 bg-glass p-6"
+    >
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
           <Tag
@@ -83,15 +104,28 @@ export function MyPostRow({
           {applications.map((application, index) => (
             <Fragment key={application.id}>
               {index > 0 && <div className="mx-4 h-px bg-line" />}
-              <ReceivedApplicationRow
-                application={application}
-                expanded={expandedApplicationId === application.id}
-                onToggle={() =>
-                  setExpandedApplicationId((current) =>
-                    current === application.id ? null : application.id,
-                  )
+              <div
+                ref={
+                  application.id === targetApplicationId
+                    ? targetApplicationRowRef
+                    : undefined
                 }
-              />
+                className={
+                  application.id === targetApplicationId && showHighlight
+                    ? "rounded-4 animate-[target-highlight_2s_ease-out]"
+                    : undefined
+                }
+              >
+                <ReceivedApplicationRow
+                  application={application}
+                  expanded={expandedApplicationId === application.id}
+                  onToggle={() =>
+                    setExpandedApplicationId((current) =>
+                      current === application.id ? null : application.id,
+                    )
+                  }
+                />
+              </div>
             </Fragment>
           ))}
           {hasMoreApplications && (
