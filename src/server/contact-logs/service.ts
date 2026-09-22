@@ -74,6 +74,7 @@ export async function createContactLog(
         wantsText: profiles.wantsText,
         description: profiles.description,
         toNickname: users.nickname,
+        toGroup: users.group,
         toAvatarUrl: users.avatarUrl,
       })
       .from(profiles)
@@ -143,6 +144,7 @@ export async function createContactLog(
         toUser: {
           id: profile.userId,
           nickname: profile.toNickname,
+          group: profile.toGroup,
           avatarUrl: profile.toAvatarUrl,
         },
         offeredResource: input.offeredResource,
@@ -186,9 +188,11 @@ export async function listContactLogs(
         profileId: contactLogs.profileId,
         fromUserId: fromUsers.id,
         fromNickname: fromUsers.nickname,
+        fromGroup: fromUsers.group,
         fromAvatarUrl: fromUsers.avatarUrl,
         toUserId: toUsers.id,
         toNickname: toUsers.nickname,
+        toGroup: toUsers.group,
         toAvatarUrl: toUsers.avatarUrl,
         offeredResource: contactLogs.offeredResource,
         wantedItem: contactLogs.wantedItem,
@@ -219,11 +223,13 @@ export async function listContactLogs(
       fromUser: {
         id: row.fromUserId,
         nickname: row.fromNickname,
+        group: row.fromGroup,
         avatarUrl: row.fromAvatarUrl,
       },
       toUser: {
         id: row.toUserId,
         nickname: row.toNickname,
+        group: row.toGroup,
         avatarUrl: row.toAvatarUrl,
       },
       offeredResource: row.offeredResource,

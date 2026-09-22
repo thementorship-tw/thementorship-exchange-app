@@ -48,6 +48,7 @@ yarn-error.log*
 # Anything tool-specific stays local.
 CLAUDE.md
 .claude/
+.cursor/
 
 # typescript
 *.tsbuildinfo

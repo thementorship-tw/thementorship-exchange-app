@@ -22,6 +22,12 @@ import {
   exchangeInfoListQuerySchema,
   exchangeInfoListResponseDoc,
 } from "@/shared/api/exchange-info/schemas";
+import {
+  myProfileListResponseDoc,
+  myProfileResponseDoc,
+  patchMyProfileSchema,
+} from "@/shared/api/me-profiles/schemas";
+import { meResponseDoc, updateMeSchema } from "@/shared/api/users/schemas";
 
 function errorResponse(description: string) {
   return {
@@ -38,6 +44,86 @@ export function buildOpenApiDocument() {
       version: "1.0.0",
     },
     paths: {
+      "/api/me": {
+        get: {
+          tags: ["Users"],
+          summary: "取得目前登入者的設定中心 Profile 資料",
+          responses: {
+            "200": {
+              description: "OK",
+              content: {
+                "application/json": { schema: meResponseDoc },
+              },
+            },
+            "401": errorResponse("Authentication required"),
+            "403": errorResponse("Account inactive or consent required"),
+          },
+        },
+        patch: {
+          tags: ["Users"],
+          summary: "更新目前登入者的設定中心 Profile（目前僅支援 nickname）",
+          requestBody: {
+            required: true,
+            content: { "application/json": { schema: updateMeSchema } },
+          },
+          responses: {
+            "200": {
+              description: "OK",
+              content: {
+                "application/json": { schema: meResponseDoc },
+              },
+            },
+            "400": errorResponse("Request body must be valid JSON"),
+            "401": errorResponse("Authentication required"),
+            "403": errorResponse("Account inactive or consent required"),
+            "422": errorResponse("Request validation failed"),
+          },
+        },
+      },
+      "/api/me/profiles": {
+        get: {
+          tags: ["Users"],
+          summary: "取得目前登入者的我的發文列表（含已下架）",
+          responses: {
+            "200": {
+              description: "OK",
+              content: {
+                "application/json": { schema: myProfileListResponseDoc },
+              },
+            },
+            "401": errorResponse("Authentication required"),
+            "403": errorResponse("Account inactive or consent required"),
+          },
+        },
+      },
+      "/api/me/profiles/{id}": {
+        patch: {
+          tags: ["Users"],
+          summary: "下架或修改目前登入者的我的發文",
+          requestParams: {
+            path: z.object({
+              id: z.string().meta({ description: "Profile ID" }),
+            }),
+          },
+          requestBody: {
+            required: true,
+            content: { "application/json": { schema: patchMyProfileSchema } },
+          },
+          responses: {
+            "200": {
+              description: "OK",
+              content: {
+                "application/json": { schema: myProfileResponseDoc },
+              },
+            },
+            "400": errorResponse("Request body must be valid JSON"),
+            "401": errorResponse("Authentication required"),
+            "403": errorResponse("Account inactive or consent required"),
+            "404": errorResponse("Profile not found"),
+            "422": errorResponse("Request validation failed"),
+          },
+        },
+      },
       "/api/exchange-info": {
         get: {
           tags: ["Exchange Info"],
