@@ -6,6 +6,10 @@ import { Toast } from "@/components/toast";
 
 import { DelistPostDialog } from "./delist-post-dialog";
 import { EditPostDialog } from "./edit-post-dialog";
+import type { MyProfileResponse } from "@/shared/api/me-profiles/schemas";
+
+import type { ExchangePostFormValues } from "../home/exchange-post-form";
+
 import type { MyPost } from "./settings-mock-data";
 import { MyPostRow } from "./my-post-row";
 
@@ -24,6 +28,10 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
     string | undefined
   >();
   const [delisting, setDelisting] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editErrorMessage, setEditErrorMessage] = useState<
+    string | undefined
+  >();
 
   const editingPost =
     editPostId === null
@@ -61,6 +69,49 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
     }
   }
 
+  async function confirmEdit(values: ExchangePostFormValues) {
+    if (editingPost === null) return;
+
+    setSavingEdit(true);
+    try {
+      const response = await fetch(`/api/me/profiles/${editingPost.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          offersText: values.offersText,
+          wantsText: values.wantsText,
+          description: values.description || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = (await response.json()) as ApiErrorBody;
+        setEditErrorMessage(body.error?.message ?? "貼文更新失敗");
+        return;
+      }
+
+      const { data } = (await response.json()) as MyProfileResponse;
+      setPosts((current) =>
+        current.map((post) =>
+          post.id === editingPost.id
+            ? {
+                ...post,
+                offersText: data.offersText,
+                wantsText: data.wantsText,
+                description: data.description ?? "",
+              }
+            : post,
+        ),
+      );
+      setEditPostId(null);
+      setEditToastOpen(true);
+    } catch {
+      setEditErrorMessage("貼文更新失敗");
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
   if (posts.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center rounded-20 bg-glass px-6 py-12 text-body text-secondary">
@@ -91,23 +142,12 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
           key={editingPost.id}
           post={editingPost}
           open={editPostId !== null}
-          onClose={() => setEditPostId(null)}
-          onSave={(values) => {
-            setPosts((current) =>
-              current.map((post) =>
-                post.id === editingPost.id
-                  ? {
-                      ...post,
-                      offersText: values.offersText,
-                      wantsText: values.wantsText,
-                      description: values.description,
-                    }
-                  : post,
-              ),
-            );
+          onClose={() => {
+            if (savingEdit) return;
             setEditPostId(null);
-            setEditToastOpen(true);
           }}
+          saving={savingEdit}
+          onSave={(values) => void confirmEdit(values)}
         />
       )}
 
@@ -145,6 +185,15 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
         onClose={() => setDelistErrorMessage(undefined)}
       >
         {delistErrorMessage}
+      </Toast>
+
+      <Toast
+        open={editErrorMessage !== undefined}
+        variant="error"
+        placement="homeContent"
+        onClose={() => setEditErrorMessage(undefined)}
+      >
+        {editErrorMessage}
       </Toast>
     </>
   );

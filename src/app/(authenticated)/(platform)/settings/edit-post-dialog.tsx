@@ -19,11 +19,13 @@ export function EditPostDialog({
   post,
   open,
   onClose,
+  saving = false,
   onSave,
 }: {
   post: MyPost;
   open: boolean;
   onClose: () => void;
+  saving?: boolean;
   onSave: (values: ExchangePostFormValues) => void;
 }) {
   const [offersText, setOffersText] = useState(post.offersText);
@@ -63,15 +65,17 @@ export function EditPostDialog({
             <Button
               variant="secondary"
               size="sm"
+              disabled={saving}
               onClick={onClose}
             >
               取消
             </Button>
             <Button
               size="sm"
+              disabled={saving}
               onClick={handleConfirm}
             >
-              確認修改
+              {saving ? "儲存中…" : "確認修改"}
             </Button>
           </>
         }
