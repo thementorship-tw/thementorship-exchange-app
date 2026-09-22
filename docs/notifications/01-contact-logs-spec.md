@@ -91,6 +91,7 @@ type ContactLogResponse = {
     wantsText: string;
     description: string | null;
   };
+  profileAvailability: "available" | "unavailable";
   readAt: string | null;
   createdAt: string;
 };
@@ -98,6 +99,7 @@ type ContactLogResponse = {
 
 - `direction` 由後端依當前登入者產生，不儲存在資料庫。
 - `profile` 來自 Contact Log 內的 snapshot，不讀取目前的 Profile 內容。
+- `profileAvailability` 是目前狀態；Profile 公開、未刪除且擁有者帳號有效時為 `available`，其餘情況統一為 `unavailable`，不揭露不可用的詳細原因。
 - `fromUser`／`toUser` 的 `nickname`、`avatarUrl` 使用目前的 User 資料，不保存快照。
 - sent 與 received 使用完全相同的 response shape。
 
@@ -141,9 +143,10 @@ type CreateContactLogRequest = {
 | `page` | 否 | 預設 `1`，正整數 |
 | `pageSize` | 否 | 預設 `20`，正整數，最大 `100` |
 | `unread` | 否 | `true`／`false`；只有 received 可用 `true`（`role=sent&unread=true` 回傳 `422`） |
+| `profileId` | 否 | Profile UUID；只有 received 可用，用於取得指定貼文收到的申請 |
 | `withinDays` | 否 | 正整數；只回傳 `createdAt` 在過去 N 天內的紀錄，sent／received 皆可用；判斷一律由後端保證，前端不得自行依 `createdAt` 過濾 |
 
-查詢條件：sent 為 `fromUserId = currentUser.id`；received 為 `toUserId = currentUser.id`（加 `unread=true` 則再加 `readAt IS NULL`）。
+查詢條件：sent 為 `fromUserId = currentUser.id`；received 為 `toUserId = currentUser.id`（加 `unread=true` 則再加 `readAt IS NULL`；加 `profileId` 則只查該 Profile）。即使指定 `profileId`，仍須同時符合 `toUserId = currentUser.id`，不可讀取他人收到的申請。
 
 排序固定 `createdAt DESC, id DESC`，採 page/offset pagination（非 cursor）——單一使用者的紀錄量不多、UI 是一般分頁而非高頻訊息流或無限滾動，offset 較容易開發與除錯；未來若改為高頻即時資料或無限滾動，再評估 cursor。
 

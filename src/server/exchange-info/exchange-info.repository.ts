@@ -274,14 +274,20 @@ export async function delistMyExchangeProfile(
   return updated ?? null;
 }
 
-/** 目前使用者尚未刪除的貼文類型；下架貼文仍占用該類型。 */
+/** 目前使用者仍上架中的貼文類型；下架後可再次刊登同類型。 */
 export async function listPublishedExchangeInfoTypes(
   userId: string,
 ): Promise<ProfileType[]> {
   const rows = await getDb()
     .select({ type: profiles.type })
     .from(profiles)
-    .where(and(eq(profiles.userId, userId), isNull(profiles.deletedAt)));
+    .where(
+      and(
+        eq(profiles.userId, userId),
+        eq(profiles.visible, true),
+        isNull(profiles.deletedAt),
+      ),
+    );
 
   return rows.map(({ type }) => type);
 }

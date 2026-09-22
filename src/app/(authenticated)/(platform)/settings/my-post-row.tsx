@@ -2,12 +2,17 @@
 
 import { Fragment, useState } from "react";
 
+import { Button } from "@/components/button";
 import { Tag } from "@/components/tag";
 import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 
-import type { MyPost } from "./settings-mock-data";
+import {
+  toReceivedApplicationFromResponse,
+  type MyPost,
+} from "./settings-items";
 import { PostActionMenu } from "./post-action-menu";
 import { ReceivedApplicationRow } from "./received-application-row";
+import { useContactLogPagination } from "./use-contact-log-pagination";
 
 export function MyPostRow({
   post,
@@ -21,7 +26,19 @@ export function MyPostRow({
   onDelist: () => void;
 }) {
   const isDelisted = post.status === "delisted";
-  const hasApplications = !isDelisted && post.receivedApplications.length > 0;
+  const {
+    items: applications,
+    status: loadStatus,
+    hasMore: hasMoreApplications,
+    loadMore: loadMoreApplications,
+  } = useContactLogPagination({
+    role: "received",
+    profileId: post.id,
+    initialItems: post.receivedApplications,
+    initialTotalPages: post.receivedApplicationTotalPages,
+    mapItem: toReceivedApplicationFromResponse,
+  });
+  const hasApplications = !isDelisted && applications.length > 0;
   const [expandedApplicationId, setExpandedApplicationId] = useState<
     string | null
   >(null);
@@ -63,7 +80,7 @@ export function MyPostRow({
           aria-label="收到申請"
           className="mt-2 flex flex-col gap-1 overflow-hidden rounded-8 bg-surface-subtle py-1"
         >
-          {post.receivedApplications.map((application, index) => (
+          {applications.map((application, index) => (
             <Fragment key={application.id}>
               {index > 0 && <div className="mx-4 h-px bg-line" />}
               <ReceivedApplicationRow
@@ -77,6 +94,18 @@ export function MyPostRow({
               />
             </Fragment>
           ))}
+          {hasMoreApplications && (
+            <div className="flex justify-center px-4 py-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={loadStatus === "loading"}
+                onClick={() => loadMoreApplications(true)}
+              >
+                {loadStatus === "error" ? "重新載入" : "載入更多申請"}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

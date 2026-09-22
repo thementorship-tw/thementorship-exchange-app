@@ -200,9 +200,9 @@ export const profiles = sqliteTable(
   },
   (table) => [
     index("idx_profile_user").on(table.userId),
-    uniqueIndex("uq_profiles_user_type_not_deleted")
+    uniqueIndex("uq_profiles_user_type_visible_not_deleted")
       .on(table.userId, table.type)
-      .where(sql`${table.deletedAt} IS NULL`),
+      .where(sql`${table.visible} = true AND ${table.deletedAt} IS NULL`),
     check(
       "profiles_type_check",
       sql`${table.type} IN (${profileTypeSqlValues})`,

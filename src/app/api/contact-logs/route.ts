@@ -88,11 +88,12 @@ export const GET = withApiAuth(
       page: searchParams.get("page") ?? undefined,
       pageSize: searchParams.get("pageSize") ?? undefined,
       unread: searchParams.get("unread") ?? undefined,
+      profileId: searchParams.get("profileId") ?? undefined,
       withinDays: searchParams.get("withinDays") ?? undefined,
     });
     if (!validation.ok) return validation.response;
 
-    const { direction, page, pageSize, unreadOnly, withinDays } =
+    const { direction, page, pageSize, unreadOnly, profileId, withinDays } =
       validation.data;
     const result = await listContactLogs({
       userId: user.id,
@@ -100,6 +101,7 @@ export const GET = withApiAuth(
       page,
       pageSize,
       unreadOnly,
+      profileId,
       withinDays,
     });
 

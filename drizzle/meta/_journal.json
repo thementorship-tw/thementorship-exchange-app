@@ -36,6 +36,13 @@
       "when": 1789911504030,
       "tag": "0004_bizarre_alex_wilder",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1790062826934,
+      "tag": "0005_fearless_talisman",
+      "breakpoints": true
     }
   ]
 }

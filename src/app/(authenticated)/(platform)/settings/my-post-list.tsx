@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Toast } from "@/components/toast";
 
 import { DelistPostDialog } from "./delist-post-dialog";
-import type { MyPost } from "./settings-mock-data";
+import type { MyPost } from "./settings-items";
 import { MyPostRow } from "./my-post-row";
 
 type ApiErrorBody = {
