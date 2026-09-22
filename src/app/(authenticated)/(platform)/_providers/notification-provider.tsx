@@ -141,14 +141,21 @@ export function NotificationProvider({
       loadFailed: initialLoadFailed,
       unreadCount,
       markAsRead: async (id) => {
+        // target 可能是 undefined：這筆申請不在通知中心目前載入的範圍內
+        // （超過 30 天保留期或第一頁上限），例如從「我的發文」直接展開
+        // 一筆較舊的申請時。這種情況一樣要打 PATCH，只是沒有本地通知
+        // list 可以做 optimistic update。
         const target = notifications.find((item) => item.id === id);
-        if (target === undefined || target.readAt !== null) return;
+        if (target !== undefined && target.readAt !== null) return;
 
-        // optimistic update
         const readAt = new Date();
-        setNotifications((current) =>
-          current.map((item) => (item.id === id ? { ...item, readAt } : item)),
-        );
+        if (target !== undefined) {
+          setNotifications((current) =>
+            current.map((item) =>
+              item.id === id ? { ...item, readAt } : item,
+            ),
+          );
+        }
         try {
           const response = await fetch(`/api/contact-logs/${id}/read`, {
             method: "PATCH",
@@ -157,14 +164,16 @@ export function NotificationProvider({
             throw new Error(`Request failed with status ${response.status}`);
           }
         } catch (error: unknown) {
-          // 只回復本次 optimistic update，避免覆蓋其他已成功的已讀狀態。
-          setNotifications((current) =>
-            current.map((item) =>
-              item.id === id && item.readAt?.getTime() === readAt.getTime()
-                ? { ...item, readAt: target.readAt }
-                : item,
-            ),
-          );
+          if (target !== undefined) {
+            // 只回復本次 optimistic update，避免覆蓋其他已成功的已讀狀態。
+            setNotifications((current) =>
+              current.map((item) =>
+                item.id === id && item.readAt?.getTime() === readAt.getTime()
+                  ? { ...item, readAt: target.readAt }
+                  : item,
+              ),
+            );
+          }
           setMutationError("已讀狀態更新失敗，請稍後再試");
           console.error("[notifications] Failed to mark as read", error);
         }

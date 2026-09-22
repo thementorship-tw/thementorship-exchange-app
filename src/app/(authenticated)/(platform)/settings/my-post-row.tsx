@@ -6,6 +6,7 @@ import { Button } from "@/components/button";
 import { Tag } from "@/components/tag";
 import { PROFILE_TYPE_LABELS } from "@/shared/profile-types";
 
+import { useNotifications } from "../_providers/notification-provider";
 import {
   toReceivedApplicationFromResponse,
   type MyPost,
@@ -48,6 +49,10 @@ export function MyPostRow({
   const rowRef = useRef<HTMLLIElement>(null);
   const targetApplicationRowRef = useRef<HTMLDivElement>(null);
   const [showHighlight, setShowHighlight] = useState(false);
+  const { markAsRead } = useNotifications();
+  // 記錄這個 session 內已經觸發過已讀的 id，避免同一筆申請反覆展開/收合
+  // 時重複打 PATCH（application.readAt 本身不會因此在本地更新）。
+  const markedReadIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (targetApplicationId === undefined) return;
@@ -119,11 +124,20 @@ export function MyPostRow({
                 <ReceivedApplicationRow
                   application={application}
                   expanded={expandedApplicationId === application.id}
-                  onToggle={() =>
+                  onToggle={() => {
+                    const willExpand = expandedApplicationId !== application.id;
                     setExpandedApplicationId((current) =>
                       current === application.id ? null : application.id,
-                    )
-                  }
+                    );
+                    if (
+                      willExpand &&
+                      application.readAt === null &&
+                      !markedReadIdsRef.current.has(application.id)
+                    ) {
+                      markedReadIdsRef.current.add(application.id);
+                      void markAsRead(application.id);
+                    }
+                  }}
                 />
               </div>
             </Fragment>

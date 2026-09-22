@@ -14,6 +14,7 @@ export type ReceivedApplication = {
   wantedItem: string;
   motivation: string;
   contactInfo: string;
+  readAt: Date | null;
 };
 
 export type MyPostStatus = "active" | "delisted";
@@ -61,6 +62,7 @@ export function toReceivedApplication(
     wantedItem: log.wantedItem,
     motivation: log.motivation,
     contactInfo: log.contactInfo,
+    readAt: log.readAt,
   };
 }
 
@@ -92,6 +94,7 @@ export function toReceivedApplicationFromResponse(
     wantedItem: log.wantedItem,
     motivation: log.motivation,
     contactInfo: log.contactInfo,
+    readAt: log.readAt === null ? null : new Date(log.readAt),
   };
 }
 
