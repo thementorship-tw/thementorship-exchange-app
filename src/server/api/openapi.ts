@@ -14,9 +14,11 @@ import {
   createContactLogSchema,
   markAllContactLogsReadQuerySchema,
 } from "@/shared/api/contact-logs/schemas";
+import { CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS } from "@/shared/api/contact-logs/constants";
 import {
   createExchangeInfoResponseDoc,
   createExchangeInfoSchema,
+  exchangeInfoAvailabilityResponseDoc,
   exchangeInfoListQuerySchema,
   exchangeInfoListResponseDoc,
 } from "@/shared/api/exchange-info/schemas";
@@ -71,7 +73,26 @@ export function buildOpenApiDocument() {
             "400": errorResponse("Request body must be valid JSON"),
             "401": errorResponse("Authentication required"),
             "403": errorResponse("Account inactive or consent required"),
+            "409": errorResponse("A profile of this type already exists"),
             "422": errorResponse("Request validation failed"),
+          },
+        },
+      },
+      "/api/exchange-info/availability": {
+        get: {
+          tags: ["Exchange Info"],
+          summary: "取得目前使用者已刊登與仍可刊登的貼文類型",
+          responses: {
+            "200": {
+              description: "OK",
+              content: {
+                "application/json": {
+                  schema: exchangeInfoAvailabilityResponseDoc,
+                },
+              },
+            },
+            "401": errorResponse("Authentication required"),
+            "403": errorResponse("Account inactive or consent required"),
           },
         },
       },
@@ -80,6 +101,7 @@ export function buildOpenApiDocument() {
           tags: ["Contact Logs"],
           summary: "建立「我想聊」交流紀錄",
           requestBody: {
+            required: true,
             content: { "application/json": { schema: createContactLogSchema } },
           },
           responses: {
@@ -93,7 +115,10 @@ export function buildOpenApiDocument() {
             "401": errorResponse("Authentication required"),
             "403": errorResponse("Account inactive or consent required"),
             "404": errorResponse("Profile not found"),
-            "409": errorResponse("Cannot contact your own profile"),
+            "409": errorResponse(
+              "Cannot contact your own profile, or you already contacted this profile in the last " +
+                `${CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS} day(s)`,
+            ),
             "422": errorResponse("Request validation failed"),
           },
         },

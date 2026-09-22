@@ -1,3 +1,5 @@
+import { after } from "next/server";
+
 import { withApiAuth } from "@/server/api/middleware/auth";
 import { parseJsonBody, parseQuery } from "@/server/api/request";
 import { apiError, PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
@@ -6,6 +8,7 @@ import {
   listContactLogs,
   type ContactLogView,
 } from "@/server/contact-logs/service";
+import { sendContactLogPushNotification } from "@/server/notifications/push";
 import {
   contactLogListQuerySchema,
   createContactLogSchema,
@@ -46,6 +49,21 @@ export const POST = withApiAuth(
         "You cannot contact your own profile",
       );
     }
+    if (result.status === "duplicate_contact_today") {
+      return apiError(
+        409,
+        "DUPLICATE_CONTACT_TODAY",
+        "You already applied to this profile today",
+      );
+    }
+
+    after(() =>
+      sendContactLogPushNotification({
+        toUserId: result.log.toUser.id,
+        fromUserNickname: result.log.fromUser.nickname,
+        targetHref: "/home",
+      }),
+    );
 
     return Response.json(
       { data: serializeContactLog(result.log) },

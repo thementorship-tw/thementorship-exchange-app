@@ -4,6 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "The Mentorship Exchange",
   description: "Mentorship exchange platform",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `uq_profiles_user_type_not_deleted` ON `profiles` (`user_id`,`type`) WHERE "profiles"."deleted_at" IS NULL;

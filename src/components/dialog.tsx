@@ -13,6 +13,8 @@ export type DialogProps = {
   size?: "md" | "lg";
   scrollable?: boolean;
   className?: string;
+  /** 首頁桌機版可避開側欄，改以右側卡片內容區置中。 */
+  placement?: "viewport" | "homeContent";
 };
 
 export function Dialog({
@@ -26,6 +28,7 @@ export function Dialog({
   size = "md",
   scrollable = false,
   className = "",
+  placement = "viewport",
 }: DialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -48,7 +51,7 @@ export function Dialog({
         event.preventDefault();
         onClose();
       }}
-      className={`m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-hidden rounded-20 bg-surface p-0 text-primary shadow-xl outline-none backdrop:bg-overlay backdrop:backdrop-blur-[1px] ${size === "lg" ? "max-w-3xl" : "max-w-xl"} ${className}`.trim()}
+      className={`m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-hidden rounded-20 bg-surface p-0 text-primary shadow-xl outline-none backdrop:bg-overlay backdrop:backdrop-blur-[1px] ${size === "lg" ? "max-w-3xl" : "max-w-xl"} ${placement === "homeContent" ? "md:landscape:translate-x-[9.9375rem] lg:translate-x-[9.9375rem]" : ""} ${className}`.trim()}
     >
       <div
         className={`relative p-6 sm:p-8 ${scrollable ? "flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden" : ""}`}

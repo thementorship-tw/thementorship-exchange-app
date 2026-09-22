@@ -69,6 +69,8 @@ const exchangeInfoItemDoc = z
     offersText: z.string(),
     wantsText: z.string(),
     description: z.string().nullable(),
+    /** 目前登入者是否仍在這篇貼文的重複申請冷卻期內。 */
+    appliedWithinCooldown: z.boolean(),
     createdAt: z.iso.datetime(),
     author: z.object({
       nickname: z.string(),
@@ -95,3 +97,13 @@ export const exchangeInfoListResponseDoc = z.object({
 export const createExchangeInfoResponseDoc = z.object({
   data: exchangeInfoItemDoc,
 });
+
+export const exchangeInfoAvailabilityResponseDoc = z.object({
+  data: z.object({
+    publishedTypes: z.array(exchangeInfoTypeSchema),
+    availableTypes: z.array(exchangeInfoTypeSchema),
+  }),
+});
+export type ExchangeInfoAvailabilityResponse = z.infer<
+  typeof exchangeInfoAvailabilityResponseDoc
+>;

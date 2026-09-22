@@ -8,6 +8,7 @@ import type {
 } from "@/shared/api/contact-logs/types";
 import { getDb } from "@/server/db";
 import { contactLogs, profiles, users } from "@/server/db/schema";
+import { CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS } from "@/shared/api/contact-logs/constants";
 import type { CreateContactLogValues } from "@/shared/api/contact-logs/schemas";
 
 const fromUsers = alias(users, "from_users");
@@ -29,12 +30,18 @@ export type ContactLogView = Omit<
 
 export type CreateContactLogInput = CreateContactLogValues & {
   fromUser: ContactLogUser;
+  /**
+   * 只給 `src/server/dev-tools` 的本機模擬工具使用，跳過每日冷卻期檢查，
+   * 讓開發者可以重複觸發測試而不用等 24 小時。正式流程一律不帶這個欄位。
+   */
+  skipDuplicateCooldown?: boolean;
 };
 
 export type CreateContactLogResult =
   | { status: "created"; log: ContactLogView }
   | { status: "profile_not_found" }
-  | { status: "self_contact_not_allowed" };
+  | { status: "self_contact_not_allowed" }
+  | { status: "duplicate_contact_today" };
 
 export type ListContactLogsInput = {
   userId: string;
@@ -84,6 +91,23 @@ export async function createContactLog(
     if (profile === undefined) return { status: "profile_not_found" };
     if (profile.userId === input.fromUser.id) {
       return { status: "self_contact_not_allowed" };
+    }
+
+    if (input.skipDuplicateCooldown !== true) {
+      const [recentDuplicate] = await tx
+        .select({ id: contactLogs.id })
+        .from(contactLogs)
+        .where(
+          and(
+            eq(contactLogs.fromUserId, input.fromUser.id),
+            eq(contactLogs.profileId, input.profileId),
+            createdWithinDaysCondition(CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS),
+          ),
+        )
+        .limit(1);
+      if (recentDuplicate !== undefined) {
+        return { status: "duplicate_contact_today" };
+      }
     }
 
     const id = crypto.randomUUID();

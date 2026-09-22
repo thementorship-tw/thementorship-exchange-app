@@ -13,7 +13,8 @@ import {
 } from "drizzle-orm";
 
 import { getDb } from "@/server/db";
-import { profiles, users } from "@/server/db/schema";
+import { contactLogs, profiles, users } from "@/server/db/schema";
+import { CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS } from "@/shared/api/contact-logs/constants";
 import {
   EXCHANGE_INFO_PAGE_SIZE,
   type CreateExchangeInfoInput,
@@ -35,6 +36,7 @@ type Author = ExchangeInfoListItem["author"];
 export type ExchangeInfoCursor = { createdAt: Date; id: string };
 
 export type ListExchangeInfoOptions = {
+  viewerUserId: string;
   types: ProfileType[];
   /** 比對標題（我能提供、我想找）與展開後的內文。 */
   keyword?: string;
@@ -69,32 +71,55 @@ function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, (char) => `\\${char}`);
 }
 
-const exchangeInfoListColumns = {
-  id: profiles.id,
-  type: profiles.type,
-  offersText: profiles.offersText,
-  wantsText: profiles.wantsText,
-  description: profiles.description,
-  createdAt: profiles.createdAt,
-  authorNickname: users.nickname,
-  authorGroup: users.group,
-  authorAvatarUrl: users.avatarUrl,
-};
+function exchangeInfoListColumns(viewerUserId?: string) {
+  // 這段是 raw SQL 子查詢，參數不會經過 Drizzle timestamp 欄位的
+  // Date -> Unix seconds encoder，因此明確傳入和 SQLite 欄位相同的秒數。
+  const duplicateCutoffSeconds = Math.floor(
+    (Date.now() - CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000) /
+      1000,
+  );
+  return {
+    id: profiles.id,
+    type: profiles.type,
+    offersText: profiles.offersText,
+    wantsText: profiles.wantsText,
+    description: profiles.description,
+    createdAt: profiles.createdAt,
+    authorNickname: users.nickname,
+    authorGroup: users.group,
+    authorAvatarUrl: users.avatarUrl,
+    appliedWithinCooldown:
+      viewerUserId === undefined
+        ? sql<number>`0`
+        : sql<number>`EXISTS (
+          SELECT 1 FROM ${contactLogs}
+          WHERE ${contactLogs.profileId} = ${profiles.id}
+            AND ${contactLogs.fromUserId} = ${viewerUserId}
+            AND ${contactLogs.createdAt} >= ${duplicateCutoffSeconds}
+        )`,
+  };
+}
 
-type ExchangeInfoListRow = Omit<ExchangeInfoListItem, "author"> & {
+type ExchangeInfoListRow = Omit<
+  ExchangeInfoListItem,
+  "author" | "appliedWithinCooldown"
+> & {
   authorNickname: Author["nickname"];
   authorGroup: Author["group"];
   authorAvatarUrl: Author["avatarUrl"];
+  appliedWithinCooldown: number;
 };
 
 function toExchangeInfoListItem({
   authorNickname,
   authorGroup,
   authorAvatarUrl,
+  appliedWithinCooldown,
   ...row
 }: ExchangeInfoListRow): ExchangeInfoListItem {
   return {
     ...row,
+    appliedWithinCooldown: Boolean(appliedWithinCooldown),
     author: {
       nickname: authorNickname,
       group: authorGroup,
@@ -108,6 +133,7 @@ function toExchangeInfoListItem({
  * 已下架、已刪除或刊登者帳號停用的交換資訊不會出現。
  */
 export async function listExchangeInfo({
+  viewerUserId,
   types,
   keyword,
   sort,
@@ -151,7 +177,7 @@ export async function listExchangeInfo({
   const direction = sort === "newest" ? desc : asc;
 
   const rows = await getDb()
-    .select(exchangeInfoListColumns)
+    .select(exchangeInfoListColumns(viewerUserId))
     .from(profiles)
     .innerJoin(users, eq(profiles.userId, users.id))
     .where(and(...conditions))
@@ -182,11 +208,23 @@ export async function createExchangeInfo(
     .returning({ id: profiles.id });
 
   const [row] = await db
-    .select(exchangeInfoListColumns)
+    .select(exchangeInfoListColumns())
     .from(profiles)
     .innerJoin(users, eq(profiles.userId, users.id))
     .where(eq(profiles.id, created.id))
     .limit(1);
 
   return toExchangeInfoListItem(row);
+}
+
+/** 目前使用者尚未刪除的貼文類型；下架貼文仍占用該類型。 */
+export async function listPublishedExchangeInfoTypes(
+  userId: string,
+): Promise<ProfileType[]> {
+  const rows = await getDb()
+    .select({ type: profiles.type })
+    .from(profiles)
+    .where(and(eq(profiles.userId, userId), isNull(profiles.deletedAt)));
+
+  return rows.map(({ type }) => type);
 }

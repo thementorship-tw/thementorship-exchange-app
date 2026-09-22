@@ -1,59 +1,38 @@
+import type { ContactLogView } from "@/server/contact-logs/service";
+import type { ContactLogResponse } from "@/shared/api/contact-logs/types";
 import type { ProfileType } from "@/shared/profile-types";
 
 export type NotificationItem = {
   id: string;
   fromUserNickname: string;
   profileType: ProfileType;
-  targetType: "profile" | "application";
   targetHref: string;
   readAt: Date | null;
   createdAt: Date;
 };
 
-export const notificationTargetLabels: Record<
-  NotificationItem["targetType"],
-  string
-> = {
-  profile: "貼文",
-  application: "申請",
-};
+/** 通知目前唯一的來源：收到「我想聊」申請。還沒有獨立的 detail 頁，先固定指回 /home。 */
+export function toNotificationItem(log: ContactLogView): NotificationItem {
+  return {
+    id: log.id,
+    fromUserNickname: log.fromUser.nickname,
+    profileType: log.profile.type,
+    targetHref: "/home",
+    readAt: log.readAt,
+    createdAt: log.createdAt,
+  };
+}
 
-// TODO: 改由後端回傳建立於 10 天內的通知；前端不自行過濾時間。
-export const initialNotifications: NotificationItem[] = [
-  {
-    id: "notification-1",
-    fromUserNickname: "Ray Chen",
-    profileType: "skillAndInterest",
-    targetType: "profile",
+/** 與 toNotificationItem 相同的對應，但輸入是 client fetch 拿到的 JSON（日期為 ISO 字串）。 */
+export function notificationItemFromResponse(
+  log: ContactLogResponse,
+): NotificationItem {
+  return {
+    id: log.id,
+    fromUserNickname: log.fromUser.nickname,
+    profileType: log.profile.type,
     targetHref: "/home",
-    readAt: null,
-    createdAt: new Date("2026-09-14T02:00:00.000Z"),
-  },
-  {
-    id: "notification-2",
-    fromUserNickname: "Ray Chen",
-    profileType: "skillAndInterest",
-    targetType: "profile",
-    targetHref: "/home",
-    readAt: null,
-    createdAt: new Date("2026-09-14T02:00:00.000Z"),
-  },
-  {
-    id: "notification-3",
-    fromUserNickname: "Alicia Hen",
-    profileType: "skillAndInterest",
-    targetType: "application",
-    targetHref: "/home",
-    readAt: new Date("2026-09-14T00:00:00.000Z"),
-    createdAt: new Date("2026-09-13T16:00:00.000Z"),
-  },
-  {
-    id: "notification-4",
-    fromUserNickname: "Rath Caoe",
-    profileType: "career",
-    targetType: "application",
-    targetHref: "/home",
-    readAt: new Date("2026-09-14T00:00:00.000Z"),
-    createdAt: new Date("2026-09-13T06:00:00.000Z"),
-  },
-];
+    readAt: log.readAt === null ? null : new Date(log.readAt),
+    createdAt: new Date(log.createdAt),
+  };
+}

@@ -24,6 +24,7 @@ export function toCardSummary(
     offersText: item.offersText,
     wantsText: item.wantsText,
     description: item.description,
+    appliedWithinCooldown: item.appliedWithinCooldown,
     author: {
       nickname: item.author.nickname,
       group: item.author.group,
