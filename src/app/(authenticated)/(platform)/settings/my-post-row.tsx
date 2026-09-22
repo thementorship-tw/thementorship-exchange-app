@@ -13,11 +13,13 @@ export function MyPostRow({
   post,
   menuOpen,
   onMenuOpenChange,
+  onEdit,
   onDelist,
 }: {
   post: MyPost;
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
+  onEdit: () => void;
   onDelist: () => void;
 }) {
   const isDelisted = post.status === "delisted";
@@ -42,6 +44,7 @@ export function MyPostRow({
             <PostActionMenu
               open={menuOpen}
               onOpenChange={onMenuOpenChange}
+              onEdit={onEdit}
               onDelist={onDelist}
             />
           )}

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Toast } from "@/components/toast";
 
 import { DelistPostDialog } from "./delist-post-dialog";
+import { EditPostDialog } from "./edit-post-dialog";
 import type { MyPost } from "./settings-mock-data";
 import { MyPostRow } from "./my-post-row";
 
@@ -15,12 +16,19 @@ type ApiErrorBody = {
 export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
   const [posts, setPosts] = useState(initialPosts);
   const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
+  const [editPostId, setEditPostId] = useState<string | null>(null);
   const [delistPostId, setDelistPostId] = useState<string | null>(null);
+  const [editToastOpen, setEditToastOpen] = useState(false);
   const [delistToastOpen, setDelistToastOpen] = useState(false);
   const [delistErrorMessage, setDelistErrorMessage] = useState<
     string | undefined
   >();
   const [delisting, setDelisting] = useState(false);
+
+  const editingPost =
+    editPostId === null
+      ? null
+      : (posts.find((post) => post.id === editPostId) ?? null);
 
   async function confirmDelist() {
     if (delistPostId === null) return;
@@ -72,10 +80,36 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
             onMenuOpenChange={(open) =>
               setOpenMenuPostId(open ? post.id : null)
             }
+            onEdit={() => setEditPostId(post.id)}
             onDelist={() => setDelistPostId(post.id)}
           />
         ))}
       </ul>
+
+      {editingPost !== null && (
+        <EditPostDialog
+          key={editingPost.id}
+          post={editingPost}
+          open={editPostId !== null}
+          onClose={() => setEditPostId(null)}
+          onSave={(values) => {
+            setPosts((current) =>
+              current.map((post) =>
+                post.id === editingPost.id
+                  ? {
+                      ...post,
+                      offersText: values.offersText,
+                      wantsText: values.wantsText,
+                      description: values.description,
+                    }
+                  : post,
+              ),
+            );
+            setEditPostId(null);
+            setEditToastOpen(true);
+          }}
+        />
+      )}
 
       <DelistPostDialog
         open={delistPostId !== null}
@@ -86,6 +120,15 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
         }}
         onConfirm={() => void confirmDelist()}
       />
+
+      <Toast
+        open={editToastOpen}
+        variant="brand"
+        placement="homeContent"
+        onClose={() => setEditToastOpen(false)}
+      >
+        貼文已更新
+      </Toast>
 
       <Toast
         open={delistToastOpen}
