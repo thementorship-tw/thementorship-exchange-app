@@ -1,4 +1,4 @@
-import { Tray } from "@phosphor-icons/react/ssr";
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/button";
@@ -18,9 +18,11 @@ export const LOAD_FAILED_ERROR_DESCRIPTION =
  */
 export function ErrorState({
   image = (
-    <Tray
-      aria-hidden="true"
-      className="size-7 text-error"
+    <Image
+      src="/images/server-error.svg"
+      alt=""
+      width={32}
+      height={32}
     />
   ),
   title = LOAD_FAILED_ERROR_TITLE,

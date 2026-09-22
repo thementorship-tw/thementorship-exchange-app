@@ -4,12 +4,15 @@ import {
   parseQuery,
   validationError,
 } from "@/server/api/request";
-import { PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
+import { PRIVATE_NO_STORE_HEADERS, apiError } from "@/server/api/response";
 import {
-  createExchangeInfo,
   decodeExchangeInfoCursor,
   listExchangeInfo,
 } from "@/server/exchange-info/exchange-info.repository";
+import {
+  DuplicateProfileTypeError,
+  publishExchangeInfo,
+} from "@/server/exchange-info/service";
 import {
   createExchangeInfoSchema,
   exchangeInfoListQuerySchema,
@@ -58,7 +61,19 @@ export const POST = withApiAuth(
     const body = await parseJsonBody(request, createExchangeInfoSchema);
     if (!body.ok) return body.response;
 
-    const exchangeInfo = await createExchangeInfo(user.id, body.data);
+    let exchangeInfo;
+    try {
+      exchangeInfo = await publishExchangeInfo(user.id, body.data);
+    } catch (error) {
+      if (error instanceof DuplicateProfileTypeError) {
+        return apiError(
+          409,
+          "DUPLICATE_PROFILE_TYPE",
+          "A profile of this type already exists",
+        );
+      }
+      throw error;
+    }
 
     return Response.json(
       { data: exchangeInfo },
