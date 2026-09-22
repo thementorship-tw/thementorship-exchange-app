@@ -97,3 +97,13 @@ export const exchangeInfoListResponseDoc = z.object({
 export const createExchangeInfoResponseDoc = z.object({
   data: exchangeInfoItemDoc,
 });
+
+export const exchangeInfoAvailabilityResponseDoc = z.object({
+  data: z.object({
+    publishedTypes: z.array(exchangeInfoTypeSchema),
+    availableTypes: z.array(exchangeInfoTypeSchema),
+  }),
+});
+export type ExchangeInfoAvailabilityResponse = z.infer<
+  typeof exchangeInfoAvailabilityResponseDoc
+>;

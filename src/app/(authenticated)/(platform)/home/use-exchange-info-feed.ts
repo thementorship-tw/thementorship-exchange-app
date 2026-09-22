@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ExchangeInfoListResponse } from "@/shared/api/exchange-info/schemas";
 
+import { usePublishExchange } from "../_providers/publish-exchange-provider";
 import { toCardSummary, type CardSummary } from "./card-summary";
 
 export type FeedStatus = "loading" | "ready" | "error";
@@ -30,10 +31,12 @@ async function fetchExchangeInfoPage(
  * @param query 不含 cursor 的查詢字串，例如 "type=career&sort=oldest"
  */
 export function useExchangeInfoFeed(query: string) {
+  const { feedRevision } = usePublishExchange();
   const [cards, setCards] = useState<CardSummary[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [status, setStatus] = useState<FeedStatus>("loading");
   const controllerRef = useRef<AbortController | null>(null);
+  const handledFeedRevisionRef = useRef(feedRevision);
 
   const fetchPage = useCallback(
     (cursor: string | null) => {
@@ -66,6 +69,14 @@ export function useExchangeInfoFeed(query: string) {
     void fetchPage(null);
     return () => controllerRef.current?.abort();
   }, [fetchPage]);
+
+  // 發文成功後，立即重新載入首頁貼文列表
+  useEffect(() => {
+    if (handledFeedRevisionRef.current === feedRevision) return;
+
+    handledFeedRevisionRef.current = feedRevision;
+    void fetchPage(null);
+  }, [feedRevision, fetchPage]);
 
   /** 載入下一頁。 */
   const loadMore = useCallback(() => {
