@@ -272,6 +272,7 @@ export async function delistMyExchangeProfile(
     });
 
   return updated ?? null;
+}
 /** 目前使用者尚未刪除的貼文類型；下架貼文仍占用該類型。 */
 export async function listPublishedExchangeInfoTypes(
   userId: string,
