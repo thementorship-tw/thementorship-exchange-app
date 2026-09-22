@@ -22,6 +22,7 @@ export function SettingsProfileHeader({
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const inputRef = useRef<HTMLInputElement>(null);
   const ignoreBlurSaveRef = useRef(false);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     if (!editing) return;
@@ -43,6 +44,10 @@ export function SettingsProfileHeader({
   }
 
   async function saveNickname() {
+    // 按 Enter 會讓 input 變 disabled，依規格焦點會被收走並觸發 blur，blur 又會
+    // 再存一次；用 ref 而非 saving state 擋，才不受 render 時序影響。
+    if (savingRef.current) return;
+
     const nextNickname = draft.trim();
     if (nextNickname === profile.nickname) {
       setEditing(false);
@@ -54,6 +59,7 @@ export function SettingsProfileHeader({
       return;
     }
 
+    savingRef.current = true;
     setSaving(true);
     try {
       const response = await fetch("/api/me", {
@@ -76,6 +82,7 @@ export function SettingsProfileHeader({
     } catch {
       setErrorMessage("暱稱更新失敗");
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }
