@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { Toast } from "@/components/toast";
-import { PROFILE_TYPES } from "@/shared/profile-types";
+import type { ExchangeInfoAvailabilityResponse } from "@/shared/api/exchange-info/schemas";
+import type { PatchMyProfileContentInput } from "@/shared/api/me-profiles/schemas";
+import { PROFILE_TYPES, type ProfileType } from "@/shared/profile-types";
 
 import { ExchangePostFormFields } from "../home/exchange-post-form-fields";
-import {
-  type ExchangePostFormValues,
-  validateExchangePostFormValues,
-} from "../home/exchange-post-form";
+import { validateExchangePostFormValues } from "../home/exchange-post-form";
 
 import type { MyPost } from "./settings-items";
 
@@ -26,13 +25,51 @@ export function EditPostDialog({
   open: boolean;
   onClose: () => void;
   saving?: boolean;
-  onSave: (values: ExchangePostFormValues) => void;
+  onSave: (values: PatchMyProfileContentInput) => void;
 }) {
+  const [type, setType] = useState<ProfileType>(post.type);
   const [offersText, setOffersText] = useState(post.offersText);
   const [wantsText, setWantsText] = useState(post.wantsText);
   const [description, setDescription] = useState(post.description);
   const [showErrors, setShowErrors] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [loadingTypes, setLoadingTypes] = useState(true);
+  const [selectableTypes, setSelectableTypes] = useState<ProfileType[]>([
+    post.type,
+  ]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    let cancelled = false;
+    void fetch("/api/exchange-info/availability")
+      .then(async (response) => {
+        if (!response.ok)
+          throw new Error(`Availability failed: ${response.status}`);
+        return (await response.json()) as ExchangeInfoAvailabilityResponse;
+      })
+      .then(({ data }) => {
+        if (cancelled) return;
+        setSelectableTypes(
+          PROFILE_TYPES.filter(
+            (candidate) =>
+              candidate === post.type ||
+              data.availableTypes.includes(candidate),
+          ),
+        );
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to load available profile types", error);
+        if (!cancelled) setErrorMessage("載入可用標籤失敗，請稍後再試");
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingTypes(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, post.type]);
 
   const formValues = { offersText, wantsText, description };
   const { offersInvalid, wantsInvalid, descriptionInvalid } =
@@ -46,6 +83,7 @@ export function EditPostDialog({
     }
 
     onSave({
+      type,
       offersText: offersText.trim(),
       wantsText: wantsText.trim(),
       description: description.trim(),
@@ -86,12 +124,15 @@ export function EditPostDialog({
             onOffersTextChange={setOffersText}
             onWantsTextChange={setWantsText}
             onDescriptionChange={setDescription}
-            selectableTypes={[]}
-            displayTypes={[...PROFILE_TYPES]}
-            selectedType={post.type}
-            onSelectType={() => {}}
-            typeSelectionDisabled
-            tagHint="點擊選擇，一種類標籤僅能發佈一篇貼文"
+            selectableTypes={selectableTypes}
+            selectedType={type}
+            onSelectType={setType}
+            tagsDisabled={loadingTypes}
+            tagHint={
+              loadingTypes
+                ? "載入可用標籤中…"
+                : "點擊選擇，一種類標籤僅能發佈一篇貼文"
+            }
             showErrors={showErrors}
             offersInvalid={offersInvalid}
             wantsInvalid={wantsInvalid}

@@ -26,7 +26,7 @@ type NotificationContextValue = {
   notifications: NotificationItem[];
   loadFailed: boolean;
   unreadCount: number;
-  markAsRead: (id: string) => Promise<void>;
+  markAsRead: (id: string) => Promise<boolean>;
   markAllAsRead: () => Promise<void>;
   enablePushNotifications: () => Promise<boolean>;
 };
@@ -146,7 +146,7 @@ export function NotificationProvider({
         // 一筆較舊的申請時。這種情況一樣要打 PATCH，只是沒有本地通知
         // list 可以做 optimistic update。
         const target = notifications.find((item) => item.id === id);
-        if (target !== undefined && target.readAt !== null) return;
+        if (target !== undefined && target.readAt !== null) return true;
 
         const readAt = new Date();
         if (target !== undefined) {
@@ -163,6 +163,7 @@ export function NotificationProvider({
           if (!response.ok) {
             throw new Error(`Request failed with status ${response.status}`);
           }
+          return true;
         } catch (error: unknown) {
           if (target !== undefined) {
             // 只回復本次 optimistic update，避免覆蓋其他已成功的已讀狀態。
@@ -176,6 +177,7 @@ export function NotificationProvider({
           }
           setMutationError("已讀狀態更新失敗，請稍後再試");
           console.error("[notifications] Failed to mark as read", error);
+          return false;
         }
       },
       markAllAsRead: async () => {

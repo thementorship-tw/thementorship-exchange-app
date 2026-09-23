@@ -7,9 +7,10 @@ import { Toast } from "@/components/toast";
 import { readApiError } from "./api-error";
 import { DelistPostDialog } from "./delist-post-dialog";
 import { EditPostDialog } from "./edit-post-dialog";
-import type { MyProfileResponse } from "@/shared/api/me-profiles/schemas";
-
-import type { ExchangePostFormValues } from "../home/exchange-post-form";
+import type {
+  MyProfileResponse,
+  PatchMyProfileContentInput,
+} from "@/shared/api/me-profiles/schemas";
 
 import type { MyPost } from "./settings-items";
 import { MyPostRow } from "./my-post-row";
@@ -74,7 +75,7 @@ export function MyPostList({
     }
   }
 
-  async function confirmEdit(values: ExchangePostFormValues) {
+  async function confirmEdit(values: PatchMyProfileContentInput) {
     if (editingPost === null) return;
 
     setSavingEdit(true);
@@ -83,6 +84,7 @@ export function MyPostList({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          type: values.type,
           offersText: values.offersText,
           wantsText: values.wantsText,
           description: values.description || null,
@@ -91,7 +93,14 @@ export function MyPostList({
 
       if (!response.ok) {
         const body = await readApiError(response);
-        setEditErrorMessage(body.error?.message ?? "貼文更新失敗");
+        if (
+          response.status === 409 ||
+          body.error?.code === "DUPLICATE_PROFILE_TYPE"
+        ) {
+          setEditErrorMessage("你已有該種類標籤貼文，請選擇其他分類");
+        } else {
+          setEditErrorMessage(body.error?.message ?? "貼文更新失敗");
+        }
         return;
       }
 
@@ -101,6 +110,7 @@ export function MyPostList({
           post.id === editingPost.id
             ? {
                 ...post,
+                type: data.type,
                 offersText: data.offersText,
                 wantsText: data.wantsText,
                 description: data.description ?? "",

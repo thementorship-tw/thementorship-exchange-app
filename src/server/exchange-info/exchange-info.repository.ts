@@ -18,6 +18,7 @@ import { CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS } from "@/shared/api/contact-logs/c
 import {
   EXCHANGE_INFO_PAGE_SIZE,
   type CreateExchangeInfoInput,
+  type ExchangeInfoContentInput,
   type ExchangeInfoListResponseItem,
   type ExchangeInfoSortOrder,
 } from "@/shared/api/exchange-info/schemas";
@@ -277,16 +278,13 @@ export async function delistMyExchangeProfile(
 export async function updateMyExchangeProfile(
   userId: string,
   profileId: string,
-  input: {
-    offersText: string;
-    wantsText: string;
-    description: string | null;
-  },
+  input: ExchangeInfoContentInput,
 ): Promise<MyExchangeProfileRow | null> {
   const db = getDb();
   const [updated] = await db
     .update(profiles)
     .set({
+      type: input.type,
       offersText: input.offersText,
       wantsText: input.wantsText,
       description: input.description,
@@ -296,6 +294,7 @@ export async function updateMyExchangeProfile(
       and(
         eq(profiles.id, profileId),
         eq(profiles.userId, userId),
+        eq(profiles.visible, true),
         isNull(profiles.deletedAt),
       ),
     )

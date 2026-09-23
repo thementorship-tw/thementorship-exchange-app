@@ -138,7 +138,11 @@ export function MyPostRow({
                       !markedReadIdsRef.current.has(application.id)
                     ) {
                       markedReadIdsRef.current.add(application.id);
-                      void markAsRead(application.id);
+                      void markAsRead(application.id).then((succeeded) => {
+                        if (!succeeded) {
+                          markedReadIdsRef.current.delete(application.id);
+                        }
+                      });
                     }
                   }}
                 />

@@ -120,6 +120,7 @@ export function buildOpenApiDocument() {
             "401": errorResponse("Authentication required"),
             "403": errorResponse("Account inactive or consent required"),
             "404": errorResponse("Profile not found"),
+            "409": errorResponse("A profile of this type already exists"),
             "422": errorResponse("Request validation failed"),
           },
         },

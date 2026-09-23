@@ -18,12 +18,9 @@ export type ExchangePostFormFieldsProps = {
   onWantsTextChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   selectableTypes: ProfileType[];
-  /** 覆寫 Tag 列顯示的類型；修改貼文時顯示全部類型、鎖定不可換。 */
-  displayTypes?: ProfileType[];
   selectedType: ProfileType | null;
   onSelectType: (type: ProfileType) => void;
   tagHint: string;
-  typeSelectionDisabled?: boolean;
   tagsDisabled?: boolean;
   fieldsDisabled?: boolean;
   showErrors?: boolean;
@@ -42,11 +39,9 @@ export function ExchangePostFormFields({
   onWantsTextChange,
   onDescriptionChange,
   selectableTypes,
-  displayTypes,
   selectedType,
   onSelectType,
   tagHint,
-  typeSelectionDisabled = false,
   tagsDisabled = false,
   fieldsDisabled = false,
   showErrors = false,
@@ -59,7 +54,6 @@ export function ExchangePostFormFields({
 }: ExchangePostFormFieldsProps) {
   const offersTextareaRef = useRef<HTMLTextAreaElement>(null);
   const wantsTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const tagTypes = displayTypes ?? selectableTypes;
 
   useEffect(() => {
     for (const textarea of [
@@ -78,39 +72,22 @@ export function ExchangePostFormFields({
         <fieldset disabled={tagsDisabled || fieldsDisabled}>
           <legend className="sr-only">選擇貼文標籤</legend>
           <div className="flex flex-wrap items-center gap-2">
-            {tagTypes.map((profileType) => {
-              const tag = (
+            {selectableTypes.map((profileType) => (
+              <button
+                key={profileType}
+                type="button"
+                aria-pressed={selectedType === profileType}
+                onClick={() => onSelectType(profileType)}
+                className="cursor-pointer rounded-pill focus-visible:outline-2 focus-visible:outline-brand"
+              >
                 <Tag
                   variant="filled"
                   tone={selectedType === profileType ? "brand" : "white"}
                 >
                   #{PROFILE_TYPE_LABELS[profileType]}
                 </Tag>
-              );
-
-              if (typeSelectionDisabled) {
-                return (
-                  <span
-                    key={profileType}
-                    className="rounded-pill"
-                  >
-                    {tag}
-                  </span>
-                );
-              }
-
-              return (
-                <button
-                  key={profileType}
-                  type="button"
-                  aria-pressed={selectedType === profileType}
-                  onClick={() => onSelectType(profileType)}
-                  className="cursor-pointer rounded-pill focus-visible:outline-2 focus-visible:outline-brand"
-                >
-                  {tag}
-                </button>
-              );
-            })}
+              </button>
+            ))}
             <span className="text-caption text-secondary">{tagHint}</span>
           </div>
         </fieldset>

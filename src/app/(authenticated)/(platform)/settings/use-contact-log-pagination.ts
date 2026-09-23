@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { CONTACT_LOG_DEFAULT_PAGE_SIZE } from "@/shared/api/contact-logs/constants";
 import type {
@@ -33,13 +33,19 @@ export function useContactLogPagination<T>({
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [status, setStatus] = useState<LoadStatus>("ready");
+  const requestInFlightRef = useRef(false);
   const hasMore = page < totalPages;
 
   const loadMore = useCallback(
     (retry = false) => {
-      if ((!retry && status === "error") || status === "loading" || !hasMore)
+      if (
+        requestInFlightRef.current ||
+        (!retry && status === "error") ||
+        !hasMore
+      )
         return;
 
+      requestInFlightRef.current = true;
       setStatus("loading");
       const params = new URLSearchParams({
         role,
@@ -67,6 +73,9 @@ export function useContactLogPagination<T>({
         .catch((error: unknown) => {
           console.error("Failed to load contact logs", error);
           setStatus("error");
+        })
+        .finally(() => {
+          requestInFlightRef.current = false;
         });
     },
     [role, profileId, page, hasMore, status, mapItem],

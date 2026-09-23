@@ -1,5 +1,5 @@
 type ApiErrorBody = {
-  error?: { message?: string; fields?: Record<string, string> };
+  error?: { code?: string; message?: string; fields?: Record<string, string> };
 };
 
 /**

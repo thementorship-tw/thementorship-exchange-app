@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { MEMBER_GROUPS } from "@/shared/member-groups";
-import { PROFILE_TYPES } from "@/shared/profile-types";
+import { profileTypeSchema } from "@/shared/profile-types";
 
 import {
   DEFAULT_EXCHANGE_INFO_SORT,
@@ -23,12 +23,10 @@ export {
   type ExchangeInfoSortOrder,
 } from "./constants";
 
-const exchangeInfoTypeSchema = z.enum(PROFILE_TYPES);
-
 export type ExchangeInfoListQuery = z.infer<typeof exchangeInfoListQuerySchema>;
 
 export const exchangeInfoListQuerySchema = z.object({
-  type: z.array(exchangeInfoTypeSchema).default([]).meta({
+  type: z.array(profileTypeSchema).default([]).meta({
     description:
       "標籤篩選，可帶入多個標籤，例如 ?type=skillAndInterest&type=career",
   }),
@@ -45,8 +43,9 @@ export const exchangeInfoListQuerySchema = z.object({
     .meta({ description: "上一頁回傳的 nextCursor；第一頁不用帶" }),
 });
 
-export const createExchangeInfoSchema = z.object({
-  type: exchangeInfoTypeSchema,
+/** 一篇交流貼文的內容欄位；新增與修改都是這組欄位，跟操作動詞無關。 */
+export const exchangeInfoContentSchema = z.object({
+  type: profileTypeSchema,
   offersText: z
     .string()
     .trim()
@@ -60,12 +59,18 @@ export const createExchangeInfoSchema = z.object({
     .nullish()
     .transform((value) => (value ? value : null)),
 });
-export type CreateExchangeInfoInput = z.infer<typeof createExchangeInfoSchema>;
+export type ExchangeInfoContentInput = z.infer<
+  typeof exchangeInfoContentSchema
+>;
+
+/** 新增交換資訊：目前跟內容欄位完全一樣。 */
+export const createExchangeInfoSchema = exchangeInfoContentSchema;
+export type CreateExchangeInfoInput = ExchangeInfoContentInput;
 
 const exchangeInfoItemDoc = z
   .object({
     id: z.string(),
-    type: exchangeInfoTypeSchema,
+    type: profileTypeSchema,
     offersText: z.string(),
     wantsText: z.string(),
     description: z.string().nullable(),
@@ -100,8 +105,8 @@ export const createExchangeInfoResponseDoc = z.object({
 
 export const exchangeInfoAvailabilityResponseDoc = z.object({
   data: z.object({
-    publishedTypes: z.array(exchangeInfoTypeSchema),
-    availableTypes: z.array(exchangeInfoTypeSchema),
+    publishedTypes: z.array(profileTypeSchema),
+    availableTypes: z.array(profileTypeSchema),
   }),
 });
 export type ExchangeInfoAvailabilityResponse = z.infer<

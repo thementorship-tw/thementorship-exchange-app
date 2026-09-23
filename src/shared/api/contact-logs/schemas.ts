@@ -12,7 +12,7 @@ import {
 } from "@/shared/api/contact-logs/constants";
 import { positiveIntegerString, requiredText } from "@/shared/api/validation";
 import { MEMBER_GROUPS } from "@/shared/member-groups";
-import { PROFILE_TYPES } from "@/shared/profile-types";
+import { profileTypeSchema } from "@/shared/profile-types";
 
 /**
  * Response shape. There is no runtime response validation to reuse
@@ -31,7 +31,7 @@ export const contactLogUserSchema = z
 
 export const contactLogProfileSnapshotSchema = z
   .object({
-    type: z.enum(PROFILE_TYPES),
+    type: profileTypeSchema,
     offersText: z.string(),
     wantsText: z.string(),
     description: z.string().nullable(),
