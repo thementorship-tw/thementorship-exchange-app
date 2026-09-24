@@ -22,7 +22,7 @@ export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
         className="hidden -translate-y-20 object-cover object-[left_90%] md:landscape:block lg:block"
       />
       <Image
-        src="/images/login/background-sm.png"
+        src="/images/login/background-sm.svg"
         alt=""
         fill
         loading="eager"
