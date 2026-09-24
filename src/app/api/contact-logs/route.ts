@@ -59,6 +59,7 @@ export const POST = withApiAuth(
       sendContactLogPushNotification({
         toUserId: result.log.toUser.id,
         fromUserNickname: result.log.fromUser.nickname,
+        profileType: result.log.profile.type,
         targetHref: buildContactLogTargetHref({
           profileId: result.log.profileId,
           applicationId: result.log.id,
