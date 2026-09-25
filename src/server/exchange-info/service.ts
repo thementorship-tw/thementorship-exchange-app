@@ -1,8 +1,13 @@
 import {
   createExchangeInfo,
   listPublishedExchangeInfoTypes,
+  updateMyExchangeProfile,
+  type MyExchangeProfileRow,
 } from "@/server/exchange-info/exchange-info.repository";
-import type { CreateExchangeInfoInput } from "@/shared/api/exchange-info/schemas";
+import type {
+  CreateExchangeInfoInput,
+  ExchangeInfoContentInput,
+} from "@/shared/api/exchange-info/schemas";
 import { PROFILE_TYPES, type ProfileType } from "@/shared/profile-types";
 
 export class DuplicateProfileTypeError extends Error {
@@ -42,6 +47,22 @@ export async function publishExchangeInfo(
 ) {
   try {
     return await createExchangeInfo(userId, input);
+  } catch (error) {
+    if (isDuplicateProfileTypeError(error)) {
+      throw new DuplicateProfileTypeError();
+    }
+    throw error;
+  }
+}
+
+/** 設定中心修改貼文內容，允許換分類；換成別篇貼文已佔用的分類會丟 DuplicateProfileTypeError。 */
+export async function updateExchangeInfoContent(
+  userId: string,
+  profileId: string,
+  input: ExchangeInfoContentInput,
+): Promise<MyExchangeProfileRow | null> {
+  try {
+    return await updateMyExchangeProfile(userId, profileId, input);
   } catch (error) {
     if (isDuplicateProfileTypeError(error)) {
       throw new DuplicateProfileTypeError();

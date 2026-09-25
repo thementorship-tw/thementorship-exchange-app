@@ -31,7 +31,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
 
       <h1 className="sr-only">交流列表</h1>
 
-      <div className="mx-auto grid min-h-0 w-full max-w-360 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] gap-2 px-4 pb-2 md:px-0 md:landscape:gap-6 md:landscape:py-6 lg:gap-6 lg:py-6">
+      <div className="mx-auto grid min-h-0 w-full max-w-360 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] gap-2 px-4 pb-2 md:px-0 md:landscape:gap-6 md:landscape:pt-2 md:landscape:pb-0 lg:gap-6 lg:pt-2 lg:pb-0">
         <ExchangeList
           apiQuery={apiQuery}
           filterBar={<FilterBar params={{ types, sort, keyword }} />}

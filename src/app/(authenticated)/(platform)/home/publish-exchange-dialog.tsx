@@ -233,14 +233,14 @@ export function PublishExchangeDialog({
           event.preventDefault();
           closePublisher();
         }}
-        className="mt-16 h-[calc(100dvh-4rem)] max-h-none w-full max-w-none rounded-t-20 bg-surface p-0 text-primary outline-none backdrop:bg-overlay md:landscape:!m-0 md:landscape:!h-fit md:landscape:!max-w-none md:landscape:rounded-20 lg:!m-0 lg:!h-fit lg:!max-w-none lg:rounded-20"
+        className="mt-16 h-[calc(100dvh-4rem)] max-h-none w-full max-w-none rounded-t-20 bg-surface p-0 text-primary outline-none backdrop:bg-overlay md:landscape:!m-0 md:landscape:!h-fit md:landscape:!max-w-none md:landscape:bg-transparent lg:!m-0 lg:!h-fit lg:!max-w-none lg:bg-transparent"
       >
         <form
           onSubmit={(event) => {
             event.preventDefault();
             requestConfirmation();
           }}
-          className="flex h-full flex-col gap-4 p-4 md:landscape:h-auto md:landscape:p-5 lg:h-auto lg:p-5"
+          className="flex h-full flex-col gap-4 p-4 md:landscape:h-auto md:landscape:p-0 lg:h-auto lg:p-0"
         >
           <h2
             id="publish-exchange-title"
@@ -249,26 +249,29 @@ export function PublishExchangeDialog({
             發布貼文
           </h2>
 
-          <ExchangePostFormFields
-            values={formValues}
-            onOffersTextChange={setOffersText}
-            onWantsTextChange={setWantsText}
-            onDescriptionChange={setDescription}
-            selectableTypes={availableTypes}
-            selectedType={type}
-            onSelectType={setType}
-            tagHint={tagHint}
-            tagsDisabled={loadingTypes}
-            fieldsDisabled={submitting}
-            showErrors={showErrors}
-            offersInvalid={offersInvalid}
-            wantsInvalid={wantsInvalid}
-            descriptionInvalid={descriptionInvalid}
-            showTypeError={
-              showErrors && type === null && availableTypes.length > 0
-            }
-            autoGrowKey={open}
-          />
+          <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-20 bg-surface p-2">
+            <ExchangePostFormFields
+              values={formValues}
+              onOffersTextChange={setOffersText}
+              onWantsTextChange={setWantsText}
+              onDescriptionChange={setDescription}
+              selectableTypes={availableTypes}
+              selectedType={type}
+              onSelectType={setType}
+              tagHint={tagHint}
+              tagsDisabled={loadingTypes}
+              fieldsDisabled={submitting}
+              showErrors={showErrors}
+              offersInvalid={offersInvalid}
+              wantsInvalid={wantsInvalid}
+              descriptionInvalid={descriptionInvalid}
+              showTypeError={
+                showErrors && type === null && availableTypes.length > 0
+              }
+              autoGrowKey={open}
+              descriptionClassName="relative mx-3 mb-3 min-h-36 flex-1 md:landscape:min-h-28 lg:min-h-28"
+            />
+          </div>
 
           <div className="flex justify-end gap-2">
             <Button

@@ -1,16 +1,15 @@
 import { z } from "zod";
 import "zod-openapi";
 
-import { createExchangeInfoSchema } from "@/shared/api/exchange-info/schemas";
-import { PROFILE_TYPES } from "@/shared/profile-types";
+import { exchangeInfoContentSchema } from "@/shared/api/exchange-info/schemas";
+import { profileTypeSchema } from "@/shared/profile-types";
 
-const myProfileTypeSchema = z.enum(PROFILE_TYPES);
 const myProfileStatusSchema = z.enum(["active", "delisted"]);
 
 export const myProfileItemDoc = z
   .object({
     id: z.string(),
-    type: myProfileTypeSchema,
+    type: profileTypeSchema,
     status: myProfileStatusSchema,
     offersText: z.string(),
     wantsText: z.string(),
@@ -32,10 +31,12 @@ export const patchMyProfileDelistSchema = z.object({
   visible: z.literal(false).meta({ description: "設為 false 代表下架" }),
 });
 
-/** 設定中心修改貼文內容（不可變更 type）。 */
-export const patchMyProfileContentSchema = createExchangeInfoSchema.omit({
-  type: true,
-});
+/** 設定中心修改貼文內容，含分類；換成別篇貼文已佔用的分類會回傳 409。 */
+export const patchMyProfileContentSchema = exchangeInfoContentSchema;
+
+export type PatchMyProfileContentInput = z.infer<
+  typeof patchMyProfileContentSchema
+>;
 
 export const patchMyProfileSchema = z.union([
   patchMyProfileDelistSchema,

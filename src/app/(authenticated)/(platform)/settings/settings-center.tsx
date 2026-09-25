@@ -7,21 +7,32 @@ import { useState } from "react";
 import type { SettingsProfile } from "@/shared/api/users/schemas";
 
 import { MyPostList } from "./my-post-list";
-import type { MyPost } from "./settings-mock-data";
+import { SentApplicationList } from "./sent-application-list";
+import type { MyPost, SentApplication } from "./settings-items";
 import { SettingsProfileHeader } from "./settings-profile-header";
 import { SettingsTabs, type SettingsTab } from "./settings-tabs";
 
 export function SettingsCenter({
   profile,
   initialPosts,
+  initialSentApplications,
+  initialSentTotalPages,
+  initialActiveTab = "posts",
+  targetProfileId,
+  targetApplicationId,
 }: {
   profile: SettingsProfile;
   initialPosts: MyPost[];
+  initialSentApplications: SentApplication[];
+  initialSentTotalPages: number;
+  initialActiveTab?: SettingsTab;
+  targetProfileId?: string;
+  targetApplicationId?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("posts");
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialActiveTab);
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col px-4 pt-4 pb-6 md:px-0 md:landscape:pt-2 lg:pt-2">
+    <section className="flex min-h-0 flex-1 flex-col px-4 pt-4 pb-6 md:px-0 md:landscape:pt-2 md:landscape:pb-0 lg:pt-2 lg:pb-0">
       <div className="mb-7 flex items-center md:landscape:hidden lg:hidden">
         <Link
           href="/home"
@@ -46,15 +57,28 @@ export function SettingsCenter({
           role="tabpanel"
           id="settings-tabpanel-posts"
           aria-labelledby="settings-tab-posts"
+          hidden={activeTab !== "posts"}
           className="flex min-h-0 flex-1 flex-col pt-2"
         >
-          {activeTab === "posts" ? (
-            <MyPostList initialPosts={initialPosts} />
-          ) : (
-            <div className="flex flex-1 items-center justify-center rounded-20 bg-glass px-6 py-12 text-body text-secondary">
-              即將推出
-            </div>
-          )}
+          <MyPostList
+            initialPosts={initialPosts}
+            targetProfileId={targetProfileId}
+            targetApplicationId={targetApplicationId}
+          />
+        </div>
+
+        <div
+          role="tabpanel"
+          id="settings-tabpanel-sentApplications"
+          aria-labelledby="settings-tab-sentApplications"
+          hidden={activeTab !== "sentApplications"}
+          className="flex min-h-0 flex-1 flex-col pt-2"
+        >
+          <SentApplicationList
+            active={activeTab === "sentApplications"}
+            initialApplications={initialSentApplications}
+            initialTotalPages={initialSentTotalPages}
+          />
         </div>
       </div>
     </section>

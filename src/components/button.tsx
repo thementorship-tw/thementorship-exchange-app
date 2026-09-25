@@ -19,7 +19,7 @@ export type ButtonProps = Omit<
   ButtonStyleProps;
 
 const base =
-  "inline-flex cursor-pointer items-center justify-center shadow-sm transition enabled:active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2";
+  "inline-flex cursor-pointer items-center justify-center transition enabled:active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:

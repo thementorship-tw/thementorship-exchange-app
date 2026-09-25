@@ -15,6 +15,7 @@ import {
   createContactLogSchema,
 } from "@/shared/api/contact-logs/schemas";
 import type { ContactLogResponse } from "@/shared/api/contact-logs/types";
+import { buildContactLogTargetHref } from "@/shared/contact-log-target";
 
 // 將 Date 物件轉換為 ISO 字串
 function serializeContactLog(log: ContactLogView): ContactLogResponse {
@@ -68,7 +69,10 @@ export const POST = withApiAuth(
       sendContactLogPushNotification({
         toUserId: result.log.toUser.id,
         fromUserNickname: result.log.fromUser.nickname,
-        targetHref: "/home",
+        targetHref: buildContactLogTargetHref({
+          profileId: result.log.profileId,
+          applicationId: result.log.id,
+        }),
       }),
     );
 
@@ -88,11 +92,12 @@ export const GET = withApiAuth(
       page: searchParams.get("page") ?? undefined,
       pageSize: searchParams.get("pageSize") ?? undefined,
       unread: searchParams.get("unread") ?? undefined,
+      profileId: searchParams.get("profileId") ?? undefined,
       withinDays: searchParams.get("withinDays") ?? undefined,
     });
     if (!validation.ok) return validation.response;
 
-    const { direction, page, pageSize, unreadOnly, withinDays } =
+    const { direction, page, pageSize, unreadOnly, profileId, withinDays } =
       validation.data;
     const result = await listContactLogs({
       userId: user.id,
@@ -100,6 +105,7 @@ export const GET = withApiAuth(
       page,
       pageSize,
       unreadOnly,
+      profileId,
       withinDays,
     });
 

@@ -49,6 +49,8 @@ export type ListContactLogsInput = {
   page: number;
   pageSize: number;
   unreadOnly: boolean;
+  /** received 列表可限定某一篇 Profile；owner condition 仍會同時套用。 */
+  profileId?: string;
   /** 只回傳 createdAt 在過去 N 天內的紀錄；不帶則不限制。 */
   withinDays?: number;
 };
@@ -157,6 +159,7 @@ export async function createContactLog(
           wantsText: profile.wantsText,
           description: profile.description,
         },
+        profileAvailability: "available",
         readAt: null,
         createdAt: created.createdAt,
       },
@@ -174,6 +177,9 @@ export async function listContactLogs(
   const conditions = [ownerCondition];
   if (input.direction === "received" && input.unreadOnly) {
     conditions.push(isNull(contactLogs.readAt));
+  }
+  if (input.profileId !== undefined) {
+    conditions.push(eq(contactLogs.profileId, input.profileId));
   }
   if (input.withinDays !== undefined) {
     conditions.push(createdWithinDaysCondition(input.withinDays));
@@ -202,12 +208,16 @@ export async function listContactLogs(
         profileOffersText: contactLogs.profileOffersSnapshot,
         profileWantsText: contactLogs.profileWantsSnapshot,
         profileDescription: contactLogs.profileDescriptionSnapshot,
+        profileVisible: profiles.visible,
+        profileDeletedAt: profiles.deletedAt,
+        profileOwnerActive: toUsers.active,
         readAt: contactLogs.readAt,
         createdAt: contactLogs.createdAt,
       })
       .from(contactLogs)
       .innerJoin(fromUsers, eq(contactLogs.fromUserId, fromUsers.id))
       .innerJoin(toUsers, eq(contactLogs.toUserId, toUsers.id))
+      .innerJoin(profiles, eq(contactLogs.profileId, profiles.id))
       .where(where)
       .orderBy(desc(contactLogs.createdAt), desc(contactLogs.id))
       .limit(input.pageSize)
@@ -242,6 +252,12 @@ export async function listContactLogs(
         wantsText: row.profileWantsText,
         description: row.profileDescription,
       },
+      profileAvailability:
+        row.profileVisible &&
+        row.profileDeletedAt === null &&
+        row.profileOwnerActive
+          ? "available"
+          : "unavailable", // 這個欄位的值是根據當下的資料狀態計算出來的，並非 contact log 建立時的快照
       readAt: row.readAt,
       createdAt: row.createdAt,
     })),

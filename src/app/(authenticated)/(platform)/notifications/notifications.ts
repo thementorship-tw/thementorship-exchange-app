@@ -1,5 +1,6 @@
 import type { ContactLogView } from "@/server/contact-logs/service";
 import type { ContactLogResponse } from "@/shared/api/contact-logs/types";
+import { buildContactLogTargetHref } from "@/shared/contact-log-target";
 import type { ProfileType } from "@/shared/profile-types";
 
 export type NotificationItem = {
@@ -11,13 +12,16 @@ export type NotificationItem = {
   createdAt: Date;
 };
 
-/** 通知目前唯一的來源：收到「我想聊」申請。還沒有獨立的 detail 頁，先固定指回 /home。 */
+/** 通知目前唯一的來源：收到「我想聊」申請。 */
 export function toNotificationItem(log: ContactLogView): NotificationItem {
   return {
     id: log.id,
     fromUserNickname: log.fromUser.nickname,
     profileType: log.profile.type,
-    targetHref: "/home",
+    targetHref: buildContactLogTargetHref({
+      profileId: log.profileId,
+      applicationId: log.id,
+    }),
     readAt: log.readAt,
     createdAt: log.createdAt,
   };
@@ -31,7 +35,10 @@ export function notificationItemFromResponse(
     id: log.id,
     fromUserNickname: log.fromUser.nickname,
     profileType: log.profile.type,
-    targetHref: "/home",
+    targetHref: buildContactLogTargetHref({
+      profileId: log.profileId,
+      applicationId: log.id,
+    }),
     readAt: log.readAt === null ? null : new Date(log.readAt),
     createdAt: new Date(log.createdAt),
   };

@@ -1,0 +1,2 @@
+DROP INDEX `uq_profiles_user_type_not_deleted`;--> statement-breakpoint
+CREATE UNIQUE INDEX `uq_profiles_user_type_visible_not_deleted` ON `profiles` (`user_id`,`type`) WHERE "profiles"."visible" = true AND "profiles"."deleted_at" IS NULL;

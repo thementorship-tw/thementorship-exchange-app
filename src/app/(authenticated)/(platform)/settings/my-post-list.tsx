@@ -7,14 +7,23 @@ import { Toast } from "@/components/toast";
 import { readApiError } from "./api-error";
 import { DelistPostDialog } from "./delist-post-dialog";
 import { EditPostDialog } from "./edit-post-dialog";
-import type { MyProfileResponse } from "@/shared/api/me-profiles/schemas";
+import type {
+  MyProfileResponse,
+  PatchMyProfileContentInput,
+} from "@/shared/api/me-profiles/schemas";
 
-import type { ExchangePostFormValues } from "../home/exchange-post-form";
-
-import type { MyPost } from "./settings-mock-data";
+import type { MyPost } from "./settings-items";
 import { MyPostRow } from "./my-post-row";
 
-export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
+export function MyPostList({
+  initialPosts,
+  targetProfileId,
+  targetApplicationId,
+}: {
+  initialPosts: MyPost[];
+  targetProfileId?: string;
+  targetApplicationId?: string;
+}) {
   const [posts, setPosts] = useState(initialPosts);
   const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
   const [editPostId, setEditPostId] = useState<string | null>(null);
@@ -66,7 +75,7 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
     }
   }
 
-  async function confirmEdit(values: ExchangePostFormValues) {
+  async function confirmEdit(values: PatchMyProfileContentInput) {
     if (editingPost === null) return;
 
     setSavingEdit(true);
@@ -75,6 +84,7 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          type: values.type,
           offersText: values.offersText,
           wantsText: values.wantsText,
           description: values.description || null,
@@ -83,7 +93,14 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
 
       if (!response.ok) {
         const body = await readApiError(response);
-        setEditErrorMessage(body.error?.message ?? "貼文更新失敗");
+        if (
+          response.status === 409 ||
+          body.error?.code === "DUPLICATE_PROFILE_TYPE"
+        ) {
+          setEditErrorMessage("你已有該種類標籤貼文，請選擇其他分類");
+        } else {
+          setEditErrorMessage(body.error?.message ?? "貼文更新失敗");
+        }
         return;
       }
 
@@ -93,6 +110,7 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
           post.id === editingPost.id
             ? {
                 ...post,
+                type: data.type,
                 offersText: data.offersText,
                 wantsText: data.wantsText,
                 description: data.description ?? "",
@@ -130,6 +148,9 @@ export function MyPostList({ initialPosts }: { initialPosts: MyPost[] }) {
             }
             onEdit={() => setEditPostId(post.id)}
             onDelist={() => setDelistPostId(post.id)}
+            targetApplicationId={
+              post.id === targetProfileId ? targetApplicationId : undefined
+            }
           />
         ))}
       </ul>

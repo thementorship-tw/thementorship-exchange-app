@@ -12,7 +12,7 @@ import {
 } from "@/shared/api/contact-logs/constants";
 import { positiveIntegerString, requiredText } from "@/shared/api/validation";
 import { MEMBER_GROUPS } from "@/shared/member-groups";
-import { PROFILE_TYPES } from "@/shared/profile-types";
+import { profileTypeSchema } from "@/shared/profile-types";
 
 /**
  * Response shape. There is no runtime response validation to reuse
@@ -31,7 +31,7 @@ export const contactLogUserSchema = z
 
 export const contactLogProfileSnapshotSchema = z
   .object({
-    type: z.enum(PROFILE_TYPES),
+    type: profileTypeSchema,
     offersText: z.string(),
     wantsText: z.string(),
     description: z.string().nullable(),
@@ -50,6 +50,7 @@ export const contactLogResponseSchema = z
     motivation: z.string(),
     contactInfo: z.string(),
     profile: contactLogProfileSnapshotSchema,
+    profileAvailability: z.enum(["available", "unavailable"]),
     readAt: z.iso.datetime().nullable(),
     createdAt: z.iso.datetime(),
   })
@@ -136,6 +137,9 @@ export const contactLogListQuerySchema = z
       .optional()
       .meta({ description: "只能搭配 role=received 使用" })
       .transform((value) => value === "true"),
+    profileId: z.string().uuid("Must be a valid UUID").optional().meta({
+      description: "只查指定貼文收到的申請；只能搭配 role=received 使用",
+    }),
     withinDays: withinDaysSchema(),
   })
   .superRefine((value, context) => {
@@ -146,12 +150,20 @@ export const contactLogListQuerySchema = z
         message: "Can only be used with role=received",
       });
     }
+    if (value.role === "sent" && value.profileId !== undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["profileId"],
+        message: "Can only be used with role=received",
+      });
+    }
   })
-  .transform(({ role, page, pageSize, unread, withinDays }) => ({
+  .transform(({ role, page, pageSize, unread, profileId, withinDays }) => ({
     direction: role,
     page,
     pageSize,
     unreadOnly: unread,
+    profileId,
     withinDays,
   }));
 

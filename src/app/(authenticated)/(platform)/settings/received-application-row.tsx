@@ -3,7 +3,7 @@
 import { CaretDown } from "@phosphor-icons/react/ssr";
 import { useId } from "react";
 
-import type { ReceivedApplication } from "./settings-mock-data";
+import type { ReceivedApplication } from "./settings-items";
 
 const DETAIL_FIELDS = [
   { key: "offeredResource", label: "提供" },
