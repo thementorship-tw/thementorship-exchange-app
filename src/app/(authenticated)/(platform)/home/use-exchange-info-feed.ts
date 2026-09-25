@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ExchangeInfoListResponse } from "@/shared/api/exchange-info/schemas";
+import { withBasePath } from "@/shared/base-path";
 
 import { usePublishExchange } from "../_providers/publish-exchange-provider";
 import { toCardSummary, type CardSummary } from "./card-summary";
@@ -17,7 +18,9 @@ async function fetchExchangeInfoPage(
   const params = new URLSearchParams(query);
   if (cursor) params.set("cursor", cursor);
 
-  const response = await fetch(`/api/exchange-info?${params}`, { signal });
+  const response = await fetch(withBasePath(`/api/exchange-info?${params}`), {
+    signal,
+  });
   if (!response.ok) {
     throw new Error(`GET /api/exchange-info failed with ${response.status}`);
   }

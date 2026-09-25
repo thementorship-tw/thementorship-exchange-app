@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Toast } from "@/components/toast";
+import { withBasePath } from "@/shared/base-path";
 
 import { readApiError } from "./api-error";
 import { DelistPostDialog } from "./delist-post-dialog";
@@ -49,11 +50,14 @@ export function MyPostList({
 
     setDelisting(true);
     try {
-      const response = await fetch(`/api/me/profiles/${delistPostId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visible: false }),
-      });
+      const response = await fetch(
+        withBasePath(`/api/me/profiles/${delistPostId}`),
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ visible: false }),
+        },
+      );
 
       if (!response.ok) {
         const body = await readApiError(response);
@@ -80,16 +84,19 @@ export function MyPostList({
 
     setSavingEdit(true);
     try {
-      const response = await fetch(`/api/me/profiles/${editingPost.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: values.type,
-          offersText: values.offersText,
-          wantsText: values.wantsText,
-          description: values.description || null,
-        }),
-      });
+      const response = await fetch(
+        withBasePath(`/api/me/profiles/${editingPost.id}`),
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: values.type,
+            offersText: values.offersText,
+            wantsText: values.wantsText,
+            description: values.description || null,
+          }),
+        },
+      );
 
       if (!response.ok) {
         const body = await readApiError(response);

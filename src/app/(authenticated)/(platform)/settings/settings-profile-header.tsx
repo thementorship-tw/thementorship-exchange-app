@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/button";
 import { Toast } from "@/components/toast";
+import { withBasePath } from "@/shared/base-path";
 import type { MeResponse, SettingsProfile } from "@/shared/api/users/schemas";
 import { NICKNAME_MAX_LENGTH } from "@/shared/api/users/constants";
 
@@ -62,7 +63,7 @@ export function SettingsProfileHeader({
     savingRef.current = true;
     setSaving(true);
     try {
-      const response = await fetch("/api/me", {
+      const response = await fetch(withBasePath("/api/me"), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nickname: nextNickname }),

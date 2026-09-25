@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createDocument } from "zod-openapi";
 
 import { apiErrorResponseDoc } from "@/server/api/response-docs";
+import { BASE_PATH } from "@/shared/base-path";
 import {
   contactLogListResponseDoc,
   createContactLogResponseDoc,
@@ -43,6 +44,9 @@ export function buildOpenApiDocument() {
       title: "The Mentorship Exchange API",
       version: "1.0.0",
     },
+    // 下面 paths 的 key 是不含 basePath 的路徑（/api/me），由 servers 補上 /exchange。
+    // 相對路徑會以文件所在的網域為基準，所以本機與正式環境都適用。
+    servers: [{ url: BASE_PATH }],
     paths: {
       "/api/me": {
         get: {

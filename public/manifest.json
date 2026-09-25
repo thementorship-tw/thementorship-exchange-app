@@ -2,14 +2,16 @@
   "name": "技能交換平台",
   "short_name": "技能交換平台",
   "description": "Mentorship exchange platform",
-  "start_url": "/home",
+  "id": "/exchange/",
+  "start_url": "/exchange/home",
+  "scope": "/exchange/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "lang": "zh-Hant",
   "icons": [
     {
-      "src": "/images/logo.png",
+      "src": "/exchange/images/logo.png",
       "sizes": "361x361",
       "type": "image/png",
       "purpose": "any"

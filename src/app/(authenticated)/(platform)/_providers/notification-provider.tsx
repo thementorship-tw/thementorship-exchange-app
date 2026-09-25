@@ -12,6 +12,7 @@ import {
 import { Toast } from "@/components/toast";
 import { NOTIFICATION_RETENTION_DAYS } from "@/shared/api/contact-logs/constants";
 import type { ContactLogResponse } from "@/shared/api/contact-logs/types";
+import { withBasePath } from "@/shared/base-path";
 
 import { notificationItemFromResponse } from "../notifications/notifications";
 import type { NotificationItem } from "../notifications/notifications";
@@ -71,7 +72,9 @@ export function NotificationProvider({
   const refetchNotifications = useCallback(async () => {
     try {
       const response = await fetch(
-        `/api/contact-logs?role=received&withinDays=${NOTIFICATION_RETENTION_DAYS}`,
+        withBasePath(
+          `/api/contact-logs?role=received&withinDays=${NOTIFICATION_RETENTION_DAYS}`,
+        ),
       );
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
@@ -157,9 +160,10 @@ export function NotificationProvider({
           );
         }
         try {
-          const response = await fetch(`/api/contact-logs/${id}/read`, {
-            method: "PATCH",
-          });
+          const response = await fetch(
+            withBasePath(`/api/contact-logs/${id}/read`),
+            { method: "PATCH" },
+          );
           if (!response.ok) {
             throw new Error(`Request failed with status ${response.status}`);
           }
@@ -197,7 +201,9 @@ export function NotificationProvider({
 
         try {
           const response = await fetch(
-            `/api/contact-logs/read-all?withinDays=${NOTIFICATION_RETENTION_DAYS}`,
+            withBasePath(
+              `/api/contact-logs/read-all?withinDays=${NOTIFICATION_RETENTION_DAYS}`,
+            ),
             { method: "PATCH" },
           );
           if (!response.ok) {

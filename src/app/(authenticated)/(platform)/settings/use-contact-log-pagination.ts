@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 
 import { CONTACT_LOG_DEFAULT_PAGE_SIZE } from "@/shared/api/contact-logs/constants";
+import { withBasePath } from "@/shared/base-path";
 import type {
   ContactLogListResponse,
   ContactLogResponse,
@@ -54,7 +55,7 @@ export function useContactLogPagination<T>({
         ...(profileId === undefined ? {} : { profileId }),
       });
 
-      void fetch(`/api/contact-logs?${params}`)
+      void fetch(withBasePath(`/api/contact-logs?${params}`))
         .then(async (response) => {
           if (!response.ok)
             throw new Error(`Request failed: ${response.status}`);

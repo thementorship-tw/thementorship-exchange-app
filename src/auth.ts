@@ -8,6 +8,7 @@ import { cache } from "react";
 import { getSafeCallbackUrl } from "@/app/login/callback-url";
 import { LOGIN_ERROR } from "@/app/login/login-errors";
 import { readConsentReceipt } from "@/server/auth/consent-receipt";
+import { stripBasePath, withBasePath } from "@/shared/base-path";
 import {
   createUserOnFirstLogin,
   recordReturningLogin,
@@ -29,6 +30,13 @@ declare module "next-auth" {
 export const LOGIN_PATH = "/login";
 export const FORCE_SIGN_OUT_PATH = "/api/auth/force-signout";
 
+/**
+ * 路徑語意約定：程式內部的 callbackUrl、LOGIN_PATH 一律是「不含 basePath」的路徑，
+ * 這樣交給 Next.js 的 redirect() / <Link> 時不會重複加前綴。
+ * 只有在「交給 Auth.js」的那一刻才用 withBasePath() 加上，因為 Auth.js 不認得
+ * Next.js 的 basePath。見 src/shared/base-path.ts。
+ */
+
 const CONSENT_CLAIM = "consent";
 
 const CALLBACK_URL_COOKIE =
@@ -42,9 +50,11 @@ async function readCallbackUrl(): Promise<string> {
 
   try {
     const url = new URL(raw);
-    return getSafeCallbackUrl(`${url.pathname}${url.search}${url.hash}`);
+    return getSafeCallbackUrl(
+      stripBasePath(`${url.pathname}${url.search}${url.hash}`),
+    );
   } catch {
-    return getSafeCallbackUrl(raw);
+    return getSafeCallbackUrl(stripBasePath(raw));
   }
 }
 
@@ -53,21 +63,29 @@ async function loginErrorRedirect(code: string): Promise<string> {
     error: code,
     callbackUrl: await readCallbackUrl(),
   });
-  return `${LOGIN_PATH}?${params}`;
+  // signIn callback 回傳的字串由 Auth.js 當成導向網址，所以要含 basePath。
+  // callbackUrl 參數本身維持不含 basePath，由登入頁回填表單後再交給 actions.ts。
+  return withBasePath(`${LOGIN_PATH}?${params}`);
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Next.js 的 basePath 不會傳給 Auth.js，要另外告訴它 auth 路由的完整位置
+  basePath: withBasePath("/api/auth"),
   providers: [Google],
   pages: {
-    signIn: LOGIN_PATH,
-    error: LOGIN_PATH,
+    signIn: withBasePath(LOGIN_PATH),
+    error: withBasePath(LOGIN_PATH),
   },
   callbacks: {
     authorized: ({ auth, request }) => {
       if (!auth?.user) return false;
       if (isCurrentConsent(auth.consent)) return true;
 
-      const url = new URL(LOGIN_PATH, request.nextUrl);
+      // 用 nextUrl.clone() 而不是 new URL(LOGIN_PATH, request.nextUrl)：
+      // NextURL 會保留 basePath，而且它的 pathname 本來就不含 basePath。
+      const url = request.nextUrl.clone();
+      url.pathname = LOGIN_PATH;
+      url.search = "";
       url.searchParams.set(
         "callbackUrl",
         `${request.nextUrl.pathname}${request.nextUrl.search}`,

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { Toast } from "@/components/toast";
+import { withBasePath } from "@/shared/base-path";
 import type { ExchangeInfoAvailabilityResponse } from "@/shared/api/exchange-info/schemas";
 import type { PatchMyProfileContentInput } from "@/shared/api/me-profiles/schemas";
 import { PROFILE_TYPES, type ProfileType } from "@/shared/profile-types";
@@ -42,7 +43,7 @@ export function EditPostDialog({
     if (!open) return;
 
     let cancelled = false;
-    void fetch("/api/exchange-info/availability")
+    void fetch(withBasePath("/api/exchange-info/availability"))
       .then(async (response) => {
         if (!response.ok)
           throw new Error(`Availability failed: ${response.status}`);

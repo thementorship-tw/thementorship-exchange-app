@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+
+import { withBasePath } from "@/shared/base-path";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "The Mentorship Exchange",
   description: "Mentorship exchange platform",
-  manifest: "/manifest.json",
+  // metadata 的 manifest 路徑不會自動加 basePath
+  manifest: withBasePath("/manifest.json"),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

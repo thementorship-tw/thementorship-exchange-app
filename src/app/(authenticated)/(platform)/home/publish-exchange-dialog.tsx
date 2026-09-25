@@ -5,6 +5,7 @@ import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { Toast } from "@/components/toast";
+import { withBasePath } from "@/shared/base-path";
 import type { ExchangeInfoAvailabilityResponse } from "@/shared/api/exchange-info/schemas";
 import type { ProfileType } from "@/shared/profile-types";
 
@@ -120,7 +121,9 @@ export function PublishExchangeDialog({
   const loadAvailability = async () => {
     setLoadingTypes(true);
     try {
-      const response = await fetch("/api/exchange-info/availability");
+      const response = await fetch(
+        withBasePath("/api/exchange-info/availability"),
+      );
       if (!response.ok)
         throw new Error(`Availability failed: ${response.status}`);
       const body = (await response.json()) as ExchangeInfoAvailabilityResponse;
@@ -175,7 +178,7 @@ export function PublishExchangeDialog({
 
     setSubmitting(true);
     try {
-      const response = await fetch("/api/exchange-info", {
+      const response = await fetch(withBasePath("/api/exchange-info"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type, offersText, wantsText, description }),

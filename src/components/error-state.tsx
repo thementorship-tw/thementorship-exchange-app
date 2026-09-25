@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/button";
+import { withBasePath } from "@/shared/base-path";
 
 export const OFFLINE_ERROR_TITLE = "目前沒有網路連線";
 export const OFFLINE_ERROR_DESCRIPTION =
@@ -19,7 +20,7 @@ export const LOAD_FAILED_ERROR_DESCRIPTION =
 export function ErrorState({
   image = (
     <Image
-      src="/images/server-error.svg"
+      src={withBasePath("/images/server-error.svg")}
       alt=""
       width={32}
       height={32}

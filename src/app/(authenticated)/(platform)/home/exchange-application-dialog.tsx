@@ -5,6 +5,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
 import { Toast } from "@/components/toast";
+import { withBasePath } from "@/shared/base-path";
 import {
   CONTACT_LOG_CONTACT_INFO_MAX_LENGTH,
   CONTACT_LOG_MOTIVATION_MAX_LENGTH,
@@ -133,7 +134,7 @@ export function ExchangeApplicationDialog({
   const submit = async () => {
     setSubmitting(true);
     try {
-      const response = await fetch("/api/contact-logs", {
+      const response = await fetch(withBasePath("/api/contact-logs"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
