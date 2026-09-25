@@ -68,6 +68,29 @@ export function MyPostRow({
     return () => clearTimeout(timer);
   }, [targetApplicationId]);
 
+  // 當使用者從系統通知進入設定中心，指定申請自動展開時，也要把該申請標記為已讀，而且避免重複送出已讀請求。
+  useEffect(() => {
+    if (targetApplicationId === undefined) return;
+
+    const targetApplication = applications.find(
+      (application) => application.id === targetApplicationId,
+    );
+    if (
+      targetApplication === undefined ||
+      targetApplication.readAt !== null ||
+      markedReadIdsRef.current.has(targetApplicationId)
+    ) {
+      return;
+    }
+
+    markedReadIdsRef.current.add(targetApplicationId);
+    void markAsRead(targetApplicationId).then((succeeded) => {
+      if (!succeeded) {
+        markedReadIdsRef.current.delete(targetApplicationId);
+      }
+    });
+  }, [applications, markAsRead, targetApplicationId]);
+
   return (
     <li
       ref={rowRef}

@@ -54,20 +54,22 @@ messaging.onBackgroundMessage((payload) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const targetHref = (event.notification.data && event.notification.data.targetHref) || "/home";
+  const targetUrl = new URL(targetHref, self.location.origin).href;
 
   event.waitUntil(
     (async () => {
       const clientsList = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-      const existing = clientsList.find((client) => client.url.includes(targetHref));
+      const existing = clientsList.find((client) => client.url === targetUrl);
       if (existing) {
         return existing.focus();
       }
       if (clientsList.length > 0) {
         const client = clientsList[0];
         await client.focus();
-        return "navigate" in client ? client.navigate(targetHref) : undefined;
+        return "navigate" in client ? client.navigate(targetUrl) : undefined;
       }
-      return self.clients.openWindow(targetHref);
+      const openedClient = await self.clients.openWindow(targetUrl);
+      return openedClient ? openedClient.focus() : undefined;
     })(),
   );
 });

@@ -30,7 +30,7 @@
 通知中心每一筆通知對應一筆 `contact_logs`，點擊行為：
 
 - **已讀邏輯不變**：click 當下呼叫 `markAsRead(id)`（`PATCH /api/contact-logs/:id/read`），只標記「這一筆」已讀。已讀狀態掛在每筆 `contact_logs.read_at`，不是掛在貼文或使用者身上，所以同一貼文其他人的申請不會被連帶標成已讀——這是刻意如此，跟信箱點開一封信不會連帶已讀其他信一樣。
-- **導航目標**：`targetHref` 組成 `/settings?tab=posts&profileId=<profileId>&applicationId=<contactLogId>`（見 `contact-log-target.ts`），站內通知與系統推播都不再固定回 `/home`。
+- **導航目標**：`targetHref` 組成 `/settings?tab=posts&profileId=<profileId>&applicationId=<contactLogId>`（見 `contact-log-target.ts`）。
 - **落地行為**：`SettingsPage` 讀這三個 query 參數 → 切到「我的發文」tab → 對應的 `MyPostRow` 掛載時捲到「目標那筆申請」本身（不是整篇貼文，貼文若申請很多筆會太長），並把 `expandedApplicationId` 預設成目標 id（展開那筆申請）；目標那筆會短暫高亮（`target-highlight` keyframe，2 秒淡出）幫助使用者確認捲到的是哪一筆。
 - **已知邊界情況**：如果目標申請剛好不在該貼文最新 20 筆內（要同貼文短時間湧入 20 筆以上更新申請才會發生，機率低），只會捲到貼文本身、不會自動翻頁去找，使用者要自己點「載入更多申請」。不影響已讀狀態，純粹是展開動畫不會自動觸發。
 - **直接在「我的發文」展開申請也會標已讀**：`ReceivedApplicationRow` 展開（且該筆 `readAt` 為 `null`）時會呼叫同一個 `markAsRead`，不限定要從通知點過來。`markAsRead` 因此也放寬成：即使這筆申請不在通知中心目前載入的範圍內（超過 30 天保留期或第一頁上限）也照樣送出 `PATCH`，只是不會有本地通知 list 的 optimistic update。

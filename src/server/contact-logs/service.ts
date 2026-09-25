@@ -28,6 +28,15 @@ export type ContactLogView = Omit<
   createdAt: Date;
 };
 
+// 將 Date 物件轉換為 ISO 字串
+export function serializeContactLog(log: ContactLogView): ContactLogResponse {
+  return {
+    ...log,
+    readAt: log.readAt?.toISOString() ?? null,
+    createdAt: log.createdAt.toISOString(),
+  };
+}
+
 export type CreateContactLogInput = CreateContactLogValues & {
   fromUser: ContactLogUser;
   /**

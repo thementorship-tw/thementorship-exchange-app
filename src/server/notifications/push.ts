@@ -4,6 +4,7 @@ import {
   deactivateTokens,
   listActiveTokensForUser,
 } from "@/server/push-subscriptions/service";
+import { PROFILE_TYPE_LABELS, type ProfileType } from "@/shared/profile-types";
 
 const INVALID_TOKEN_ERROR_CODES = new Set([
   "messaging/invalid-registration-token",
@@ -13,6 +14,7 @@ const INVALID_TOKEN_ERROR_CODES = new Set([
 export type ContactLogPushInput = {
   toUserId: string;
   fromUserNickname: string;
+  profileType: ProfileType;
   targetHref: string;
 };
 
@@ -38,8 +40,8 @@ export async function sendContactLogPushNotification(
     const response = await getFirebaseMessaging().sendEachForMulticast({
       tokens,
       data: {
-        title: `${input.fromUserNickname} 想和你交換`,
-        body: "快去看看他的申請",
+        title: `${input.fromUserNickname} 想和你交換「${PROFILE_TYPE_LABELS[input.profileType]}」`,
+        body: "快去看看他的申請。",
         targetHref: input.targetHref,
       }, // data-only + SW 工程上的控制權與後續擴充性
     });

@@ -1,6 +1,6 @@
 {
-  "name": "The Mentorship Exchange",
-  "short_name": "Mentorship Exchange",
+  "name": "技能交換平台",
+  "short_name": "技能交換平台",
   "description": "Mentorship exchange platform",
   "start_url": "/home",
   "display": "standalone",

@@ -7,24 +7,14 @@ import { apiError, PRIVATE_NO_STORE_HEADERS } from "@/server/api/response";
 import {
   createContactLog,
   listContactLogs,
-  type ContactLogView,
+  serializeContactLog,
 } from "@/server/contact-logs/service";
 import { sendContactLogPushNotification } from "@/server/notifications/push";
 import {
   contactLogListQuerySchema,
   createContactLogSchema,
 } from "@/shared/api/contact-logs/schemas";
-import type { ContactLogResponse } from "@/shared/api/contact-logs/types";
 import { buildContactLogTargetHref } from "@/shared/contact-log-target";
-
-// 將 Date 物件轉換為 ISO 字串
-function serializeContactLog(log: ContactLogView): ContactLogResponse {
-  return {
-    ...log,
-    readAt: log.readAt?.toISOString() ?? null,
-    createdAt: log.createdAt.toISOString(),
-  };
-}
 
 export const POST = withApiAuth(
   "POST /api/contact-logs",
@@ -69,6 +59,7 @@ export const POST = withApiAuth(
       sendContactLogPushNotification({
         toUserId: result.log.toUser.id,
         fromUserNickname: result.log.fromUser.nickname,
+        profileType: result.log.profile.type,
         targetHref: buildContactLogTargetHref({
           profileId: result.log.profileId,
           applicationId: result.log.id,

@@ -102,7 +102,7 @@ export function NotificationProvider({
     let unsubscribe: (() => void) | undefined; // 保存 FCM listener 的取消函式
     // 當網站目前在前景，而且收到 FCM message，就執行這個 callback。
     void listenForForegroundMessages(() => {
-      void refetchNotifications();
+      void refetchNotifications(); // FCM message 只是一個「有新通知」的 signal，實際的通知資料還是要向後端重新抓，資料庫才是真正資料來源。
     })
       .then((unsub) => {
         if (disposed) {
