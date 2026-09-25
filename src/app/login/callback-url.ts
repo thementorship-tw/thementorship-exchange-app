@@ -1,4 +1,6 @@
 // callbackUrl 本來是為了改善 UX，但它來自 request/query string，先 normalize/parse，再驗證最後的 origin。防 Open Redirect
+import { stripBasePath } from "@/shared/base-path";
+
 const DEFAULT_CALLBACK_URL = "/home";
 
 /** Accept only same-origin paths. Query-string values are always untrusted. */
@@ -22,7 +24,9 @@ export function getSafeCallbackUrl(
     const base = new URL(allowedOrigin ?? "https://callback.invalid"); // 基準 URL
     const url = isRelative ? new URL(candidate, base) : new URL(candidate);
     if (url.origin !== base.origin) return DEFAULT_CALLBACK_URL;
-    return `${url.pathname}${url.search}${url.hash}`; // 不需要假的 origin
+    // 回傳「不含 basePath」的 app 內部路徑。Auth.js 導回登入頁時帶的 callbackUrl
+    // 是含 /exchange 的完整網址，這裡要剝掉，否則 redirect() 會變成 /exchange/exchange/...
+    return stripBasePath(`${url.pathname}${url.search}${url.hash}`); // 不需要假的 origin
   } catch {
     return DEFAULT_CALLBACK_URL;
   }

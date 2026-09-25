@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 
+import { withBasePath } from "@/shared/base-path";
+
 export function hasPointer() {
   return window.matchMedia("(pointer: fine)").matches; // fine: 滑鼠、觸控板、觸控筆
 }
@@ -16,7 +18,7 @@ export function Lens() {
         }}
       >
         <Image
-          src="/images/landing-background.png"
+          src={withBasePath("/images/landing-background.png")}
           alt=""
           fill
           loading="eager"

@@ -1,7 +1,10 @@
 import { ApiReference } from "@scalar/nextjs-api-reference";
 
+import { withBasePath } from "@/shared/base-path";
+
 const apiReferenceHandler = ApiReference({
-  url: "/api/openapi.json",
+  // 這個網址由瀏覽器端的 API 文件頁讀取，需要含 basePath
+  url: withBasePath("/api/openapi.json"),
   pageTitle: "The Mentorship Exchange API",
 });
 

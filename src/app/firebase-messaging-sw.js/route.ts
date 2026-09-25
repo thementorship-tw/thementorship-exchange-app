@@ -1,13 +1,14 @@
 // Next.js 動態產生 JS，Browser 把它註冊成 Service Worker
 
+import { BASE_PATH } from "@/shared/base-path";
 import {
   firebaseClientConfig,
   isFirebaseClientConfigured,
 } from "@/shared/firebase/client-config";
 
 /**
- * Serves the FCM service worker at the site root (`/firebase-messaging-sw.js`)
- * so its default scope covers the whole app, not just `/public`. A plain
+ * Serves the FCM service worker at `/exchange/firebase-messaging-sw.js`
+ * (basePath included) so its default scope covers the whole app, not just `/public`. A plain
  * static file under `public/` can't read env vars, so this is a route
  * handler instead — see docs/notifications/02-realtime-notification-architecture.md.
  *
@@ -34,6 +35,12 @@ importScripts("https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging-com
 
 firebase.initializeApp(${JSON.stringify(config)});
 
+// 這個 app 掛在 ${BASE_PATH} 底下（見 src/shared/base-path.ts）。
+// push payload 的 targetHref 是不含 basePath 的 app 內部路徑（跟站內 <Link> 共用），
+// 所以在 SW 這裡組成完整網址時要補上。
+const BASE_PATH = ${JSON.stringify(BASE_PATH)};
+const DEFAULT_TARGET_HREF = BASE_PATH + "/home";
+
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
@@ -42,18 +49,18 @@ messaging.onBackgroundMessage((payload) => {
   const data = payload.data || {};
   const title = data.title || "The Mentorship Exchange";
   const body = data.body || "";
-  const targetHref = data.targetHref || "/home";
+  const targetHref = data.targetHref ? BASE_PATH + data.targetHref : DEFAULT_TARGET_HREF;
 
   self.registration.showNotification(title, {
     body,
-    icon: "/images/logo.png",
+    icon: BASE_PATH + "/images/logo.png",
     data: { targetHref },
   });
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const targetHref = (event.notification.data && event.notification.data.targetHref) || "/home";
+  const targetHref = (event.notification.data && event.notification.data.targetHref) || DEFAULT_TARGET_HREF;
   const targetUrl = new URL(targetHref, self.location.origin).href;
 
   event.waitUntil(

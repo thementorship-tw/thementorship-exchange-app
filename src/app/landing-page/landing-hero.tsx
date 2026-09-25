@@ -11,6 +11,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/button";
+import { withBasePath } from "@/shared/base-path";
 
 import { Bubble } from "./landing-bubble";
 import { Lens, hasPointer } from "./landing-lens";
@@ -87,7 +88,7 @@ function BlurredBackdrop({ lensVisible }: { lensVisible: boolean }) {
       className="pointer-events-none absolute inset-0 -z-10"
     >
       <Image
-        src="/images/landing-background.png"
+        src={withBasePath("/images/landing-background.png")}
         alt=""
         fill
         loading="eager"
@@ -116,7 +117,7 @@ export function LandingPage({ ctaHref }: { ctaHref: string }) {
 
       <div className="flex w-full max-w-82 flex-col items-center px-5 pt-5">
         <Image
-          src="/images/logo.png"
+          src={withBasePath("/images/logo.png")}
           alt="The Mentorship Exchange"
           width={62}
           height={60}

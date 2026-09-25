@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { withBasePath } from "@/shared/base-path";
+
 type BoatSide = "left" | "right";
 
 export type OceanSceneProps = {
@@ -14,7 +16,7 @@ export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
       className="absolute inset-0 -z-10"
     >
       <Image
-        src="/images/login/background-lg.png"
+        src={withBasePath("/images/login/background-lg.png")}
         alt=""
         fill
         loading="eager"
@@ -22,7 +24,7 @@ export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
         className="hidden -translate-y-20 object-cover object-[left_90%] md:landscape:block lg:block"
       />
       <Image
-        src="/images/login/background-sm.svg"
+        src={withBasePath("/images/login/background-sm.svg")}
         alt=""
         fill
         loading="eager"
@@ -35,7 +37,7 @@ export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
         className={`login-boat login-boat-${boatSide} absolute z-10 hidden aspect-1003/614 md:landscape:block lg:block`}
       >
         <Image
-          src="/images/login/boat.png"
+          src={withBasePath("/images/login/boat.png")}
           alt=""
           fill
           fetchPriority="high"
@@ -46,7 +48,7 @@ export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
 
       <div className="login-wave login-wave-back absolute bottom-[5px] left-0 z-20 hidden h-[136px] w-[calc(100%+60px)] md:landscape:block lg:block">
         <Image
-          src="/images/login/wave-3.png"
+          src={withBasePath("/images/login/wave-3.png")}
           alt=""
           fill
           loading="eager"
@@ -56,7 +58,7 @@ export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
       </div>
       <div className="login-wave login-wave-middle absolute bottom-[-5px] left-0 z-30 hidden h-[136px] w-[calc(100%+60px)] md:landscape:block lg:block">
         <Image
-          src="/images/login/wave-2.png"
+          src={withBasePath("/images/login/wave-2.png")}
           alt=""
           fill
           loading="eager"
@@ -66,7 +68,7 @@ export function OceanScene({ boatSide = "right" }: OceanSceneProps = {}) {
       </div>
       <div className="login-wave login-wave-front absolute bottom-[-15px] left-0 z-40 hidden h-[136px] w-[calc(100%+40px)] md:landscape:block lg:block">
         <Image
-          src="/images/login/wave-1.png"
+          src={withBasePath("/images/login/wave-1.png")}
           alt=""
           fill
           loading="eager"

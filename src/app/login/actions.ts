@@ -5,6 +5,7 @@ import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
 
 import { issueConsentReceipt } from "@/server/auth/consent-receipt";
+import { withBasePath } from "@/shared/base-path";
 
 import { getSafeCallbackUrl } from "./callback-url";
 
@@ -24,10 +25,10 @@ export async function signInWithGoogle(
 
   try {
     // 登入中...
+    // getSafeCallbackUrl 回傳不含 basePath 的路徑；交給 Auth.js 前要加上
     await signIn("google", {
-      redirectTo: getSafeCallbackUrl(
-        formData.get("callbackUrl"),
-        process.env.AUTH_URL,
+      redirectTo: withBasePath(
+        getSafeCallbackUrl(formData.get("callbackUrl"), process.env.AUTH_URL),
       ),
     });
   } catch (error) {

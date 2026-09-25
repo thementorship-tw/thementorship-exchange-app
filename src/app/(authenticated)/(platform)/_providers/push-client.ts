@@ -7,6 +7,7 @@ import {
   firebaseVapidKey,
   isFirebaseClientConfigured,
 } from "@/shared/firebase/client-config";
+import { withBasePath } from "@/shared/base-path";
 
 /**
  * `firebase/app` and `firebase/messaging` touch browser globals at import
@@ -39,7 +40,12 @@ export async function registerFirebaseServiceWorker(): Promise<ServiceWorkerRegi
   if (!("serviceWorker" in navigator) || !isFirebaseClientConfigured()) {
     return null;
   }
-  return navigator.serviceWorker.register("/firebase-messaging-sw.js");
+  // SW 的預設 scope 是腳本所在的目錄，放在 /exchange/ 底下剛好只管交換平台，
+  // 不會干擾官網其他頁面。scope 寫明白是為了讓意圖清楚。
+  return navigator.serviceWorker.register(
+    withBasePath("/firebase-messaging-sw.js"),
+    { scope: withBasePath("/") },
+  );
 }
 
 /**
@@ -64,7 +70,7 @@ export async function enablePushNotifications(): Promise<boolean> {
   });
   if (!token) return false;
 
-  const response = await fetch("/api/push-subscriptions", {
+  const response = await fetch(withBasePath("/api/push-subscriptions"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ fcmToken: token }),
