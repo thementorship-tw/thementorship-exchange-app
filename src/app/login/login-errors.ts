@@ -1,5 +1,4 @@
-/** CHECK: 回報管道網址待確認 */
-const CONTACT_URL = "mailto:contact@example.com";
+const CONTACT_URL = "https://forms.gle/wcRkDoHDR1X5c88C6";
 
 type LoginErrorBodyPart = string | { text: string; href: string };
 

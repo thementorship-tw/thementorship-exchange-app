@@ -32,6 +32,8 @@ export function LoginErrorDialog({
             <a
               key={index}
               href={part.href}
+              target="_blank"
+              rel="noopener noreferrer"
               className="cursor-pointer font-semibold text-brand underline decoration-1 underline-offset-4 transition-colors hover:text-link-hover focus-visible:rounded-4 focus-visible:outline-2 focus-visible:outline-brand"
             >
               {part.text}
