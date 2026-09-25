@@ -16,6 +16,16 @@ body {
   outline-offset: 0;
 }
 
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  :focus-visible {
+    outline: none;
+  }
+}
+
 @keyframes login-boat-drift {
   0%,
   100% {
