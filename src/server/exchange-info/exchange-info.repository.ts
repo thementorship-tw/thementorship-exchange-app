@@ -85,18 +85,18 @@ export function decodeExchangeInfoCursor(
 
   if (parts[0] === "chrono" && parts.length === 3) {
     const [, secondsRaw, id] = parts;
+    if (secondsRaw === "" || !id) return null;
     const seconds = Number(secondsRaw);
-    if (!Number.isSafeInteger(seconds) || !id) return null;
+    if (!Number.isSafeInteger(seconds)) return null;
     return { mode: "chrono", updatedAt: new Date(seconds * 1000), id };
   }
 
   if (parts[0] === "relevance" && parts.length === 4) {
     const [, rankRaw, secondsRaw, id] = parts;
+    if (rankRaw === "" || secondsRaw === "" || !id) return null;
     const rank = Number(rankRaw);
     const seconds = Number(secondsRaw);
-    if (!Number.isFinite(rank) || !Number.isSafeInteger(seconds) || !id) {
-      return null;
-    }
+    if (!Number.isFinite(rank) || !Number.isSafeInteger(seconds)) return null;
     return { mode: "relevance", rank, updatedAt: new Date(seconds * 1000), id };
   }
 
@@ -107,13 +107,28 @@ function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, (char) => `\\${char}`);
 }
 
-function exchangeInfoListColumns(viewerUserId?: string) {
-  // 這段是 raw SQL 子查詢，參數不會經過 Drizzle timestamp 欄位的
-  // Date -> Unix seconds encoder，因此明確傳入和 SQLite 欄位相同的秒數。
-  const duplicateCutoffSeconds = Math.floor(
+/**
+ * FTS5 的 MATCH 右邊是它自己的查詢語法（引號、AND/OR/NOT、-、*、col:），不是單純
+ * 字面比對；把使用者輸入包成一個 phrase（雙引號包起來、內部雙引號 double 跳脫）
+ * 關掉語法解析，否則像 "-node" 這種輸入會被解讀成排除語意，帶孤立引號則會直接
+ * 讓 SQLite 拋語法錯誤。
+ */
+function toFtsMatchQuery(value: string): string {
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
+/** duplicateLog cooldown 的秒數門檻，chrono／relevance 兩條查詢路徑共用。 */
+function getDuplicateCutoffSeconds(): number {
+  return Math.floor(
     (Date.now() - CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000) /
       1000,
   );
+}
+
+function exchangeInfoListColumns(viewerUserId?: string) {
+  // 這段是 raw SQL 子查詢，參數不會經過 Drizzle timestamp 欄位的
+  // Date -> Unix seconds encoder，因此明確傳入和 SQLite 欄位相同的秒數。
+  const duplicateCutoffSeconds = getDuplicateCutoffSeconds();
   return {
     id: profiles.id,
     type: profiles.type,
@@ -315,10 +330,7 @@ async function listExchangeInfoByRelevance({
   keyword: string;
   cursor?: Extract<ExchangeInfoCursor, { mode: "relevance" }>;
 }): Promise<{ items: ExchangeInfoListItem[]; nextCursor: string | null }> {
-  const duplicateCutoffSeconds = Math.floor(
-    (Date.now() - CONTACT_LOG_DUPLICATE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000) /
-      1000,
-  );
+  const duplicateCutoffSeconds = getDuplicateCutoffSeconds();
 
   const typeCondition =
     types.length > 0
@@ -364,7 +376,7 @@ async function listExchangeInfoByRelevance({
       JOIN profiles_fts ON profiles_fts.rowid = p.rowid
       JOIN users u ON u.id = p.user_id
       WHERE p.visible = 1 AND p.deleted_at IS NULL AND u.active = 1
-        AND profiles_fts MATCH ${keyword}
+        AND profiles_fts MATCH ${toFtsMatchQuery(keyword)}
         ${typeCondition}
     ) t
     WHERE 1 = 1 ${cursorCondition}
@@ -374,20 +386,21 @@ async function listExchangeInfoByRelevance({
 
   const hasMore = rows.length > EXCHANGE_INFO_PAGE_SIZE;
   const pageRows = rows.slice(0, EXCHANGE_INFO_PAGE_SIZE);
-  const items: ExchangeInfoListItem[] = pageRows.map((row) => ({
-    id: row.id,
-    type: row.type,
-    offersText: row.offersText,
-    wantsText: row.wantsText,
-    description: row.description,
-    createdAt: new Date(row.createdAtSeconds * 1000),
-    appliedWithinCooldown: Boolean(row.appliedWithinCooldown),
-    author: {
-      nickname: row.authorNickname,
-      group: row.authorGroup,
-      avatarUrl: row.authorAvatarUrl,
-    },
-  }));
+  const items = pageRows.map((row) =>
+    toExchangeInfoListItem({
+      id: row.id,
+      type: row.type,
+      offersText: row.offersText,
+      wantsText: row.wantsText,
+      description: row.description,
+      createdAt: new Date(row.createdAtSeconds * 1000),
+      updatedAt: new Date(row.updatedAtSeconds * 1000),
+      authorNickname: row.authorNickname,
+      authorGroup: row.authorGroup,
+      authorAvatarUrl: row.authorAvatarUrl,
+      appliedWithinCooldown: row.appliedWithinCooldown,
+    }),
+  );
   const lastRow = pageRows.at(-1);
 
   return {
