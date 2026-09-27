@@ -335,6 +335,7 @@ export function PublishExchangeDialog({
               type="button"
               variant="accent"
               size="sm"
+              onMouseDown={(event) => event.preventDefault()}
               onClick={closePublisher}
               disabled={submitting}
             >
@@ -343,6 +344,7 @@ export function PublishExchangeDialog({
             <Button
               type="submit"
               size="sm"
+              onMouseDown={(event) => event.preventDefault()}
               disabled={
                 loadingTypes || submitting || availableTypes.length === 0
               }
@@ -352,7 +354,7 @@ export function PublishExchangeDialog({
           </div>
 
           <p className="shrink-0 text-center text-xs text-secondary">
-            deploy-check: 2026-09-27 21:15 CST
+            deploy-check: 2026-09-27 21:19 CST
           </p>
         </form>
       </dialog>
