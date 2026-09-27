@@ -271,7 +271,7 @@ export function PublishExchangeDialog({
               showTypeError={
                 showErrors && type === null && availableTypes.length > 0
               }
-              autoGrowKey={open}
+              dialogOpen={open}
               descriptionClassName="relative mx-3 mb-3 min-h-36 flex-1 md:landscape:min-h-28 lg:min-h-28"
             />
           </div>

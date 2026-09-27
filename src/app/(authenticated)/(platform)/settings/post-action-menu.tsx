@@ -71,7 +71,7 @@ export function PostActionMenu({
               onOpenChange(false);
               onEdit();
             }}
-            className="flex w-full cursor-pointer items-center justify-center px-4 py-3 text-body-strong text-secondary transition hover:bg-surface focus-visible:outline-2 focus-visible:outline-brand"
+            className="flex w-full cursor-pointer items-center justify-center px-4 py-3 text-body-strong text-secondary transition-colors hover:bg-line focus-visible:outline-2 focus-visible:outline-brand"
           >
             修改
           </button>
@@ -82,7 +82,7 @@ export function PostActionMenu({
               onOpenChange(false);
               onDelist();
             }}
-            className="flex w-full cursor-pointer items-center justify-center px-4 py-3 text-body-strong text-secondary transition hover:bg-surface focus-visible:outline-2 focus-visible:outline-brand"
+            className="flex w-full cursor-pointer items-center justify-center px-4 py-3 text-body-strong text-secondary transition-colors hover:bg-line focus-visible:outline-2 focus-visible:outline-brand"
           >
             下架
           </button>
