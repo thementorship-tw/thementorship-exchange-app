@@ -21,7 +21,7 @@ type ApiErrorBody = {
 
 const DESKTOP_PUBLISHER_MEDIA =
   "(min-width: 1024px), (min-width: 768px) and (orientation: landscape)";
-const MOBILE_DIALOG_TOP = 64;
+const MOBILE_DIALOG_TOP = 24;
 
 async function readApiError(response: Response): Promise<ApiErrorBody> {
   try {
@@ -64,6 +64,7 @@ export function PublishExchangeDialog({
   const [showErrors, setShowErrors] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
   const [dialogStyle, setDialogStyle] = useState<CSSProperties>();
+  const [viewportDebug, setViewportDebug] = useState("");
   const dialogViewportHeightRef = useRef<number | null>(null);
   const pointerActiveRef = useRef(false);
   const pendingViewportExpansionRef = useRef(false);
@@ -90,13 +91,17 @@ export function PublishExchangeDialog({
 
       const updateDialogStyle = () => {
         dialogViewportHeightRef.current = viewport.height;
+        const height = Math.max(viewport.height - MOBILE_DIALOG_TOP, 0);
         setDialogStyle({
           top: viewport.offsetTop + MOBILE_DIALOG_TOP,
           left: viewport.offsetLeft,
           width: viewport.width,
-          height: Math.max(viewport.height - MOBILE_DIALOG_TOP, 0),
+          height,
           margin: 0,
         });
+        setViewportDebug(
+          `vv h=${Math.round(viewport.height)} top=${Math.round(viewport.offsetTop)} winH=${window.innerHeight} dlgH=${Math.round(height)}`,
+        );
       };
 
       const isExpanding =
@@ -290,7 +295,7 @@ export function PublishExchangeDialog({
           event.preventDefault();
           closePublisher();
         }}
-        className="mt-16 h-[calc(100dvh-4rem)] max-h-none w-full max-w-none rounded-t-20 bg-surface p-0 text-primary outline-none backdrop:bg-overlay md:landscape:!m-0 md:landscape:!h-fit md:landscape:!max-w-none md:landscape:bg-transparent lg:!m-0 lg:!h-fit lg:!max-w-none lg:bg-transparent"
+        className="mt-6 h-[calc(100dvh-1.5rem)] max-h-none w-full max-w-none rounded-t-20 bg-surface p-0 text-primary outline-none backdrop:bg-overlay md:landscape:!m-0 md:landscape:!h-fit md:landscape:!max-w-none md:landscape:bg-transparent lg:!m-0 lg:!h-fit lg:!max-w-none lg:bg-transparent"
       >
         <form
           onSubmit={(event) => {
@@ -354,7 +359,7 @@ export function PublishExchangeDialog({
           </div>
 
           <p className="shrink-0 text-center text-xs text-secondary">
-            deploy-check: 2026-09-27 21:19 CST
+            deploy-check: 2026-09-27 21:45 CST · {viewportDebug || "vv: n/a"}
           </p>
         </form>
       </dialog>
