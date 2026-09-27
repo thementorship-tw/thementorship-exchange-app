@@ -2,12 +2,13 @@
 import type { FirebaseApp } from "firebase/app";
 import type { Messaging } from "firebase/messaging";
 
+import { registerAppServiceWorker } from "@/shared/app-service-worker";
+import { withBasePath } from "@/shared/base-path";
 import {
   firebaseClientConfig,
   firebaseVapidKey,
   isFirebaseClientConfigured,
 } from "@/shared/firebase/client-config";
-import { withBasePath } from "@/shared/base-path";
 
 /**
  * `firebase/app` and `firebase/messaging` touch browser globals at import
@@ -29,25 +30,6 @@ async function getFirebaseMessagingClient(): Promise<Messaging | null> {
     getApps()[0] ??
     initializeApp(firebaseClientConfig as Record<string, string>);
   return getMessaging(app);
-}
-
-/**
- * Registers the app's one service worker (see `firebase-messaging-sw.js`
- * route handler) — it handles FCM push in addition to an offline-fallback
- * page, so this must run regardless of whether Firebase is configured.
- *
- * Idempotent — calling this again with the same script URL returns the
- * existing registration instead of re-registering, so it's safe to call
- * both eagerly on mount and again inside `enablePushNotifications`.
- */
-export async function registerAppServiceWorker(): Promise<ServiceWorkerRegistration | null> {
-  if (!("serviceWorker" in navigator)) return null;
-  // SW 的預設 scope 是腳本所在的目錄，放在 /exchange/ 底下剛好只管交換平台，
-  // 不會干擾官網其他頁面。scope 寫明白是為了讓意圖清楚。
-  return navigator.serviceWorker.register(
-    withBasePath("/firebase-messaging-sw.js"),
-    { scope: withBasePath("/") },
-  );
 }
 
 /**

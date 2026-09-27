@@ -39,7 +39,12 @@ ${messagingScript}
 ${offlineFallbackScript()}`;
 
   return new Response(body, {
-    headers: { "Content-Type": "application/javascript; charset=utf-8" },
+    headers: {
+      "Content-Type": "application/javascript; charset=utf-8",
+      // 沒有這行的話瀏覽器／CDN 可能沿用舊版腳本內容去比對「有沒有更新」，
+      // 導致部署新版之後裝置端一直裝不到新的 SW。
+      "Cache-Control": "no-cache",
+    },
   });
 }
 
@@ -104,13 +109,17 @@ self.addEventListener("notificationclick", (event) => {
  * 錯位或吃到舊資料的風險——只有在 fetch 真的失敗時才 fallback 顯示。
  */
 function offlineFallbackScript(): string {
-  return `const OFFLINE_CACHE_NAME = "offline-fallback-v1";
+  return `const OFFLINE_CACHE_PREFIX = "exchange-offline-fallback-";
+const OFFLINE_CACHE_NAME = OFFLINE_CACHE_PREFIX + "v3";
 const OFFLINE_URL = new URL(BASE_PATH + "/offline.html", self.location.origin).href;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(OFFLINE_CACHE_NAME);
+      // offline.html 是純靜態頁、不引用任何圖片，只快取這一支就夠了——
+      // 之前連帶快取的裝飾用圖片，離線時瀏覽器對它們的請求不會經過這裡的
+      // fetch handler（只攔截 navigate），快取了也用不到，反而看起來像圖片壞了。
       await cache.add(OFFLINE_URL);
       await self.skipWaiting();
     })(),
@@ -122,7 +131,9 @@ self.addEventListener("activate", (event) => {
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
-        keys.filter((key) => key !== OFFLINE_CACHE_NAME).map((key) => caches.delete(key)),
+        keys
+          .filter((key) => key.startsWith(OFFLINE_CACHE_PREFIX) && key !== OFFLINE_CACHE_NAME)
+          .map((key) => caches.delete(key)),
       );
       await self.clients.claim();
     })(),

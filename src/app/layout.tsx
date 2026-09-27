@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { AppServiceWorkerRegistration } from "@/components/app-service-worker-registration";
 import { VersionLogger } from "@/components/version-logger";
 import { withBasePath } from "@/shared/base-path";
 import packageJson from "../../package.json";
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col">
+        <AppServiceWorkerRegistration />
         {children}
         <VersionLogger version={packageJson.version} />
       </body>
