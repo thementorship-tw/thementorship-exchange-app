@@ -18,6 +18,7 @@ export function validateExchangePostFormValues(values: ExchangePostFormValues) {
     values.wantsText.trim().length === 0 ||
     values.wantsText.trim().length > EXCHANGE_INFO_WANTS_TEXT_MAX_LENGTH;
   const descriptionInvalid =
+    values.description.trim().length === 0 ||
     values.description.trim().length > EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH;
 
   return { offersInvalid, wantsInvalid, descriptionInvalid };
