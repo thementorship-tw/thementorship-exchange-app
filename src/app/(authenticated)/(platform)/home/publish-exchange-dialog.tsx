@@ -64,6 +64,9 @@ export function PublishExchangeDialog({
   const [showErrors, setShowErrors] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
   const [dialogStyle, setDialogStyle] = useState<CSSProperties>();
+  const dialogViewportHeightRef = useRef<number | null>(null);
+  const pointerActiveRef = useRef(false);
+  const pendingViewportExpansionRef = useRef(false);
 
   const formValues = { offersText, wantsText, description };
   const { offersInvalid, wantsInvalid, descriptionInvalid } =
@@ -85,15 +88,35 @@ export function PublishExchangeDialog({
         return;
       }
 
-      setDialogStyle({
-        top: viewport.offsetTop + MOBILE_DIALOG_TOP,
-        left: viewport.offsetLeft,
-        width: viewport.width,
-        height: Math.max(viewport.height - MOBILE_DIALOG_TOP, 0),
-        margin: 0,
-      });
+      const updateDialogStyle = () => {
+        dialogViewportHeightRef.current = viewport.height;
+        setDialogStyle({
+          top: viewport.offsetTop + MOBILE_DIALOG_TOP,
+          left: viewport.offsetLeft,
+          width: viewport.width,
+          height: Math.max(viewport.height - MOBILE_DIALOG_TOP, 0),
+          margin: 0,
+        });
+      };
+
+      const isExpanding =
+        dialogViewportHeightRef.current !== null &&
+        viewport.height > dialogViewportHeightRef.current;
+
+      // 鍵盤收起會讓視口變高：若此時仍有觸控手勢在進行中，先記錄待處理的更新，
+      // 等手勢結束（pointerup/pointercancel）再套用，避免按鈕在點擊瞬間被版面重排推走。
+      if (isExpanding && pointerActiveRef.current) {
+        pendingViewportExpansionRef.current = true;
+        return;
+      }
+
+      pendingViewportExpansionRef.current = false;
+      updateDialogStyle();
       return;
     }
+
+    dialogViewportHeightRef.current = null;
+    pendingViewportExpansionRef.current = false;
 
     const content = document.querySelector<HTMLElement>(
       "[data-publish-exchange-content]",
@@ -115,14 +138,34 @@ export function PublishExchangeDialog({
     if (!open) return;
 
     const viewport = window.visualViewport;
+    const handlePointerDown = () => {
+      pointerActiveRef.current = true;
+    };
+    const flushPendingExpansion = () => {
+      pointerActiveRef.current = false;
+      if (pendingViewportExpansionRef.current) {
+        pendingViewportExpansionRef.current = false;
+        measureDialogBounds();
+      }
+    };
+
     window.addEventListener("resize", measureDialogBounds);
     viewport?.addEventListener("resize", measureDialogBounds);
     viewport?.addEventListener("scroll", measureDialogBounds);
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("pointerup", flushPendingExpansion);
+    window.addEventListener("pointercancel", flushPendingExpansion);
 
     return () => {
       window.removeEventListener("resize", measureDialogBounds);
       viewport?.removeEventListener("resize", measureDialogBounds);
       viewport?.removeEventListener("scroll", measureDialogBounds);
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("pointerup", flushPendingExpansion);
+      window.removeEventListener("pointercancel", flushPendingExpansion);
+      pointerActiveRef.current = false;
+      pendingViewportExpansionRef.current = false;
+      dialogViewportHeightRef.current = null;
     };
   }, [open]);
 
