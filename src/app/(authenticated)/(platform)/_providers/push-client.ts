@@ -32,14 +32,16 @@ async function getFirebaseMessagingClient(): Promise<Messaging | null> {
 }
 
 /**
+ * Registers the app's one service worker (see `firebase-messaging-sw.js`
+ * route handler) — it handles FCM push in addition to an offline-fallback
+ * page, so this must run regardless of whether Firebase is configured.
+ *
  * Idempotent — calling this again with the same script URL returns the
  * existing registration instead of re-registering, so it's safe to call
  * both eagerly on mount and again inside `enablePushNotifications`.
  */
-export async function registerFirebaseServiceWorker(): Promise<ServiceWorkerRegistration | null> {
-  if (!("serviceWorker" in navigator) || !isFirebaseClientConfigured()) {
-    return null;
-  }
+export async function registerAppServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (!("serviceWorker" in navigator)) return null;
   // SW 的預設 scope 是腳本所在的目錄，放在 /exchange/ 底下剛好只管交換平台，
   // 不會干擾官網其他頁面。scope 寫明白是為了讓意圖清楚。
   return navigator.serviceWorker.register(
@@ -57,7 +59,7 @@ export async function enablePushNotifications(): Promise<boolean> {
   const messaging = await getFirebaseMessagingClient();
   if (messaging === null) return false;
 
-  const registration = await registerFirebaseServiceWorker();
+  const registration = await registerAppServiceWorker();
   if (registration === null) return false;
 
   const permission = await Notification.requestPermission();

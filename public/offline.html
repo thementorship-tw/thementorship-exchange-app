@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>目前沒有網路連線</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f4f6fa;
+        color: #1f2630;
+        font-family:
+          "PingFang TC",
+          "Noto Sans TC",
+          "Microsoft JhengHei",
+          ui-sans-serif,
+          system-ui,
+          sans-serif;
+        padding: 24px;
+      }
+
+      .card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        text-align: center;
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 48px 32px;
+        max-width: 360px;
+        width: 100%;
+      }
+
+      .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        border-radius: 999px;
+        background: #fbeae8;
+      }
+
+      .icon svg {
+        width: 28px;
+        height: 28px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 26px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 22px;
+        color: #62676e;
+      }
+
+      button {
+        margin-top: 8px;
+        cursor: pointer;
+        border: 1px solid #d8d9dc;
+        background: #ffffff;
+        color: #1f2630;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 999px;
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card" role="alert">
+      <div class="icon">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#a62c24"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 3l18 18" />
+          <path
+            d="M5 12.5a13 13 0 0 1 4-2.6M9.5 8.3A16 16 0 0 1 19 10.5M12.5 15.8a5 5 0 0 1 2.7 1.4M12 19h.01"
+          />
+        </svg>
+      </div>
+      <h1>目前沒有網路連線</h1>
+      <p>請確認你的網路狀態，連線恢復後再重新整理。</p>
+      <button onclick="location.reload()">重新整理</button>
+    </div>
+  </body>
+</html>
