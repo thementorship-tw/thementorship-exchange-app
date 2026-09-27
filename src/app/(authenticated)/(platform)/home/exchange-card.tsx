@@ -60,10 +60,10 @@ export function ExchangeCard({
         </div>
 
         <div className="flex flex-col gap-1">
-          <p className="text-body-lg-strong text-primary">
+          <p className="text-body-lg-strong text-primary break-words">
             我能提供：{offersText}
           </p>
-          <p className="text-body-lg-strong text-primary">
+          <p className="text-body-lg-strong text-primary break-words">
             我想找：{wantsText}
           </p>
         </div>
@@ -71,7 +71,7 @@ export function ExchangeCard({
 
       <div className="flex flex-col gap-3 px-4 py-2 md:landscape:px-5 lg:px-5">
         {expanded && description !== null && (
-          <p className="text-body text-primary">{description}</p>
+          <p className="text-body text-primary break-words">{description}</p>
         )}
 
         <div className="flex items-center justify-between gap-2">

@@ -41,7 +41,9 @@ export function ReceivedApplicationRow({
               {application.applicantGroup}
             </span>
           </div>
-          <p className="text-body-lg text-primary">{application.requestText}</p>
+          <p className="text-body-lg text-primary break-words">
+            {application.requestText}
+          </p>
         </div>
 
         <span className="shrink-0 text-body text-secondary">
