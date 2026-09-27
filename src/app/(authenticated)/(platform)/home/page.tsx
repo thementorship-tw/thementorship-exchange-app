@@ -34,7 +34,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
         <ExchangeList
           apiQuery={apiQuery}
           filterBar={<FilterBar params={{ types, sort, keyword }} />}
-          filtered={types.length > 0}
+          filtered={types.length > 0 || keyword !== ""}
         />
       </div>
 
