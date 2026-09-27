@@ -1,12 +1,12 @@
 -- Custom SQL migration file, put your code below! --
 
 -- FTS5 external content table over profiles.offers_text / description / wants_text.
--- Uses the built-in `trigram` tokenizer (fixed 3-gram; see design.md D2/D6 for the
--- documented 2-character CJK query limitation and its LIKE fallback).
+-- Uses the built-in `trigram` tokenizer (fixed 3-gram), so queries shorter than 3
+-- characters (e.g. 2-character CJK terms) cannot match and fall back to LIKE.
 --
 -- `content='profiles'` with no `content_rowid` relies on `profiles` keeping its
 -- implicit integer rowid (the table must never be declared WITHOUT ROWID, or this
--- mapping breaks — see design.md Risks).
+-- mapping breaks).
 CREATE VIRTUAL TABLE profiles_fts USING fts5(
   offers_text, description, wants_text,
   content='profiles',

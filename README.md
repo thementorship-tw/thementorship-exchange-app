@@ -38,6 +38,12 @@ pnpm db:seed       # seed the local whitelist configured in .env.local
 pnpm db:studio     # browse the database
 ```
 
+Always apply schema changes with `db:migrate`, never `db:push`. Some migrations are
+hand-written SQL (e.g. the `profiles_fts` FTS5 table and its sync triggers) that
+`schema.ts` cannot express; `db:push` only diffs `schema.ts`, so it silently skips
+them. A database built with `db:push` has no `profiles_fts`, and any keyword search
+of 3+ characters fails with `no such table: profiles_fts`.
+
 `db:seed` is restricted to a local `file:` database. Set
 `DEV_WHITELIST_SESSION` and the comma-separated `DEV_WHITELIST_EMAILS` in
 `.env.local`; never commit real email addresses. Re-running the command restores

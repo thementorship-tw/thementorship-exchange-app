@@ -35,7 +35,7 @@ export type ExchangeInfoListItem = Omit<
 type Author = ExchangeInfoListItem["author"];
 
 /**
- * 兩種分頁模式（見 openspec/changes/search-mechanism-plan/design.md D8）：
+ * 兩種分頁模式：
  * - chrono：無關鍵字，或關鍵字少於 RELEVANCE_KEYWORD_MIN_LENGTH 字（LIKE fallback）。
  *   排序鍵是 (updatedAt, id)。
  * - relevance：關鍵字達 RELEVANCE_KEYWORD_MIN_LENGTH 字以上，走 FTS5。
@@ -186,7 +186,7 @@ function toExchangeInfoListItem({
 /**
  * 公開的交換資訊列表。
  *
- * 排序邏輯（design.md D4）：
+ * 排序邏輯：
  * - 關鍵字達 3 字以上：依相關性（bm25）排序，忽略 `sort`，交給 listExchangeInfoByRelevance。
  * - 關鍵字少於 3 字，或沒有關鍵字：依 updatedAt 排序（chrono）；
  *   有關鍵字時同樣忽略 `sort`、固定新到舊，交給 listExchangeInfoChrono。
@@ -260,7 +260,7 @@ async function listExchangeInfoChrono({
   }
 
   // 有關鍵字時（即使短到走 LIKE fallback）一律忽略呼叫端的 sort，固定新到舊，
-  // 維持「有關鍵字＝相關性邏輯主導排序」在任何查詢字數下的一致行為（design.md D4）。
+  // 維持「有關鍵字＝相關性邏輯主導排序」在任何查詢字數下的一致行為。
   const isDescending = keyword ? true : sort === "newest";
   const direction = isDescending ? desc : asc;
 
