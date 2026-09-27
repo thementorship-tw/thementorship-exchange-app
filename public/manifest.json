@@ -11,8 +11,8 @@
   "lang": "zh-Hant",
   "icons": [
     {
-      "src": "/exchange/images/logo.png",
-      "sizes": "361x361",
+      "src": "/exchange/images/logo-1024x1024.png",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any"
     }
