@@ -116,9 +116,13 @@ export function MyPostRow({
           )}
         </div>
 
-        <p className="text-body-lg text-primary">我能提供：{post.offersText}</p>
-        <p className="text-body-lg text-primary">我想找：{post.wantsText}</p>
-        <p className="whitespace-pre-wrap text-body-lg text-primary">
+        <p className="text-body-lg text-primary break-words">
+          我能提供：{post.offersText}
+        </p>
+        <p className="text-body-lg text-primary break-words">
+          我想找：{post.wantsText}
+        </p>
+        <p className="whitespace-pre-wrap text-body-lg text-primary break-words">
           {post.description}
         </p>
 

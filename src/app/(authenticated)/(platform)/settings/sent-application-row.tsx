@@ -39,14 +39,14 @@ export function SentApplicationRow({
           >
             #{PROFILE_TYPE_LABELS[application.profileType]}
           </Tag>
-          <p className="text-body-lg text-primary">
+          <p className="text-body-lg text-primary break-words">
             我能提供：{application.profileOffersText}
           </p>
-          <p className="text-body-lg text-primary">
+          <p className="text-body-lg text-primary break-words">
             我想找：{application.profileWantsText}
           </p>
           {application.profileDescription !== null && (
-            <p className="whitespace-pre-wrap text-body-lg text-primary">
+            <p className="whitespace-pre-wrap text-body-lg text-primary break-words">
               {application.profileDescription}
             </p>
           )}
@@ -83,7 +83,7 @@ export function SentApplicationRow({
             }`}
           >
             <dt className="text-body-lg text-primary">{label}：</dt>
-            <dd className="mt-1 whitespace-pre-wrap text-body-lg text-primary">
+            <dd className="mt-1 whitespace-pre-wrap text-body-lg text-primary break-words">
               {application[key]}
             </dd>
           </div>
