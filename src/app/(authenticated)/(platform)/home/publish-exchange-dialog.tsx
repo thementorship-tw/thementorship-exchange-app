@@ -19,10 +19,9 @@ type ApiErrorBody = {
   error?: { code?: string; message?: string };
 };
 
-type DialogBounds = { top: number; left: number; width: number };
-
 const DESKTOP_PUBLISHER_MEDIA =
   "(min-width: 1024px), (min-width: 768px) and (orientation: landscape)";
+const MOBILE_DIALOG_TOP = 64;
 
 async function readApiError(response: Response): Promise<ApiErrorBody> {
   try {
@@ -64,7 +63,7 @@ export function PublishExchangeDialog({
   const [submitting, setSubmitting] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
-  const [dialogBounds, setDialogBounds] = useState<DialogBounds | null>(null);
+  const [dialogStyle, setDialogStyle] = useState<CSSProperties>();
 
   const formValues = { offersText, wantsText, description };
   const { offersInvalid, wantsInvalid, descriptionInvalid } =
@@ -80,7 +79,19 @@ export function PublishExchangeDialog({
 
   const measureDialogBounds = () => {
     if (!window.matchMedia(DESKTOP_PUBLISHER_MEDIA).matches) {
-      setDialogBounds(null);
+      const viewport = window.visualViewport;
+      if (!viewport) {
+        setDialogStyle(undefined);
+        return;
+      }
+
+      setDialogStyle({
+        top: viewport.offsetTop + MOBILE_DIALOG_TOP,
+        left: viewport.offsetLeft,
+        width: viewport.width,
+        height: Math.max(viewport.height - MOBILE_DIALOG_TOP, 0),
+        margin: 0,
+      });
       return;
     }
 
@@ -90,7 +101,7 @@ export function PublishExchangeDialog({
     if (!content) return;
 
     const { top, left, width } = content.getBoundingClientRect();
-    setDialogBounds({ top, left, width });
+    setDialogStyle({ top, left, width });
   };
 
   useEffect(() => {
@@ -103,8 +114,16 @@ export function PublishExchangeDialog({
   useEffect(() => {
     if (!open) return;
 
+    const viewport = window.visualViewport;
     window.addEventListener("resize", measureDialogBounds);
-    return () => window.removeEventListener("resize", measureDialogBounds);
+    viewport?.addEventListener("resize", measureDialogBounds);
+    viewport?.addEventListener("scroll", measureDialogBounds);
+
+    return () => {
+      window.removeEventListener("resize", measureDialogBounds);
+      viewport?.removeEventListener("resize", measureDialogBounds);
+      viewport?.removeEventListener("scroll", measureDialogBounds);
+    };
   }, [open]);
 
   const resetForm = () => {
@@ -222,15 +241,7 @@ export function PublishExchangeDialog({
     <>
       <dialog
         ref={dialogRef}
-        style={
-          dialogBounds
-            ? ({
-                top: dialogBounds.top,
-                left: dialogBounds.left,
-                width: dialogBounds.width,
-              } satisfies CSSProperties)
-            : undefined
-        }
+        style={dialogStyle}
         aria-labelledby="publish-exchange-title"
         onCancel={(event) => {
           event.preventDefault();
@@ -271,7 +282,7 @@ export function PublishExchangeDialog({
               showTypeError={
                 showErrors && type === null && availableTypes.length > 0
               }
-              autoGrowKey={open}
+              dialogOpen={open}
               descriptionClassName="relative mx-3 mb-3 min-h-36 flex-1 md:landscape:min-h-28 lg:min-h-28"
             />
           </div>

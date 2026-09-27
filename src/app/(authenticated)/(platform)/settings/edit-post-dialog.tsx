@@ -138,7 +138,7 @@ export function EditPostDialog({
             offersInvalid={offersInvalid}
             wantsInvalid={wantsInvalid}
             descriptionInvalid={descriptionInvalid}
-            autoGrowKey={open}
+            dialogOpen={open}
             descriptionClassName="relative min-h-28"
           />
         </div>

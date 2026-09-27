@@ -15,9 +15,15 @@ if (!configuredDatabaseUrl) {
   throw new Error("TURSO_DATABASE_URL is required. See .env.example.");
 }
 
-if (!configuredDatabaseUrl.startsWith("file:")) {
+/**
+ * 預設只給本機用；其他人也在用同一個 Turso Cloud 資料庫時，亂灌假資料會互相干擾。
+ * 確定要對非 file: 的資料庫（例如共用的 staging）灌測試資料時，加 --allow-remote。
+ */
+const allowRemote = process.argv.includes("--allow-remote");
+
+if (!configuredDatabaseUrl.startsWith("file:") && !allowRemote) {
   throw new Error(
-    "Mock profiles seed is for local development only. TURSO_DATABASE_URL must use a file: URL.",
+    "Mock profiles seed defaults to local development only. TURSO_DATABASE_URL must use a file: URL, or pass --allow-remote to intentionally seed a shared/cloud database.",
   );
 }
 
@@ -27,7 +33,10 @@ const databaseUrl: string = configuredDatabaseUrl;
 const MOCK_SESSION = 0;
 
 async function main(): Promise<void> {
-  const client = createClient({ url: databaseUrl });
+  const client = createClient({
+    url: databaseUrl,
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  });
   const db = drizzle(client);
 
   try {
@@ -41,62 +50,62 @@ async function main(): Promise<void> {
       nicknames.map((nickname, index) => [nickname, `mock-user-${index + 1}`]),
     );
 
-    await db
-      .insert(users)
-      .values(
-        nicknames.map((nickname) => {
-          const id = userIdByNickname.get(nickname)!;
-          return {
-            id,
-            sub: `mock:${id}`,
-            email: `${id}@example.com`,
-            session: MOCK_SESSION,
-            group: groupByNickname.get(nickname)!,
-            googleName: nickname,
-            nickname,
-            active: true,
-          };
-        }),
-      )
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          nickname: sql`excluded.nickname`,
-          group: sql`excluded."group"`,
+    // 逐筆 insert，不用一次塞全部 values 的批次寫法：Turso 的 remote HTTP
+    // 連線對這種大型多列 batched INSERT 會回 401（已實測確認，本機 file:
+    // 資料庫不會遇到，只有連遠端 Turso Cloud 時才會踩到）。25 筆逐筆寫的
+    // 效能差異可忽略，換來能同時在本機與遠端跑。
+    for (const nickname of nicknames) {
+      const id = userIdByNickname.get(nickname)!;
+      await db
+        .insert(users)
+        .values({
+          id,
+          sub: `mock:${id}`,
+          email: `${id}@example.com`,
+          session: MOCK_SESSION,
+          group: groupByNickname.get(nickname)!,
+          googleName: nickname,
+          nickname,
           active: true,
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: users.id,
+          set: {
+            nickname: sql`excluded.nickname`,
+            group: sql`excluded."group"`,
+            active: true,
+          },
+        });
+    }
 
-    await db
-      .insert(profiles)
-      .values(
-        items.map((item) => {
-          const userId = userIdByNickname.get(item.author.nickname)!;
-          return {
-            id: item.id,
-            userId,
-            type: item.type,
-            offersText: item.offersText,
-            wantsText: item.wantsText,
-            description: item.description,
-            visible: true,
-            createdAt: item.createdAt,
-            createdBy: userId,
-          };
-        }),
-      )
-      .onConflictDoUpdate({
-        target: profiles.id,
-        set: {
-          type: sql`excluded.type`,
-          offersText: sql`excluded.offers_text`,
-          wantsText: sql`excluded.wants_text`,
-          description: sql`excluded.description`,
-          createdAt: sql`excluded.created_at`,
+    for (const item of items) {
+      const userId = userIdByNickname.get(item.author.nickname)!;
+      await db
+        .insert(profiles)
+        .values({
+          id: item.id,
+          userId,
+          type: item.type,
+          offersText: item.offersText,
+          wantsText: item.wantsText,
+          description: item.description,
           visible: true,
-          deletedAt: null,
-        },
-      });
+          createdAt: item.createdAt,
+          createdBy: userId,
+        })
+        .onConflictDoUpdate({
+          target: profiles.id,
+          set: {
+            type: sql`excluded.type`,
+            offersText: sql`excluded.offers_text`,
+            wantsText: sql`excluded.wants_text`,
+            description: sql`excluded.description`,
+            createdAt: sql`excluded.created_at`,
+            visible: true,
+            deletedAt: null,
+          },
+        });
+    }
 
     console.log(
       `Seeded ${items.length} mock profiles from ${nicknames.length} mock users.`,

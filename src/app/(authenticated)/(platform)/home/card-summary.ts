@@ -2,19 +2,23 @@ import type { ExchangeInfoListResponseItem } from "@/shared/api/exchange-info/sc
 import { formatPostTime } from "@/utils/format";
 
 /**
- * 卡片用的單筆交換資訊：欄位與 API 相同，createdAt 換成格式化好的 timeLabel。
+ * 卡片用的單筆交換資訊：欄位與 API 相同，createdAt、updatedAt 換成格式化好的 timeLabel。
  */
-export type CardSummary = Omit<ExchangeInfoListResponseItem, "createdAt"> & {
-  /** 已格式化的發文時間 */
+export type CardSummary = Omit<
+  ExchangeInfoListResponseItem,
+  "createdAt" | "updatedAt"
+> & {
+  /** 已格式化的最後更新時間 */
   timeLabel: string;
 };
 
 export function toCardSummary(
   {
-    createdAt,
+    updatedAt,
     ...item
-  }: Omit<ExchangeInfoListResponseItem, "createdAt"> & {
+  }: Omit<ExchangeInfoListResponseItem, "createdAt" | "updatedAt"> & {
     createdAt: Date | string;
+    updatedAt: Date | string;
   },
   now: Date,
 ): CardSummary {
@@ -30,6 +34,6 @@ export function toCardSummary(
       group: item.author.group,
       avatarUrl: item.author.avatarUrl,
     },
-    timeLabel: formatPostTime(new Date(createdAt), now),
+    timeLabel: formatPostTime(new Date(updatedAt), now),
   };
 }

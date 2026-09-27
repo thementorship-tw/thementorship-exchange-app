@@ -20,7 +20,7 @@ const DAY = 24 * HOUR;
 
 const mockItems: (Omit<
   ProfileListItem,
-  "createdAt" | "appliedWithinCooldown"
+  "createdAt" | "updatedAt" | "appliedWithinCooldown"
 > & { agoMs: number })[] = [
   {
     id: "mock-1",
@@ -273,11 +273,16 @@ export async function listProfiles({
           text.toLowerCase().includes(needle),
         ),
     )
-    .map(({ agoMs, ...item }) => ({
-      ...item,
-      appliedWithinCooldown: false,
-      createdAt: new Date(now - agoMs),
-    }))
+    .map(({ agoMs, ...item }) => {
+      // 假資料都視為沒修改過，更新時間等於建立時間。
+      const createdAt = new Date(now - agoMs);
+      return {
+        ...item,
+        appliedWithinCooldown: false,
+        createdAt,
+        updatedAt: createdAt,
+      };
+    })
     .sort((a, b) =>
       order === "newest"
         ? b.createdAt.getTime() - a.createdAt.getTime()
