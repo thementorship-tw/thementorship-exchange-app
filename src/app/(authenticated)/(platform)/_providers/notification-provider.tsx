@@ -19,7 +19,6 @@ import type { NotificationItem } from "../notifications/notifications";
 import {
   enablePushNotifications,
   listenForForegroundMessages,
-  registerFirebaseServiceWorker,
   reregisterPushTokenIfGranted,
 } from "./push-client";
 
@@ -94,9 +93,6 @@ export function NotificationProvider({
 
   // FCM + Browser lifecycle 的監聽機制
   useEffect(() => {
-    void registerFirebaseServiceWorker().catch((error: unknown) => {
-      console.error("[push] Failed to register service worker", error);
-    }); // 確保 Firebase 使用的 Service Worker 已經向 Browser 註冊
     void reregisterPushTokenIfGranted().catch((error: unknown) => {
       console.error("[push] Failed to re-register push token", error);
     }); // 確保已經授權的使用者的 FCM token 已經向後端註冊
