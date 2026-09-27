@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/button";
 import { Toast } from "@/components/toast";
@@ -9,7 +9,9 @@ import { withBasePath } from "@/shared/base-path";
 import type { MeResponse, SettingsProfile } from "@/shared/api/users/schemas";
 import { NICKNAME_MAX_LENGTH } from "@/shared/api/users/constants";
 
+import { signOutAction } from "./actions";
 import { readApiError } from "./api-error";
+import { LogoutDialog } from "./logout-dialog";
 
 export function SettingsProfileHeader({
   profile: initialProfile,
@@ -24,6 +26,8 @@ export function SettingsProfileHeader({
   const inputRef = useRef<HTMLInputElement>(null);
   const ignoreBlurSaveRef = useRef(false);
   const savingRef = useRef(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [signingOut, startSignOut] = useTransition();
 
   useEffect(() => {
     if (!editing) return;
@@ -105,6 +109,14 @@ export function SettingsProfileHeader({
           )}
           <p className="truncate text-h2 text-primary">{profile.googleName}</p>
           <p className="shrink-0 text-h2 text-gold">{profile.group}</p>
+          <Button
+            variant="accent"
+            size="sm"
+            className="shrink-0"
+            onClick={() => setLogoutOpen(true)}
+          >
+            登出
+          </Button>
         </div>
 
         <div className="flex min-w-0 flex-1 flex-wrap items-center justify-start gap-3 md:landscape:justify-end lg:justify-end">
@@ -155,6 +167,15 @@ export function SettingsProfileHeader({
           )}
         </div>
       </header>
+
+      <LogoutDialog
+        open={logoutOpen}
+        confirming={signingOut}
+        onClose={() => {
+          if (!signingOut) setLogoutOpen(false);
+        }}
+        onConfirm={() => startSignOut(() => signOutAction())}
+      />
 
       <Toast
         open={errorMessage !== undefined}

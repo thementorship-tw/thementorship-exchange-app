@@ -232,19 +232,16 @@ export default async function HomePage() {
 
 ### 5.5 登出
 
-在 `/home` 內用 Server Action 包 `signOut`，登出後導回首頁 `/`：
+登出按鈕在設定中心個人資料列（`settings-profile-header.tsx`），點擊後先跳確認框，確認後呼叫 Server Action 包的 `signOut`，登出後導回 `/login`：
 
 ```typescript
-import { signOut } from "@/auth";
+// src/app/(authenticated)/(platform)/settings/actions.ts
+"use server";
 
-<form
-  action={async () => {
-    "use server";
-    await signOut({ redirectTo: "/" });
-  }}
->
-  <button type="submit">登出</button>
-</form>;
+export async function signOutAction(): Promise<void> {
+  // 交給 Auth.js 的網址要含 basePath
+  await signOut({ redirectTo: withBasePath(LOGIN_PATH) });
+}
 ```
 
 ---
@@ -366,7 +363,7 @@ Google Provider 預設提供：
 - [x] env 變數未 commit 至 git
 - [x] refresh 頁面後 session 仍在
 - [x] 於 Google consent 頁按「取消」→ 顯示錯誤訊息
-- [x] 登出後導回首頁 `/`，session 已清除
+- [x] 登出後導回 `/login`，session 已清除
 - [x] 登出後無法進入受保護頁面（被 redirect）
 
 ### Staging / Production（待 URL）
