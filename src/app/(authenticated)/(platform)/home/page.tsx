@@ -22,8 +22,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
       : "";
   const { types, sort } = parseListParams(params);
 
-  // TODO: 關鍵字搜尋由夥伴串接，屆時把 keyword 帶進 buildExchangeInfoApiQuery。
-  const apiQuery = buildExchangeInfoApiQuery({ types, sort });
+  const apiQuery = buildExchangeInfoApiQuery({ types, sort, keyword });
 
   return (
     <>
@@ -35,7 +34,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
         <ExchangeList
           apiQuery={apiQuery}
           filterBar={<FilterBar params={{ types, sort, keyword }} />}
-          filtered={types.length > 0}
+          filtered={types.length > 0 || keyword !== ""}
         />
       </div>
 

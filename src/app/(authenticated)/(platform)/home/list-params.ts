@@ -34,9 +34,11 @@ export function parseListParams(params: {
 export function buildExchangeInfoApiQuery({
   types,
   sort,
-}: Pick<ListParams, "types" | "sort">): string {
+  keyword,
+}: Pick<ListParams, "types" | "sort" | "keyword">): string {
   const query = new URLSearchParams();
 
+  if (keyword) query.set("q", keyword);
   for (const type of PROFILE_TYPES.filter((value) => types.includes(value))) {
     query.append("type", type);
   }
