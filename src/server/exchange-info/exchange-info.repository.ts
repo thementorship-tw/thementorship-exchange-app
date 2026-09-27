@@ -157,16 +157,13 @@ type ExchangeInfoListRow = Omit<
   ExchangeInfoListItem,
   "author" | "appliedWithinCooldown"
 > & {
-  updatedAt: Date;
   authorNickname: Author["nickname"];
   authorGroup: Author["group"];
   authorAvatarUrl: Author["avatarUrl"];
   appliedWithinCooldown: number;
 };
 
-/** updatedAt 只用來組 cursor，不是公開回應欄位，映射時要拿掉，不能外流。 */
 function toExchangeInfoListItem({
-  updatedAt: _updatedAt,
   authorNickname,
   authorGroup,
   authorAvatarUrl,
