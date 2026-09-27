@@ -297,16 +297,16 @@ export function PublishExchangeDialog({
             event.preventDefault();
             requestConfirmation();
           }}
-          className="flex h-full flex-col gap-4 p-4 md:landscape:h-auto md:landscape:p-0 lg:h-auto lg:p-0"
+          className="flex h-full min-h-0 flex-col gap-4 p-4 md:landscape:h-auto md:landscape:p-0 lg:h-auto lg:p-0"
         >
           <h2
             id="publish-exchange-title"
-            className="text-center text-body-lg-strong md:landscape:sr-only lg:sr-only"
+            className="shrink-0 text-center text-body-lg-strong md:landscape:sr-only lg:sr-only"
           >
             發布貼文
           </h2>
 
-          <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-20 bg-surface p-2">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain rounded-20 bg-surface p-2">
             <ExchangePostFormFields
               values={formValues}
               onOffersTextChange={setOffersText}
@@ -330,7 +330,7 @@ export function PublishExchangeDialog({
             />
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex shrink-0 justify-end gap-2">
             <Button
               type="button"
               variant="accent"
@@ -350,6 +350,10 @@ export function PublishExchangeDialog({
               確認發文
             </Button>
           </div>
+
+          <p className="shrink-0 text-center text-xs text-secondary">
+            deploy-check: 2026-09-27 21:15 CST
+          </p>
         </form>
       </dialog>
 
