@@ -77,6 +77,8 @@ const exchangeInfoItemDoc = z
     /** 目前登入者是否仍在這篇貼文的重複申請冷卻期內。 */
     appliedWithinCooldown: z.boolean(),
     createdAt: z.iso.datetime(),
+    /** 最後修改時間；未修改過的貼文與 createdAt 相同。 */
+    updatedAt: z.iso.datetime(),
     author: z.object({
       nickname: z.string(),
       group: z.enum(MEMBER_GROUPS),
