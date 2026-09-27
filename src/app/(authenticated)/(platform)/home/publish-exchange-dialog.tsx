@@ -64,7 +64,6 @@ export function PublishExchangeDialog({
   const [showErrors, setShowErrors] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
   const [dialogStyle, setDialogStyle] = useState<CSSProperties>();
-  const [viewportDebug, setViewportDebug] = useState("");
   const dialogViewportHeightRef = useRef<number | null>(null);
   const pointerActiveRef = useRef(false);
   const pendingViewportExpansionRef = useRef(false);
@@ -91,17 +90,13 @@ export function PublishExchangeDialog({
 
       const updateDialogStyle = () => {
         dialogViewportHeightRef.current = viewport.height;
-        const height = Math.max(viewport.height - MOBILE_DIALOG_TOP, 0);
         setDialogStyle({
           top: viewport.offsetTop + MOBILE_DIALOG_TOP,
           left: viewport.offsetLeft,
           width: viewport.width,
-          height,
+          height: Math.max(viewport.height - MOBILE_DIALOG_TOP, 0),
           margin: 0,
         });
-        setViewportDebug(
-          `vv h=${Math.round(viewport.height)} top=${Math.round(viewport.offsetTop)} winH=${window.innerHeight} dlgH=${Math.round(height)}`,
-        );
       };
 
       const isExpanding =
@@ -357,10 +352,6 @@ export function PublishExchangeDialog({
               確認發文
             </Button>
           </div>
-
-          <p className="shrink-0 text-center text-xs text-secondary">
-            deploy-check: 2026-09-27 21:45 CST · {viewportDebug || "vv: n/a"}
-          </p>
         </form>
       </dialog>
 
