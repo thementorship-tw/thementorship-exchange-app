@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/button";
 import { Dialog } from "@/components/dialog";
@@ -67,21 +67,27 @@ function AutoGrowTextarea({
   value,
   placeholder,
   maxLength,
+  dialogOpen,
   onChange,
 }: {
   value: string;
   placeholder: string;
   maxLength: number;
+  dialogOpen: boolean;
   onChange: (value: string) => void;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useLayoutEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [value]);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [value, dialogOpen]);
 
   return (
     <textarea
@@ -91,7 +97,7 @@ function AutoGrowTextarea({
       maxLength={maxLength}
       rows={1}
       onChange={(event) => onChange(event.target.value)}
-      className="mt-1 min-h-6 resize-none overflow-hidden bg-transparent text-body text-primary outline-none placeholder:text-secondary"
+      className="mt-1 min-h-6 resize-none overflow-hidden bg-transparent text-body-lg text-primary outline-none placeholder:text-secondary"
     />
   );
 }
@@ -251,6 +257,7 @@ export function ExchangeApplicationDialog({
                   value={values[key]}
                   placeholder={placeholder}
                   maxLength={maxLength}
+                  dialogOpen={open}
                   onChange={(value) =>
                     setValues((current) => ({
                       ...current,

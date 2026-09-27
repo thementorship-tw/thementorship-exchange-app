@@ -24,12 +24,13 @@ import {
 } from "@/shared/api/exchange-info/schemas";
 import type { ProfileType } from "@/shared/profile-types";
 
-/** 與 API 回傳的單筆資料相同，只是 createdAt 在 server 端還是 Date。 */
+/** 與 API 回傳的單筆資料相同，只是 createdAt、updatedAt 在 server 端還是 Date。 */
 export type ExchangeInfoListItem = Omit<
   ExchangeInfoListResponseItem,
-  "createdAt"
+  "createdAt" | "updatedAt"
 > & {
   createdAt: Date;
+  updatedAt: Date;
 };
 
 type Author = ExchangeInfoListItem["author"];

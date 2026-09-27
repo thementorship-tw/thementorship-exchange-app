@@ -72,7 +72,7 @@ export function SearchField({ className = "" }: { className?: string }) {
           setKeyword(event.target.value);
           debouncedReplaceKeyword.run(event.target.value);
         }}
-        className="min-w-0 flex-1 bg-transparent text-body text-primary outline-none placeholder:text-secondary [&::-webkit-search-cancel-button]:appearance-none"
+        className="min-w-0 flex-1 bg-transparent text-body-lg text-primary outline-none placeholder:text-secondary [&::-webkit-search-cancel-button]:appearance-none"
       />
       {filled && (
         <button

@@ -28,8 +28,8 @@ export type ExchangePostFormFieldsProps = {
   wantsInvalid: boolean;
   descriptionInvalid: boolean;
   showTypeError?: boolean;
-  /** 父層 Dialog 開關時傳入，以便重新計算 textarea 高度。 */
-  autoGrowKey?: boolean;
+  /** Dialog 開啟時重新計算 textarea 高度。 */
+  dialogOpen?: boolean;
   descriptionClassName?: string;
 };
 
@@ -49,22 +49,27 @@ export function ExchangePostFormFields({
   wantsInvalid,
   descriptionInvalid,
   showTypeError = false,
-  autoGrowKey = true,
+  dialogOpen = true,
   descriptionClassName = "relative min-h-36 flex-1 md:landscape:min-h-28 lg:min-h-28",
 }: ExchangePostFormFieldsProps) {
   const offersTextareaRef = useRef<HTMLTextAreaElement>(null);
   const wantsTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    for (const textarea of [
-      offersTextareaRef.current,
-      wantsTextareaRef.current,
-    ]) {
-      if (!textarea) continue;
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  }, [values.offersText, values.wantsText, autoGrowKey]);
+    // 使用 requestAnimationFrame 以確保 textarea scrollHeight 計算正確，避免在 textarea 還沒渲染完成時就計算高度。
+    const frame = requestAnimationFrame(() => {
+      for (const textarea of [
+        offersTextareaRef.current,
+        wantsTextareaRef.current,
+      ]) {
+        if (!textarea) continue;
+        textarea.style.height = "auto";
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      }
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [values.offersText, values.wantsText, dialogOpen]);
 
   return (
     <>
@@ -92,10 +97,11 @@ export function ExchangePostFormFields({
           </div>
         </fieldset>
 
-        <label className="mt-3 grid grid-cols-[auto_1fr_auto] items-start gap-x-1 text-body">
+        <label className="mt-3 grid grid-cols-[auto_1fr_auto] items-baseline gap-x-1 text-body">
           <span className="text-body-strong">我能提供：</span>
           <textarea
             ref={offersTextareaRef}
+            autoFocus
             rows={1}
             value={values.offersText}
             onChange={(event) => onOffersTextChange(event.target.value)}
@@ -103,7 +109,7 @@ export function ExchangePostFormFields({
             disabled={fieldsDisabled}
             aria-invalid={showErrors && offersInvalid}
             placeholder="你能提供的是？"
-            className="max-h-24 min-w-0 resize-none overflow-y-auto bg-transparent text-primary outline-none placeholder:text-secondary"
+            className="max-h-24 min-w-0 resize-none overflow-y-auto bg-transparent text-body-lg text-primary outline-none placeholder:text-secondary"
           />
           <span
             className={
@@ -116,7 +122,7 @@ export function ExchangePostFormFields({
           </span>
         </label>
 
-        <label className="mt-2 grid grid-cols-[auto_1fr_auto] items-start gap-x-1 text-body">
+        <label className="mt-2 grid grid-cols-[auto_1fr_auto] items-baseline gap-x-1 text-body">
           <span className="text-body-strong">我想找：</span>
           <textarea
             ref={wantsTextareaRef}
@@ -127,7 +133,7 @@ export function ExchangePostFormFields({
             disabled={fieldsDisabled}
             aria-invalid={showErrors && wantsInvalid}
             placeholder="你想尋找交換的是？"
-            className="max-h-24 min-w-0 resize-none overflow-y-auto bg-transparent text-primary outline-none placeholder:text-secondary"
+            className="max-h-24 min-w-0 resize-none overflow-y-auto bg-transparent text-body-lg text-primary outline-none placeholder:text-secondary"
           />
           <span
             className={
@@ -150,7 +156,7 @@ export function ExchangePostFormFields({
           disabled={fieldsDisabled}
           aria-invalid={descriptionInvalid}
           placeholder="輸入想要徵求／交換／尋找的內容描述，至多 300 字……"
-          className="size-full resize-none bg-transparent pb-7 text-body text-primary outline-none placeholder:text-secondary"
+          className="size-full resize-none bg-transparent pb-7 text-body-lg text-primary outline-none placeholder:text-secondary"
         />
         <span
           className={`absolute right-0 bottom-0 text-body ${descriptionInvalid ? "text-error" : "text-secondary"}`}
