@@ -1,4 +1,6 @@
-const HOUR = 60 * 60_000;
+// 以下單位皆為 ms
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 const WEEK = 7 * DAY;
 
@@ -11,16 +13,18 @@ const dateFormatter = new Intl.DateTimeFormat("en-CA", {
 
 /**
  * 將發文時間格式化成相對時間。
- * - 24 小時內：顯示「幾小時前」
+ * - 一小時內：顯示「幾分鐘前」
+ * - 一小時到 24 小時：顯示「幾小時前」
  * - 超過 24 小時到一週：顯示「幾天前」
  * - 一週以上：YYYY/MM/DD
  */
 export function formatPostTime(createdAt: Date, now: Date): string {
   const elapsed = now.getTime() - createdAt.getTime();
 
-  if (elapsed < DAY) {
-    return `${Math.max(1, Math.floor(elapsed / HOUR))} 小時前`;
+  if (elapsed < HOUR) {
+    return `${Math.max(1, Math.floor(elapsed / MINUTE))} 分鐘前`;
   }
+  if (elapsed < DAY) return `${Math.floor(elapsed / HOUR)} 小時前`;
   if (elapsed <= WEEK) return `${Math.floor(elapsed / DAY)} 天前`;
 
   const parts = dateFormatter.formatToParts(createdAt);

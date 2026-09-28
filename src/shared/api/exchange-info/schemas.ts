@@ -55,9 +55,8 @@ export const exchangeInfoContentSchema = z.object({
   description: z
     .string()
     .trim()
-    .max(EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH)
-    .nullish()
-    .transform((value) => (value ? value : null)),
+    .min(1)
+    .max(EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH),
 });
 export type ExchangeInfoContentInput = z.infer<
   typeof exchangeInfoContentSchema

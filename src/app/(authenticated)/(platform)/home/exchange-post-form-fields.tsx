@@ -154,12 +154,12 @@ export function ExchangePostFormFields({
           onChange={(event) => onDescriptionChange(event.target.value)}
           maxLength={EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH}
           disabled={fieldsDisabled}
-          aria-invalid={descriptionInvalid}
+          aria-invalid={showErrors && descriptionInvalid}
           placeholder="輸入想要徵求／交換／尋找的內容描述，至多 300 字……"
           className="size-full resize-none bg-transparent pb-7 text-body-lg text-primary outline-none placeholder:text-secondary"
         />
         <span
-          className={`absolute right-0 bottom-0 text-body ${descriptionInvalid ? "text-error" : "text-secondary"}`}
+          className={`absolute right-0 bottom-0 text-body ${descriptionInvalid && values.description.length > 0 ? "text-error" : "text-secondary"}`}
         >
           ({values.description.length}/{EXCHANGE_INFO_DESCRIPTION_MAX_LENGTH})
         </span>
