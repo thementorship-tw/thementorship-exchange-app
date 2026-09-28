@@ -81,14 +81,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!auth?.user) return false;
       if (isCurrentConsent(auth.consent)) return true;
 
-      // 用 nextUrl.clone() 而不是 new URL(LOGIN_PATH, request.nextUrl)：
-      // NextURL 會保留 basePath，而且它的 pathname 本來就不含 basePath。
-      const url = request.nextUrl.clone();
-      url.pathname = LOGIN_PATH;
-      url.search = "";
+      // 不能依賴 request.nextUrl 認得 basePath：設定了 AUTH_URL 時，Auth.js 會把 request
+      // 重新包裝（換成 AUTH_URL 的 origin），包裝後的 nextUrl 不帶 basePath 設定，
+      // pathname 會是含 /exchange 的完整路徑。所以這裡先 strip 再明確加回，
+      // 不管 nextUrl 是哪一種，結果都一致。origin 會是 AUTH_URL 的網域（正式環境為 www）。
+      const url = new URL(withBasePath(LOGIN_PATH), request.nextUrl.origin);
       url.searchParams.set(
         "callbackUrl",
-        `${request.nextUrl.pathname}${request.nextUrl.search}`,
+        `${stripBasePath(request.nextUrl.pathname)}${request.nextUrl.search}`,
       );
       return NextResponse.redirect(url);
     },
