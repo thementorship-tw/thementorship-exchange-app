@@ -12,7 +12,7 @@ export type ConsentVersions = {
  * 之後若兩份文件拆開各自維護，把下面兩行改成各自的字面值即可，
  * schema 與 `consent_logs` 的寫入規則都不用動。
  */
-const CURRENT_DOCUMENT_VERSION = "20260831";
+const CURRENT_DOCUMENT_VERSION = "20260928";
 
 export const CURRENT_CONSENT_VERSIONS: ConsentVersions = {
   termsVersion: CURRENT_DOCUMENT_VERSION,
