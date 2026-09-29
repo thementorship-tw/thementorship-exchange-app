@@ -4,7 +4,7 @@ import { ArrowClockwise } from "@phosphor-icons/react/ssr";
 
 import { useAppRefresh } from "../_providers/refresh-provider";
 
-/** 篩選列最右邊的重整鍵：外框跟篩選 Tag 同款，觸控區 44×44 往外溢出，不撐高篩選列。 */
+/** 篩選列最右邊的重整鍵，只在手機版出現：外框跟篩選 Tag 同款，觸控區 44×44 往外溢出，不撐高篩選列。 */
 export function RefreshButton() {
   const { refreshing, refresh } = useAppRefresh();
 
@@ -14,7 +14,7 @@ export function RefreshButton() {
       aria-label="重新整理"
       aria-busy={refreshing}
       onClick={refresh}
-      className={`group -my-1.5 -mr-1.5 flex size-11 shrink-0 cursor-pointer items-center justify-center transition active:translate-y-px focus-visible:outline-2 focus-visible:outline-brand ${
+      className={`group -my-1.5 -mr-1.5 flex size-11 md:landscape:hidden lg:hidden shrink-0 cursor-pointer items-center justify-center transition active:translate-y-px focus-visible:outline-2 focus-visible:outline-brand ${
         refreshing ? "text-brand" : "text-primary"
       }`}
     >
