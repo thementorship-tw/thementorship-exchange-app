@@ -12,6 +12,10 @@ import {
   PublishExchangeProvider,
 } from "./_providers/publish-exchange-provider";
 import { NotificationProvider } from "./_providers/notification-provider";
+import {
+  AppRefreshProvider,
+  RefreshBoundary,
+} from "./_providers/refresh-provider";
 import { PublishExchangeDialogContainer } from "./home/publish-exchange-dialog";
 import { toNotificationItem } from "./notifications/notifications";
 import type { NotificationItem } from "./notifications/notifications";
@@ -48,11 +52,15 @@ export default async function PlatformLayout({
         initialNotifications={initialNotifications}
       >
         <PublishExchangeProvider>
-          <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col md:px-6 md:landscape:flex-row md:landscape:gap-6 md:landscape:py-6 lg:flex-row lg:gap-6 lg:px-6 lg:py-6 xl:px-20">
-            <HomeSidebar />
-            <PublishExchangeContent>{children}</PublishExchangeContent>
-          </div>
-          <PublishExchangeDialogContainer />
+          <AppRefreshProvider>
+            <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col md:px-6 md:landscape:flex-row md:landscape:gap-6 md:landscape:py-6 lg:flex-row lg:gap-6 lg:px-6 lg:py-6 xl:px-20">
+              <HomeSidebar />
+              <PublishExchangeContent>
+                <RefreshBoundary>{children}</RefreshBoundary>
+              </PublishExchangeContent>
+            </div>
+            <PublishExchangeDialogContainer />
+          </AppRefreshProvider>
         </PublishExchangeProvider>
       </NotificationProvider>
     </main>

@@ -5,6 +5,7 @@ import { Tag } from "@/components/tag";
 import { PROFILE_TYPE_LABELS, PROFILE_TYPES } from "@/shared/profile-types";
 
 import { buildListHref, type ListParams } from "./list-params";
+import { RefreshButton } from "./refresh-button";
 
 const sortLabels = { newest: "最新的", oldest: "最舊的" } as const;
 
@@ -40,26 +41,29 @@ export function FilterBar({ params }: { params: ListParams }) {
         })}
       </div>
 
-      <Link
-        href={buildListHref({
-          ...params,
-          sort: sort === "newest" ? "oldest" : "newest",
-        })}
-        replace
-        scroll={false}
-        aria-label={`切換排序，目前為${sortLabels[sort]}`}
-        className={`
+      <div className="flex items-center gap-1">
+        <Link
+          href={buildListHref({
+            ...params,
+            sort: sort === "newest" ? "oldest" : "newest",
+          })}
+          replace
+          scroll={false}
+          aria-label={`切換排序，目前為${sortLabels[sort]}`}
+          className={`
           relative flex h-7 cursor-pointer items-center gap-1 rounded-pill px-2
           text-body whitespace-nowrap text-secondary
           transition hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-brand
           after:absolute after:-inset-x-1 after:-inset-y-2 after:content-['']
         `}
-      >
-        <SortIcon className="size-5" />
-        <span className="hidden md:landscape:inline lg:inline">
-          {sortLabels[sort]}
-        </span>
-      </Link>
+        >
+          <SortIcon className="size-5" />
+          <span className="hidden md:landscape:inline lg:inline">
+            {sortLabels[sort]}
+          </span>
+        </Link>
+        <RefreshButton />
+      </div>
     </div>
   );
 }
