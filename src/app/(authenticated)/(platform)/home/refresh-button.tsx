@@ -2,11 +2,11 @@
 
 import { ArrowClockwise } from "@phosphor-icons/react/ssr";
 
-import { useAppRefresh } from "../_providers/refresh-provider";
+import { useManualRefresh } from "../_providers/manual-refresh-provider";
 
 /** 篩選列最右邊的重整鍵：外框跟篩選 Tag 同款，觸控區 44×44 往外溢出，不撐高篩選列。 */
 export function RefreshButton() {
-  const { refreshing, refresh } = useAppRefresh();
+  const { refreshing, refresh } = useManualRefresh();
 
   return (
     <button
