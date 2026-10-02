@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   description: "Mentorship exchange platform",
   // metadata 的 manifest 路徑不會自動加 basePath
   manifest: withBasePath("/manifest.json"),
+  icons: withBasePath("/images/logo.png"),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
