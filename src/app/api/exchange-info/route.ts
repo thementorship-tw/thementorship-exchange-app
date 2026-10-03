@@ -39,7 +39,7 @@ export const GET = withApiAuth(
       return validationError({ cursor: "Invalid cursor" });
     }
 
-    const { items, nextCursor } = await listExchangeInfo({
+    const { items, nextCursor, snapshotKey } = await listExchangeInfo({
       viewerUserId: user.id,
       types: type,
       keyword: q || undefined,
@@ -48,7 +48,7 @@ export const GET = withApiAuth(
     });
 
     return Response.json(
-      { data: items, nextCursor },
+      { data: items, nextCursor, snapshotKey },
       { headers: PRIVATE_NO_STORE_HEADERS },
     );
   },

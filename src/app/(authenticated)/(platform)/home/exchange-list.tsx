@@ -211,7 +211,7 @@ function ExchangeFeed({
               className="absolute top-3 left-1/2 z-10 -translate-x-1/2 gap-2 shadow-lg"
             >
               <ArrowUp className="size-4" />
-              有較新的內容，點擊查看
+              有更新的內容，點擊查看
             </Button>
           )}
 

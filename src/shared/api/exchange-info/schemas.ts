@@ -98,6 +98,10 @@ export const exchangeInfoListResponseDoc = z.object({
     .string()
     .nullable()
     .meta({ description: "null 代表沒有下一頁" }),
+  snapshotKey: z.string().nullable().meta({
+    description:
+      "整份查詢結果的版本，結果有新增、刪除或修改時會改變；只有第一頁有值，其他頁是 null",
+  }),
 });
 
 export const createExchangeInfoResponseDoc = z.object({
