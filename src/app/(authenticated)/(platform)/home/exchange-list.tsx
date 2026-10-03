@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleNotch, WifiSlash } from "@phosphor-icons/react/ssr";
+import { ArrowUp, CircleNotch, WifiSlash } from "@phosphor-icons/react/ssr";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/button";
@@ -12,9 +12,15 @@ import {
   OFFLINE_ERROR_TITLE,
 } from "@/components/error-state";
 import { useIsOffline } from "@/hooks/use-is-offline";
+import { useAutoRefresh } from "@/hooks/use-auto-refresh";
+
+import { useManualRefresh } from "../_providers/manual-refresh-provider";
 
 import { ExchangeCard } from "./exchange-card";
 import { useExchangeInfoFeed, type FeedStatus } from "./use-exchange-info-feed";
+
+/** 離開頁面超過這個時間才自動更新，避免短暫切換 App 時一直重新抓資料。 */
+const RETURN_REFRESH_THRESHOLD_MS = 30_000;
 
 function EmptyState() {
   return (
@@ -110,8 +116,17 @@ function ExchangeFeed({
   filterBar: ReactNode;
   filtered: boolean;
 }) {
-  const { cards, status, hasMore, loadMore, retry } =
-    useExchangeInfoFeed(apiQuery);
+  const {
+    cards,
+    status,
+    hasMore,
+    hasNewer,
+    loadMore,
+    retry,
+    checkForUpdates,
+    showNewer,
+  } = useExchangeInfoFeed(apiQuery);
+  const { refreshing } = useManualRefresh();
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
   const [sentProfileIds, setSentProfileIds] = useState<Set<string>>(
     () => new Set(),
@@ -119,6 +134,17 @@ function ExchangeFeed({
   const isOffline = useIsOffline();
 
   const listRef = useRef<HTMLUListElement>(null);
+
+  useAutoRefresh(RETURN_REFRESH_THRESHOLD_MS, () => {
+    if (refreshing) return; // 如果手動重整中就不要自動重整，避免同時觸發兩次 router.refresh()。
+
+    void checkForUpdates(() => (listRef.current?.scrollTop ?? 0) > 0);
+  });
+
+  const showNewerAndScrollToTop = () => {
+    showNewer();
+    listRef.current?.scrollTo({ top: 0 });
+  };
 
   /** 滑到底部 200px 內、或內容還沒填滿可視範圍時，自動載入下一頁。 */
   useEffect(() => {
@@ -177,43 +203,56 @@ function ExchangeFeed({
       {status === "ready" && cards.length === 0 && <NoMatchState />}
 
       {cards.length > 0 && (
-        <ul
-          ref={listRef}
-          aria-busy={status === "loading"}
-          className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-24 md:landscape:pr-2 md:landscape:pb-0 lg:pr-2 lg:pb-0"
-        >
-          {cards.map((card) => (
-            <ExchangeCard
-              key={card.id}
-              card={card}
-              expanded={expandedCardId === card.id}
-              appliedWithinCooldown={
-                card.appliedWithinCooldown || sentProfileIds.has(card.id)
-              }
-              onApplicationSent={() =>
-                setSentProfileIds((current) => {
-                  const next = new Set(current);
-                  next.add(card.id);
-                  return next;
-                })
-              }
-              onToggle={() =>
-                setExpandedCardId((currentId) =>
-                  currentId === card.id ? null : card.id,
-                )
-              }
-            />
-          ))}
-
-          {hasMore && (
-            <li className="list-none">
-              <LoadingOrError
-                status={status}
-                onRetry={retry}
-              />
-            </li>
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          {hasNewer && (
+            <Button
+              size="sm"
+              onClick={showNewerAndScrollToTop}
+              className="absolute top-3 left-1/2 z-10 -translate-x-1/2 gap-2 shadow-lg"
+            >
+              <ArrowUp className="size-4" />
+              有更新的內容，點擊查看
+            </Button>
           )}
-        </ul>
+
+          <ul
+            ref={listRef}
+            aria-busy={status === "loading"}
+            className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-24 md:landscape:pr-2 md:landscape:pb-0 lg:pr-2 lg:pb-0"
+          >
+            {cards.map((card) => (
+              <ExchangeCard
+                key={card.id}
+                card={card}
+                expanded={expandedCardId === card.id}
+                appliedWithinCooldown={
+                  card.appliedWithinCooldown || sentProfileIds.has(card.id)
+                }
+                onApplicationSent={() =>
+                  setSentProfileIds((current) => {
+                    const next = new Set(current);
+                    next.add(card.id);
+                    return next;
+                  })
+                }
+                onToggle={() =>
+                  setExpandedCardId((currentId) =>
+                    currentId === card.id ? null : card.id,
+                  )
+                }
+              />
+            ))}
+
+            {hasMore && (
+              <li className="list-none">
+                <LoadingOrError
+                  status={status}
+                  onRetry={retry}
+                />
+              </li>
+            )}
+          </ul>
+        </div>
       )}
     </section>
   );

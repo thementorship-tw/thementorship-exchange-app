@@ -1,4 +1,3 @@
-// 底部工具列的重整鍵集中在這裡，讓「重整」對每一頁都是同一件事
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -23,15 +22,17 @@ type RefreshContextValue = {
 
 const RefreshContext = createContext<RefreshContextValue | null>(null);
 
-export function useAppRefresh(): RefreshContextValue {
+export function useManualRefresh(): RefreshContextValue {
   const value = useContext(RefreshContext);
   if (value === null)
-    throw new Error("useAppRefresh must be used within AppRefreshProvider");
+    throw new Error(
+      "useManualRefresh must be used within ManualRefreshProvider",
+    );
 
   return value;
 }
 
-export function AppRefreshProvider({ children }: { children: ReactNode }) {
+export function ManualRefreshProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [revision, setRevision] = useState(0);
@@ -61,7 +62,7 @@ export function AppRefreshProvider({ children }: { children: ReactNode }) {
 
 /** 重整完成後重新掛載頁面內容，讓 client 端的列表重新抓第一頁。 */
 export function RefreshBoundary({ children }: { children: ReactNode }) {
-  const { revision } = useAppRefresh();
+  const { revision } = useManualRefresh();
 
   return <Fragment key={revision}>{children}</Fragment>;
 }

@@ -122,6 +122,7 @@ export function ExchangeApplicationDialog({
 
   const close = () => {
     if (submitting) return;
+    setValues(EMPTY_FORM);
     setPhase("form");
     onClose();
   };

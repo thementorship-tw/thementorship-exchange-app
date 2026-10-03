@@ -13,9 +13,9 @@ import {
 } from "./_providers/publish-exchange-provider";
 import { NotificationProvider } from "./_providers/notification-provider";
 import {
-  AppRefreshProvider,
+  ManualRefreshProvider,
   RefreshBoundary,
-} from "./_providers/refresh-provider";
+} from "./_providers/manual-refresh-provider";
 import { PublishExchangeDialogContainer } from "./home/publish-exchange-dialog";
 import { toNotificationItem } from "./notifications/notifications";
 import type { NotificationItem } from "./notifications/notifications";
@@ -52,7 +52,7 @@ export default async function PlatformLayout({
         initialNotifications={initialNotifications}
       >
         <PublishExchangeProvider>
-          <AppRefreshProvider>
+          <ManualRefreshProvider>
             <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 flex-col md:px-6 md:landscape:flex-row md:landscape:gap-6 md:landscape:py-6 lg:flex-row lg:gap-6 lg:px-6 lg:py-6 xl:px-20">
               <HomeSidebar />
               <PublishExchangeContent>
@@ -60,7 +60,7 @@ export default async function PlatformLayout({
               </PublishExchangeContent>
             </div>
             <PublishExchangeDialogContainer />
-          </AppRefreshProvider>
+          </ManualRefreshProvider>
         </PublishExchangeProvider>
       </NotificationProvider>
     </main>

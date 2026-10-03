@@ -104,6 +104,14 @@ export function decodeExchangeInfoCursor(
   return null;
 }
 
+/**
+ * 整份查詢結果的版本：符合條件的筆數加上最新的 updatedAt 秒數
+ * 新增、刪除、下架、編輯都會讓其中一個值改變，用它判斷列表是否改變
+ */
+function toSnapshotKey(count: number, maxUpdatedAtSeconds: number | null) {
+  return `${count}:${maxUpdatedAtSeconds ?? 0}`;
+}
+
 function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, (char) => `\\${char}`);
 }
@@ -181,6 +189,13 @@ function toExchangeInfoListItem({
   };
 }
 
+export type ExchangeInfoListResult = {
+  items: ExchangeInfoListItem[];
+  nextCursor: string | null;
+  /** 只有第一頁（沒帶 cursor）才計算，其他頁是 null。 */
+  snapshotKey: string | null;
+};
+
 /**
  * 公開的交換資訊列表。
  *
@@ -197,10 +212,7 @@ export async function listExchangeInfo({
   keyword,
   sort,
   cursor,
-}: ListExchangeInfoOptions): Promise<{
-  items: ExchangeInfoListItem[];
-  nextCursor: string | null;
-}> {
+}: ListExchangeInfoOptions): Promise<ExchangeInfoListResult> {
   const trimmedKeyword = keyword?.trim();
   const keywordCharLength = trimmedKeyword ? [...trimmedKeyword].length : 0;
 
@@ -237,18 +249,18 @@ async function listExchangeInfoChrono({
   keyword?: string;
   sort: ExchangeInfoSortOrder;
   cursor?: Extract<ExchangeInfoCursor, { mode: "chrono" }>;
-}): Promise<{ items: ExchangeInfoListItem[]; nextCursor: string | null }> {
-  const conditions: (SQL | undefined)[] = [
+}): Promise<ExchangeInfoListResult> {
+  const filters: (SQL | undefined)[] = [
     eq(profiles.visible, true),
     isNull(profiles.deletedAt),
     eq(users.active, true),
   ];
 
-  if (types.length > 0) conditions.push(inArray(profiles.type, types));
+  if (types.length > 0) filters.push(inArray(profiles.type, types));
 
   if (keyword) {
     const pattern = `%${escapeLike(keyword)}%`;
-    conditions.push(
+    filters.push(
       or(
         sql`${profiles.offersText} LIKE ${pattern} ESCAPE '\\'`,
         sql`${profiles.wantsText} LIKE ${pattern} ESCAPE '\\'`,
@@ -262,6 +274,7 @@ async function listExchangeInfoChrono({
   const isDescending = keyword ? true : sort === "newest";
   const direction = isDescending ? desc : asc;
 
+  const conditions = [...filters];
   if (cursor) {
     const after = isDescending ? lt : gt;
     conditions.push(
@@ -275,13 +288,27 @@ async function listExchangeInfoChrono({
     );
   }
 
-  const rows = await getDb()
-    .select(exchangeInfoListColumns(viewerUserId))
-    .from(profiles)
-    .innerJoin(users, eq(profiles.userId, users.id))
-    .where(and(...conditions))
-    .orderBy(direction(profiles.updatedAt), direction(profiles.id))
-    .limit(EXCHANGE_INFO_PAGE_SIZE + 1);
+  const db = getDb();
+  const [rows, snapshot] = await Promise.all([
+    db
+      .select(exchangeInfoListColumns(viewerUserId))
+      .from(profiles)
+      .innerJoin(users, eq(profiles.userId, users.id))
+      .where(and(...conditions))
+      .orderBy(direction(profiles.updatedAt), direction(profiles.id))
+      .limit(EXCHANGE_INFO_PAGE_SIZE + 1),
+    cursor
+      ? undefined
+      : db
+          .select({
+            count: sql<number>`count(*)`,
+            maxUpdatedAtSeconds: sql<number | null>`max(${profiles.updatedAt})`,
+          })
+          .from(profiles)
+          .innerJoin(users, eq(profiles.userId, users.id))
+          .where(and(...filters))
+          .then(([row]) => row),
+  ]);
 
   const hasMore = rows.length > EXCHANGE_INFO_PAGE_SIZE;
   const pageRows = rows.slice(0, EXCHANGE_INFO_PAGE_SIZE);
@@ -298,6 +325,9 @@ async function listExchangeInfoChrono({
             id: lastRow.id,
           })
         : null,
+    snapshotKey: snapshot
+      ? toSnapshotKey(snapshot.count, snapshot.maxUpdatedAtSeconds)
+      : null,
   };
 }
 
@@ -327,7 +357,7 @@ async function listExchangeInfoByRelevance({
   types: ProfileType[];
   keyword: string;
   cursor?: Extract<ExchangeInfoCursor, { mode: "relevance" }>;
-}): Promise<{ items: ExchangeInfoListItem[]; nextCursor: string | null }> {
+}): Promise<ExchangeInfoListResult> {
   const duplicateCutoffSeconds = getDuplicateCutoffSeconds();
 
   const typeCondition =
@@ -350,7 +380,12 @@ async function listExchangeInfoByRelevance({
       )`
     : sql``;
 
-  const rows = await getDb().all<RelevanceRow>(sql`
+  const matchCondition = sql`p.visible = 1 AND p.deleted_at IS NULL AND u.active = 1
+        AND profiles_fts MATCH ${toFtsMatchQuery(keyword)}
+        ${typeCondition}`;
+
+  const db = getDb();
+  const rowsQuery = db.all<RelevanceRow>(sql`
     SELECT * FROM (
       SELECT
         p.id AS id,
@@ -373,14 +408,22 @@ async function listExchangeInfoByRelevance({
       FROM profiles p
       JOIN profiles_fts ON profiles_fts.rowid = p.rowid
       JOIN users u ON u.id = p.user_id
-      WHERE p.visible = 1 AND p.deleted_at IS NULL AND u.active = 1
-        AND profiles_fts MATCH ${toFtsMatchQuery(keyword)}
-        ${typeCondition}
+      WHERE ${matchCondition}
     ) t
     WHERE 1 = 1 ${cursorCondition}
     ORDER BY t.rank ASC, t."updatedAtSeconds" DESC, t.id ASC
     LIMIT ${EXCHANGE_INFO_PAGE_SIZE + 1}
   `);
+  const snapshotQuery = cursor
+    ? undefined
+    : db.get<{ count: number; maxUpdatedAtSeconds: number | null }>(sql`
+        SELECT count(*) AS count, max(p.updated_at) AS "maxUpdatedAtSeconds"
+        FROM profiles p
+        JOIN profiles_fts ON profiles_fts.rowid = p.rowid
+        JOIN users u ON u.id = p.user_id
+        WHERE ${matchCondition}
+      `);
+  const [rows, snapshot] = await Promise.all([rowsQuery, snapshotQuery]);
 
   const hasMore = rows.length > EXCHANGE_INFO_PAGE_SIZE;
   const pageRows = rows.slice(0, EXCHANGE_INFO_PAGE_SIZE);
@@ -412,6 +455,9 @@ async function listExchangeInfoByRelevance({
             id: lastRow.id,
           })
         : null,
+    snapshotKey: snapshot
+      ? toSnapshotKey(snapshot.count, snapshot.maxUpdatedAtSeconds)
+      : null,
   };
 }
 
