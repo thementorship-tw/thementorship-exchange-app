@@ -125,6 +125,10 @@ export function LandingPage({ ctaHref }: { ctaHref: string }) {
           className="mb-6 h-15 w-15.5"
         />
 
+        <p className="mb-3 rounded-pill bg-gold px-3 py-1 text-body-strong text-inverse">
+          第八屆成員限定
+        </p>
+
         <h1 className="text-h1 text-inverse">在航程上，結伴學習不孤單</h1>
 
         <p className="mt-3 max-w-120 text-body-lg text-inverse">
