@@ -71,7 +71,9 @@ export function ExchangeCard({
 
       <div className="flex flex-col gap-3 px-4 py-2 md:landscape:px-5 lg:px-5">
         {expanded && description !== null && (
-          <p className="text-body text-primary break-words">{description}</p>
+          <p className="whitespace-pre-wrap text-body text-primary break-words">
+            {description}
+          </p>
         )}
 
         <div className="flex items-center justify-between gap-2">
